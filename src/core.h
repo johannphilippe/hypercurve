@@ -25,6 +25,10 @@ std::shared_ptr<T> share(T t)
     return std::make_shared<T>(t);
 }
 
+///////////////////////////////////////////////////
+/// The segment class
+////////////////////////////////////////////////////
+
 class segment
 {
 public:
@@ -34,15 +38,18 @@ public:
         , _curve( c )
     {}
 
-    double process(std::vector<double>::iterator it, size_t size, double y_start)
+    segment(double frac, double y_dest)
+        : fractional_size(frac)
+        , y_destination(y_dest)
+    {}
+
+    virtual double process(std::vector<double>::iterator it, size_t size)
     {
         // ambitus
         const double y_diff = std::abs(y_destination - y_start);
-        const double inv_diff = std::min(y_destination, y_start);// 1 - y_diff;
+        const double offset = std::min(y_destination, y_start);// 1 - y_diff;
 
         double max = -1;
-        // diff btw start of this curve and its max point
-        // diff btw ystart and scale
         for(size_t i = 0; i < size; i++)
         {
             // Get ymin, ymax to scale.
@@ -50,12 +57,17 @@ public:
             // turn it to get the right direction
             if(y_start > y_destination) res = 1 - res;
             // scale it 		then add offset
-            res = (res * y_diff) + inv_diff;
+            res = (res * y_diff) + offset;
             if(res > max) max = res;
             *it = res;
-            it++;
+            ++it;
         }
         return max;
+    }
+
+    virtual void set_y_start(double y)
+    {
+        y_start = y;
     }
 
     void rescale_x(double factor)
@@ -65,37 +77,98 @@ public:
 
     double fractional_size;
     double y_destination;
-private:
+    double y_start = 0;
+protected:
     std::shared_ptr<curve_base> _curve;
 };
 
+class bezier_segment : public segment
+{
+public:
+    bezier_segment(double frac, double y_dest, std::shared_ptr<bezier_curve_base> crv)
+        : segment(frac, y_dest, crv)
+        , _curve(crv)
+    {}
+
+    void set_y_start( double y) override
+    {
+        y_start = y;
+        _curve->init(y_start, y_destination);
+    }
+
+    double process(std::vector<double>::iterator it, size_t size) override
+    {
+        double max = -1;
+
+        size_t cnt = 0;
+        std::pair<double, double> r1, r2;
+        r1 = _curve->process_bezier(double(cnt) / double(size));
+        r2 = _curve->process_bezier(double(cnt + 1) / double(size));
+
+        for(size_t i = 1; i <= size; i++)
+        {
+            const double x = double(i) / double(size);
+            while(cnt < size)
+            {
+                if( (r1.first <= x ) && (r2.first >= x))
+                    break;
+                r1 = _curve->process_bezier( double(cnt) / double(size) );
+                r2 = _curve->process_bezier( double(cnt + 1) / double(size) );
+                ++cnt;
+            }
+
+            double relative_x = relative_position(r1.first, r2.first, x);
+            double linear_interp = linear_interpolation(r1.second, r2.second, relative_x);
+            if(linear_interp > max) max = linear_interp;
+            *it = linear_interp;
+            ++it;
+        }
+
+        return max;
+    }
+
+protected:
+    std::shared_ptr<bezier_curve_base> _curve;
+};
+
+
+/////////////////////////////////////////////////////
+/// Curve class
+////////////////////////////////////////////////////
 
 class curve
 {
 public:
-    curve(size_t definition_, double y_start_, std::vector<segment> segs_)
+    curve(size_t definition_, double y_start_, std::vector< std::shared_ptr<segment> > segs_)
         : definition(definition_)
         , y_start(y_start_)
         , segs(segs_)
         , samples(definition)
     {
+        init();
         check_total_size();
         process();
     }
 
+    void init()
+    {
+        segs[0]->set_y_start(y_start);
+        for(size_t i = 1; i < segs.size(); i++)
+        {
+            segs[i]->set_y_start(segs[i - 1]->y_destination);
+        }
+    }
+
     void process()
     {
-        double y_from = y_start;
-
         std::vector<double>::iterator it = samples.begin();
         //
         for(size_t i = 0; i < segs.size(); i++)
         {
             // For each segment, we must give it a real size (size_t), and an iterator position
-            size_t seg_size = std::floor(segs[i].fractional_size * definition);
-            double seg_max = segs[i].process(it, seg_size, y_from);
+            size_t seg_size = std::floor(segs[i]->fractional_size * definition);
+            double seg_max = segs[i]->process(it, seg_size);
             if(seg_max > max) max = seg_max;
-            y_from = segs[i].y_destination;
             it+= seg_size;
         }
     }
@@ -119,7 +192,7 @@ private:
     {
         double x = 0;
         for(auto & it : segs)
-            x += it.fractional_size;
+            x += it->fractional_size;
         if( (x > 1.0) ||  (x < 1.0) )
         {
             // Should raise error or rescale everything.
@@ -132,16 +205,15 @@ private:
     {
         double factor = (1 + (1 - x));
         for(auto & it : segs) {
-            it.rescale_x(factor);
+            it->rescale_x(factor);
         }
     }
 
     double max = -1.0;
     size_t definition;
     double y_start;
-    std::vector<segment> segs;
+    std::vector< std::shared_ptr<segment> > segs;
     std::vector<double> samples;
-
 };
 
 }

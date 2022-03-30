@@ -19,6 +19,7 @@ target_compile_options(sndfile PRIVATE -fPIC)
 add_library(hypercurve
    src/core.h
    src/curve_lib.h
+   src/utilities.h
    )
 set_target_properties(hypercurve PROPERTIES LINKER_LANGUAGE CXX)
 
