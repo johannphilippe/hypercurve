@@ -20,6 +20,7 @@ add_library(hypercurve
    src/core.h
    src/curve_lib.h
    src/utilities.h
+   src/cubic_spline.h
    )
 set_target_properties(hypercurve PROPERTIES LINKER_LANGUAGE CXX)
 

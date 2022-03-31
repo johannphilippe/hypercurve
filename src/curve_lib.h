@@ -5,6 +5,8 @@
 #include<math.h>
 #include<iostream>
 #include<functional>
+#include<vector>
+#include"cubic_spline.h"
 
 namespace  hypercurve {
 
@@ -83,7 +85,6 @@ private:
 // Bezier Curves
 //////////////////////////////////////////////////
 
-using control_point = point;
 
 class bezier_curve_base : public virtual curve_base
 {
@@ -181,6 +182,51 @@ private:
     control_point _control_point1, _control_point2;
     double c_x, b_x, a_x, c_y, b_y, a_y;
 };
+
+//////////////////////////////////////////////////
+// Spline Curves
+//////////////////////////////////////////////////
+class cubic_spline_curve : public virtual curve_base
+{
+public:
+    cubic_spline_curve(std::vector<point> cp)
+        : _control_points( std::move(cp) )
+    {
+        if(_control_points.size() < 3)
+            throw(std::runtime_error("Control point list size must be >= 3"));
+
+
+    }
+
+    void init(double y_start_, double y_dest_) override
+    {
+       y_start = y_start_;
+       y_destination = y_dest_;
+       _control_points.insert(_control_points.begin(), curve_point(0, y_start));
+       //_control_points.push_back(curve_point(1, y_destination));
+        // For each point, determine absolute position from relative position
+        for(size_t i = 1; i < _control_points.size(); i++)
+        {
+            _control_points[i].x += _control_points[i-1].x;
+            std::cout << _control_points[i].x << std::endl;
+        }
+        for(auto & it : _control_points)
+            std::cout << "control point : " << it.x << " " << it.y << std::endl;
+    }
+
+    std::vector<double>& interpolate(size_t size)
+    {
+        return spl.interpolate_from_points(_control_points, size, point{1.0, 1.0} );
+    }
+
+private:
+
+    cubic_spline<double> spl;
+    std::vector<point> _control_points;
+    double y_start, y_destination;
+
+};
+
 
 }
 #endif // CURVE_LIB_H

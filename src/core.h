@@ -26,7 +26,7 @@ std::shared_ptr<T> share(T t)
 }
 
 ///////////////////////////////////////////////////
-/// The segment class
+// The segment class
 ////////////////////////////////////////////////////
 
 class segment
@@ -35,7 +35,7 @@ public:
     segment(double frac, double y_dest, std::shared_ptr<curve_base> c)
         : fractional_size(frac)
         , y_destination(y_dest)
-        , _curve( c )
+        , _curve( std::move(c) )
     {}
 
     segment(double frac, double y_dest)
@@ -82,12 +82,15 @@ protected:
     std::shared_ptr<curve_base> _curve;
 };
 
+///////////////////////////////////////////////////
+// Bezier segment
+////////////////////////////////////////////////////
 class bezier_segment : public segment
 {
 public:
     bezier_segment(double frac, double y_dest, std::shared_ptr<bezier_curve_base> crv)
-        : segment(frac, y_dest, crv)
-        , _curve(crv)
+        : segment(frac, y_dest)
+        , _curve( std::move(crv) )
     {}
 
     void set_y_start( double y) override
@@ -131,9 +134,44 @@ protected:
     std::shared_ptr<bezier_curve_base> _curve;
 };
 
+///////////////////////////////////////////////////
+// Spline segment
+////////////////////////////////////////////////////
+class spline_segment : public segment
+{
+public:
+    spline_segment(double frac, double y_dest, std::shared_ptr<cubic_spline_curve> cp)
+        : segment(frac, y_dest)
+        , _curve(std::move(cp))
+    {
+    }
+
+    void set_y_start( double y) override
+    {
+        _curve->init(y_start, y_destination);
+    }
+
+    double process(std::vector<double>::iterator it, size_t size) override
+    {
+        std::vector<double> &res = _curve->interpolate(size);
+        double max = -1;
+        std::cout << "size : " << size << " res size " << res.size() << std::endl;
+        for(size_t i = 0; i < size; i++)
+        {
+            std::cout << "res[" << i  << "] : " << res[i] << std::endl;
+            if(res[i] > max) max = res[i];
+            *it = limit(0, 1, res[i]);
+            ++it;
+        }
+        return max;
+    }
+private:
+    std::shared_ptr<cubic_spline_curve> _curve;
+};
+
 
 /////////////////////////////////////////////////////
-/// Curve class
+// Curve class
 ////////////////////////////////////////////////////
 
 class curve

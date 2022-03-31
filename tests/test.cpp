@@ -24,7 +24,7 @@ int main()
     int def = 16384;
 
     const int fmt = SF_FORMAT_WAV | SF_FORMAT_PCM_32;
-    SndfileHandle sf("test_hypercurve.wav", SFM_WRITE, fmt, 1, 48000);
+    SndfileHandle sf("test_hypercurveSPLINE.wav", SFM_WRITE, fmt, 1, 48000);
     // composite curve
     curve c(def, 0
             , 	{
@@ -56,7 +56,18 @@ int main()
                 share(segment(1, 1, share(hypersmooth_curve())))
              });
 
-    sf.writef(c4.get_samples(), def);
+    curve c6(def, 0, {
+                 share(spline_segment(1, 1, {
+                     share(cubic_spline_curve({
+                        point(0.2, 0.8),
+                        point(0.2, 0.2),
+                        point(0.3, 0.9),
+                        point(0.3, 1)
+                     }))
+                 }))
+             });
+
+    sf.writef(c6.get_samples(), def);
 
     return 0;
 }
