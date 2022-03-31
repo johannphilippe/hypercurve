@@ -137,5 +137,5 @@ make
 # External libraries
 
 This library uses libsndfile as an external submodule.
-It also includes [AsciiPlot]() source code with license under src/asciiplot folder.
+It also includes [AsciiPlot](https://github.com/joehood/asciiplotter) source code with license under src/asciiplot folder.
 
