@@ -140,7 +140,7 @@ protected:
 class spline_segment : public segment
 {
 public:
-    spline_segment(double frac, double y_dest, std::shared_ptr<cubic_spline_curve> cp)
+    spline_segment(double frac, double y_dest, std::shared_ptr<spline_curve_base> cp)
         : segment(frac, y_dest)
         , _curve(std::move(cp))
     {
@@ -148,6 +148,7 @@ public:
 
     void set_y_start( double y) override
     {
+        y_start = y;
         _curve->init(y_start, y_destination);
     }
 
@@ -158,7 +159,7 @@ public:
         std::cout << "size : " << size << " res size " << res.size() << std::endl;
         for(size_t i = 0; i < size; i++)
         {
-            std::cout << "res[" << i  << "] : " << res[i] << std::endl;
+        //    std::cout << "res[" << i  << "] : " << res[i] << std::endl;
             if(res[i] > max) max = res[i];
             *it = limit(0, 1, res[i]);
             ++it;
@@ -166,7 +167,7 @@ public:
         return max;
     }
 private:
-    std::shared_ptr<cubic_spline_curve> _curve;
+    std::shared_ptr<spline_curve_base> _curve;
 };
 
 

@@ -24,7 +24,7 @@ int main()
     int def = 16384;
 
     const int fmt = SF_FORMAT_WAV | SF_FORMAT_PCM_32;
-    SndfileHandle sf("test_hypercurveSPLINE.wav", SFM_WRITE, fmt, 1, 48000);
+    SndfileHandle sf("test_hypercurveCatmullRome.wav", SFM_WRITE, fmt, 1, 48000);
     // composite curve
     curve c(def, 0
             , 	{
@@ -56,6 +56,7 @@ int main()
                 share(segment(1, 1, share(hypersmooth_curve())))
              });
 
+    // Cubic spline
     curve c6(def, 0, {
                  share(spline_segment(1, 1, {
                      share(cubic_spline_curve({
@@ -67,7 +68,23 @@ int main()
                  }))
              });
 
-    sf.writef(c6.get_samples(), def);
+    // CatmullRom
+
+    curve c7(def, 0, {
+                 share(spline_segment(frac(1,2), 1, {
+                     share(catmull_rom_spline(0.5,
+                        point(-2, -0.5),
+                        point(2, 0.2)))
+                 })),
+                 share(spline_segment(frac(1,2), 0, {
+                     share(catmull_rom_spline(0.5,
+                     point(-1, 3),
+                     point(3, -5)
+                     ))
+                 }))
+             });
+
+    sf.writef(c7.get_samples(), def);
 
     return 0;
 }

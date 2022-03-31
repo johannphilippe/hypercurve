@@ -16,6 +16,8 @@ Currently, you can export curves as `.wav` files.
 - Cissoid (Diocles) 
 - Cubic 
 - Bezier (Cubic & Quadratic)
+- Cubic Spline
+- Catmull Rom Spline
 
 
 
@@ -101,7 +103,6 @@ make
 
 * Cardioid / hypercardioid
 * Spline
-* CatmullRom
 
 
 # External libraries
