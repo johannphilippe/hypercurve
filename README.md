@@ -123,10 +123,6 @@ make
 * Ruby gem 
 * Lua improvements (OOP for curve class) and tests (Reaper)
 * Csound RT opcode
-* Improve code design to allow only one type of segment  - 
-	- That would imply that each curve (simple ones) is calculated with exact points (start, destination etc)
-	- segments are calculated when initialized (init function call)
-	- curves and segments  know their destination and origin (y)
 
 ## Curves to implement
 
