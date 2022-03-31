@@ -21,6 +21,10 @@ add_library(hypercurve
    src/curve_lib.h
    src/utilities.h
    src/cubic_spline.h
+
+   # Include asciiplot library
+   src/asciiplot/asciiplotter.h
+   src/asciiplot/asciiplotter.cpp
    )
 set_target_properties(hypercurve PROPERTIES LINKER_LANGUAGE CXX)
 
@@ -32,11 +36,12 @@ add_executable(hypercurve_test
    )
 
 target_include_directories(hypercurve_test PUBLIC
-   src/core.h
-   src/curve_lib.h
+   src/
+   src/asciiplot
    )
 
 target_link_libraries(hypercurve_test
+   hypercurve
    sndfile
    )
 

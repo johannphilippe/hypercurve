@@ -5,6 +5,7 @@
 #include<vector>
 #include<memory>
 #include"curve_lib.h"
+#include"asciiplot/asciiplotter.h"
 #include<iostream>
 
 namespace hypercurve {
@@ -156,10 +157,8 @@ public:
     {
         std::vector<double> &res = _curve->interpolate(size);
         double max = -1;
-        std::cout << "size : " << size << " res size " << res.size() << std::endl;
         for(size_t i = 0; i < size; i++)
         {
-        //    std::cout << "res[" << i  << "] : " << res[i] << std::endl;
             if(res[i] > max) max = res[i];
             *it = limit(0, 1, res[i]);
             ++it;
@@ -221,12 +220,17 @@ public:
         }
     }
 
+    void ascii_display(std::string name, std::string label, char marker)
+    {
+        AsciiPlotter plot(name, 80, 15);
+        plot.addPlot(linspace(definition), samples, label, marker);
+        plot.legend();
+        plot.show();
+    }
+
     double *get_samples() {return samples.data();}
     size_t get_definition() {return definition;}
 private:
-    // TODO : implement an X rescale mode to equal zero.
-
-        // Check if sum of all seg size is equal to 0
     void check_total_size()
     {
         double x = 0;
@@ -234,7 +238,6 @@ private:
             x += it->fractional_size;
         if( (x > 1.0) ||  (x < 1.0) )
         {
-            // Should raise error or rescale everything.
             this->rescale(x);
             //throw(std::runtime_error("Curve components goes across 1.0 fractional. Use rescale mode to rescale"));
         }

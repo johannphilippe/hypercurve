@@ -1,3 +1,6 @@
 [submodule "libsndfile"]
 	path = libsndfile
 	url = https://github.com/libsndfile/libsndfile
+[submodule "asciiplotter"]
+	path = asciiplotter
+	url = https://github.com/joehood/asciiplotter.git

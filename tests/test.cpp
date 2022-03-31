@@ -25,7 +25,8 @@ int main()
 
     const int fmt = SF_FORMAT_WAV | SF_FORMAT_PCM_32;
     SndfileHandle sf("test_hypercurveCatmullRome.wav", SFM_WRITE, fmt, 1, 48000);
-    // composite curve
+
+    // Simple composite curve
     curve c(def, 0
             , 	{
                 share(segment(frac(1,4), 1.0, share(diocles_curve(1)))),
@@ -83,6 +84,8 @@ int main()
                      ))
                  }))
              });
+
+    c7.ascii_display("CatmullRom", "y = catmullrom(X)", '*');
 
     sf.writef(c7.get_samples(), def);
 

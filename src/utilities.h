@@ -70,7 +70,7 @@ inline double limit(double min, double max, double v)
     return v;
 }
 
-// Transforms the results of an interpolation to x relative values
+// Transforms the results of an interpolation to x relative values (useful for Bezier and Catmul Rom for example)
 template<typename T>
 static double remap_coordinates(std::vector< std::pair<T, T> > &map, std::vector<T> &res)
 {
@@ -91,6 +91,14 @@ static double remap_coordinates(std::vector< std::pair<T, T> > &map, std::vector
         res[i] = linear_interp;
     }
     return max;
+}
+
+std::vector<double> linspace(size_t size)
+{
+    std::vector<double> v(size);
+    for(size_t i = 0; i < size; i++)
+        v[i] = (double(i) / double(size));
+    return v;
 }
 
 }
