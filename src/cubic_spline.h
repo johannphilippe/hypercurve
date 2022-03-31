@@ -204,7 +204,7 @@ public:
         return interp;
     }
 
-private:
+protected:
     int n_points = 0, n_precision = 0;
     vector<T> x, y, interp, a, b, c, d, sig, sig_temp, h;
     vector< vector<T> > tridiagonal;

@@ -27,6 +27,7 @@ add_library(hypercurve
    src/asciiplot/asciiplotter.cpp
    )
 set_target_properties(hypercurve PROPERTIES LINKER_LANGUAGE CXX)
+target_compile_options(hypercurve PRIVATE -fPIC)
 
 #############################################
 ##### 	Build Test
@@ -60,3 +61,10 @@ target_include_directories(lua_hypercurve PUBLIC ${LUA_INCLUDE_DIR})
 target_link_libraries(lua_hypercurve hypercurve sndfile ${LUA_LIBRARIES})
 set_target_properties(lua_hypercurve PROPERTIES LINKER_LANGUAGE CXX)
 target_compile_options(lua_hypercurve PRIVATE -fPIC)
+
+## Lua C Test
+
+add_executable(lua_test lua_module/lua_test.cpp)
+target_link_libraries(lua_test lua_hypercurve)
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/lua_module/test.lua
+   DESTINATION ${CMAKE_CURRENT_BINARY_DIR})

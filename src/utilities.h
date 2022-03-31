@@ -4,8 +4,26 @@
 #include<math.h>
 #include<iostream>
 #include<vector>
+#include<memory>
 
 namespace hypercurve {
+
+
+double pos(double x)
+{
+    return (x > 0) ? x : 0;
+}
+
+double frac(double x1, double x2)
+{
+    return double(x1) / double(x2);
+}
+
+template<typename T>
+std::shared_ptr<T> share(T t)
+{
+    return std::make_shared<T>(t);
+}
 
 struct point
 {
@@ -52,6 +70,7 @@ inline double linear_interpolation(double y1, double y2, double x)
 {
     return y1 + (x * (y2 - y1)) ;
 }
+
 
 // returns x between 0 and 1 (1 being x == x2, 0 being x == x1)
 // make sure x1 <= x <= x2

@@ -35,31 +35,37 @@ int main()
                 share(segment(frac(1,4), 0, share(diocles_curve(1))))
                 }
             );
+    c.ascii_display("Composite diocles and cubic curve", "y = composite(x)", '*');
+
     // One segment curve
     curve c2(def, 0, {share(segment(frac(1,1), 1.0, share(diocles_curve(1))))});
+    c2.ascii_display("One segment diocles curve", "y = oneseg(x)", '*');
     double div = 4;
 
     // Bezier quadratic (one control point)
     curve c3(def, 0, {
-                 share(bezier_segment(frac(1,div), 1.0, share(quadratic_bezier_curve({0.1, 0.9})))),
-                 share(bezier_segment(frac(1,div), 0.5, share(quadratic_bezier_curve({0.66, 0.1})))),
-                 share(bezier_segment(frac(1,div), 0.8, share(quadratic_bezier_curve({0.9, 0.9})))),
-                 share(bezier_segment(frac(1, div), 0.1, share(quadratic_bezier_curve({0.5, 0}))))
+                 share(segment(frac(1,div), 1.0, share(quadratic_bezier_curve({0.1, 0.9})))),
+                 share(segment(frac(1,div), 0.5, share(quadratic_bezier_curve({0.66, 0.1})))),
+                 share(segment(frac(1,div), 0.8, share(quadratic_bezier_curve({0.9, 0.9})))),
+                 share(segment(frac(1, div), 0.1, share(quadratic_bezier_curve({0.5, 0}))))
              });
+    c3.ascii_display("Bezier quadratic", "y = quadratic_bezier(x)", '*');
 
     // Bezier cubic (taking two control points)
     curve c4(def, 0, {
-                 share(bezier_segment(frac(1,1), 1	, share(cubic_bezier_curve({0.2, 0.8}, {0.8, 0.2}))))
+                 share(segment(frac(1,1), 1	, share(cubic_bezier_curve({0.2, 0.8}, {0.8, 0.2}))))
              });
+    c4.ascii_display("Bezier Cubic", "y = cubic_bezier(x)", '*');
 
     // homemade smooth
     curve c5(def, 0, {
-                share(segment(1, 1, share(hypersmooth_curve())))
+                share(segment(1, 1, share(exponent_curve(9))))
              });
+    c5.ascii_display("Smooth homemade", "y = hsmooth(x)", '*');
 
     // Cubic spline
     curve c6(def, 0, {
-                 share(spline_segment(1, 1, {
+                 share(segment(1, 1, {
                      share(cubic_spline_curve({
                         point(0.2, 0.8),
                         point(0.2, 0.2),
@@ -68,16 +74,16 @@ int main()
                      }))
                  }))
              });
+    c6.ascii_display("Cubic spline", "y = cspline(X)", '*');
 
     // CatmullRom
-
     curve c7(def, 0, {
-                 share(spline_segment(frac(1,2), 1, {
+                 share(segment(frac(1,2), 1, {
                      share(catmull_rom_spline(0.5,
                         point(-2, -0.5),
                         point(2, 0.2)))
                  })),
-                 share(spline_segment(frac(1,2), 0, {
+                 share(segment(frac(1,2), 0, {
                      share(catmull_rom_spline(0.5,
                      point(-1, 3),
                      point(3, -5)
@@ -85,9 +91,9 @@ int main()
                  }))
              });
 
-    c7.ascii_display("CatmullRom", "y = catmullrom(X)", '*');
+    c7.ascii_display("Composite", "y = composite(X)", '*');
 
-    sf.writef(c7.get_samples(), def);
+    sf.writef(c.get_samples(), def);
 
     return 0;
 }

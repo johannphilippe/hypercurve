@@ -19,22 +19,49 @@ public:
     curve_base() {}
     virtual ~curve_base() {}
 
+    // This method is the one to implement/override for simple curves (who only need x and constants to calculate y)
     inline virtual double process(double x) {return x;};
+    // When you want to retrieve a single sample from a curve, it is recommanded to use this one. It is not necessary to override it for simple curves,
+    // but may be necessary for complex (bezier, spline, catmullrom ...)
+    inline virtual double process(size_t i, size_t size) {return process(frac(i, size));}
+    inline virtual double process_all(size_t size, std::vector<double>::iterator &it)
+    {
+        double max = -999;
+        for(size_t i = 0; i < size; ++i)
+        {
+            double res =  process(frac(i, size));
+            if( std::abs(res) > max) max = std::abs(res);
+            *it = res;
+            ++it;
+        }
+        return max;
+    }
 
     inline virtual void init(double y_start_, double y_dest_) {
         y_start = y_start_;
         y_destination = y_dest_;
+        abs_diff = std::abs(y_start - y_destination);
+        offset = std::min(y_start, y_destination);
         on_init();
     };
+
     // Override this one insted of init to avoid y_start and y_destination affectation repetition
     inline virtual void on_init() {}
+
 protected:
-    double y_start, y_destination;
+
+    double scale(double y)
+    {
+        if(y_start > y_destination) y = 1.0 - y;
+        return (y * abs_diff) + offset;
+    }
+
+    double y_start, y_destination, abs_diff, offset;
 };
 
 using linear_curve = curve_base;
 
-class diocles_curve : public virtual curve_base
+class diocles_curve : public curve_base
 {
 public:
     diocles_curve(const double a_)
@@ -42,7 +69,7 @@ public:
     {}
     inline double process(double x) override
     {
-        return std::sqrt( std::pow(x, 3) / (2 * a - x) );
+        return scale(std::sqrt( std::pow(x, 3) / (2 * a - x) ));
     }
 
 private:
@@ -51,27 +78,37 @@ private:
 
 using cissoid_curve = diocles_curve;
 
-class cubic_curve: public virtual curve_base
+class cubic_curve: public curve_base
 {
 public:
     inline double process(double x) override
     {
-        return std::pow(x, 3);
+        return scale(std::pow(x, 3));
     }
 };
 
 // Custom homemade curve
-class hypersmooth_curve  : public curve_base
+class exponent_curve  : public curve_base
 {
 public:
+    exponent_curve(double exponent_)
+        : exponent(exponent_)
+    {}
     inline double process(double x) override
     {
-        return std::pow(x, 3) - std::pow(x / 2.0, 2) * log(std::pow(x, 4));
+        double res = scale(std::pow(x, exponent) );
+        return res;
     }
+
+private:
+    double exponent;
 };
 
 //////////////////////////////////////////////////
 // User defined curve Curves
+//
+// Callback should return an y value between 0 and 1
+// for each x between 0 and 1
 //////////////////////////////////////////////////
 class user_defined_curve : public curve_base
 {
@@ -82,7 +119,7 @@ public:
 
     inline double process(double x) override
     {
-        return callback(x);
+        return scale(callback(x));
     }
 private:
     std::function<double(double)> callback;
@@ -93,38 +130,71 @@ private:
 // Bezier Curves
 //////////////////////////////////////////////////
 
-
-// Useless now
-class bezier_curve_base : public virtual curve_base
+class bezier_curve_base : public curve_base
 {
 public:
+    inline double process_all(size_t size, std::vector<double>::iterator &it) override
+    {
+        double max = -1;
+        size_t cnt = 0;
+        std::pair<double, double> r1, r2;
+        r1 = process_bezier(double(cnt) / double(size));
+        r2 = process_bezier(double(cnt + 1) / double(size));
 
-    virtual std::pair<double, double> process_bezier(double x) {
-        return {0,0};
+        for(size_t i = 1; i <= size; i++)
+        {
+            const double x = double(i) / double(size);
+            while(cnt < size)
+            {
+                if( (r1.first <= x ) && (r2.first >= x))
+                    break;
+                r1 = process_bezier( double(cnt) / double(size) );
+                r2 = process_bezier( double(cnt + 1) / double(size) );
+                ++cnt;
+            }
+
+            double relative_x = relative_position(r1.first, r2.first, x);
+            double linear_interp = linear_interpolation(r1.second, r2.second, relative_x);
+            if(linear_interp > max) max = linear_interp;
+            *it = linear_interp;
+            ++it;
+        }
+
+        return max;
     }
 
+    inline virtual double process(double x) override
+    {
+        throw(std::runtime_error("Unimplemented for Bezier curve"));
+    }
+
+    // This one should be implemented instead of the above one (if wanted to process single bezier point)
+    inline virtual double process(size_t i, size_t size) override
+    {
+        return process(frac(i, size));
+    }
 protected:
+    inline virtual std::pair<double, double> process_bezier(double x) {return {0,0};}
 };
 
-class quadratic_bezier_curve : public virtual bezier_curve_base
+class quadratic_bezier_curve : public bezier_curve_base
 {
 public:
     quadratic_bezier_curve(control_point cp)
         : _control_point(cp)
     {}
 
-    void init(double y_start_, double y_dest_) override
+    void on_init() override
     {
-        y_start = y_start_;
-        y_destination = y_dest_;
         c_x = (3 * (_control_point.x));
         b_x = (-c_x);
         a_x = (1 - c_x - b_x);
-        c_y = ( 3 * (_control_point.y - y_start_));
+        c_y = ( 3 * (_control_point.y - y_start));
         b_y = (-c_y);
-        a_y = (y_dest_ - y_start_ - c_y - b_y);
+        a_y = (y_destination - y_start - c_y - b_y);
     }
 
+private:
     inline std::pair<double, double> process_bezier(double x) override
     {
         return {
@@ -133,17 +203,11 @@ public:
         };
     }
 
-    inline double process(double x) override
-    {
-        return (a_y * std::pow(x,3)) + (b_y * std::pow(x,2)) + (c_y * x) + y_start;
-    }
-
-private:
     control_point _control_point;
     double c_x, b_x, a_x, c_y, b_y, a_y;
 };
 
-class cubic_bezier_curve : public virtual bezier_curve_base
+class cubic_bezier_curve : public bezier_curve_base
 {
 public:
     cubic_bezier_curve(control_point _cp1, control_point _cp2)
@@ -163,6 +227,7 @@ public:
         a_y = ((-3) * y_start + 3 * _control_point1.y);
     }
 
+private:
     std::pair<double, double> process_bezier(double x) override
     {
         return {
@@ -175,15 +240,6 @@ public:
                     + y_start
         };
     }
-    inline double process(double x) override
-    {
-            return (std::pow(x, 3) * c_y)
-                    + (std::pow(x, 2) * b_y)
-                    + (x * a_y)
-                    + y_start;
-    }
-
-private:
     control_point _control_point1, _control_point2;
     double c_x, b_x, a_x, c_y, b_y, a_y;
 };
@@ -206,8 +262,6 @@ public:
     {
         if(_control_points.size() < 3)
             throw(std::runtime_error("Control point list size must be >= 3"));
-
-
     }
 
     void on_init() override
@@ -221,9 +275,17 @@ public:
         }
     }
 
-    std::vector<double>& interpolate(size_t size) override
+    inline virtual double process_all(size_t size, std::vector<double>::iterator &it)
     {
-        return spl.interpolate_from_points(_control_points, size, point{1.0, 1.0} );
+        std::vector<double>& res = spl.interpolate_from_points(_control_points, size, point{1.0, 1.0});
+        double max = -999;
+        for(size_t i = 0; i < size; i++)
+        {
+            if(res[i] > max) max = res[i];
+            *it = res[i];
+            ++it;
+        }
+        return max;
     }
 
 private:
@@ -231,14 +293,12 @@ private:
     std::vector<point> _control_points;
 };
 
-
-
 // User passes control points P0 and P3 assuming that P1(0,y) and P2(1,y). Calculation will be relative, and will be  rescaled after.
 // Based on https://www.desmos.com/calculator/552cpvzfxw?lang=fr
 
 // To get a real centripetal or chordal, we should be based on https://www.desmos.com/calculator/9kazaxavsf?lang=fr
 // alpha =  Parametric constant: 0.5 for the centripetal spline, 0.0 for the uniform spline, 1.0 for the chordal spline.
-class catmull_rom_spline : public virtual spline_curve_base
+class catmull_rom_spline : public spline_curve_base
 {
 public:
     catmull_rom_spline(double alpha_, point p0, point p3)
@@ -254,14 +314,14 @@ public:
         _cp2 = point(1, y_destination);
     }
 
-    std::vector<double> &interpolate(size_t size)
+
+    inline virtual double process_all(size_t size, std::vector<double>::iterator &it)
     {
-        res.resize(size);
         size_t cnt = 0;
         std::pair<double, double> r1, r2;
-        r1 = calculate(0);
-        r2 = calculate(1.0 / double(size));
-        double max = -1;
+        r1 = process_catmul_rom(0);
+        r2 = process_catmul_rom(1.0 / double(size));
+        double max = -999;
         for(size_t i =0; i < size; i++)
         {
             const double x = double(i) / double(size);
@@ -269,21 +329,22 @@ public:
             {
                 if((r1.first <= x) && (r2.first >= x))
                     break;
-                r1 = calculate( double(cnt) / double(size) );
-                r2 = calculate( double(cnt + 1) / double(size) );
+                r1 = process_catmul_rom( double(cnt) / double(size) );
+                r2 = process_catmul_rom( double(cnt + 1) / double(size) );
                 ++cnt;
             }
 
             double relative_x = relative_position(r1.first, r2.first, x);
             double linear_interp = linear_interpolation(r1.second, r2.second, relative_x);
             if(linear_interp > max) max = linear_interp;
-            res[i] = linear_interp;
+            *it = linear_interp;
+            ++it;
         }
-        return res;
+        return  max;
     }
 private:
 
-    std::pair<double, double> calculate(double x)
+    std::pair<double, double> process_catmul_rom(double x)
     {
         const double y = linear_interpolation(y_start, y_destination, x);
         const double rx = 0.5 * ((_cp1.x * 2.0) + (-_cp0.x + _cp2.x) * x
@@ -300,10 +361,9 @@ private:
     double alpha = 0;
     control_point _cp0, _cp3, _cp1, _cp2;
     double t0, t1, t2, t3;
-
-    std::vector<double> res;
 };
 
 
 }
 #endif // CURVE_LIB_H
+
