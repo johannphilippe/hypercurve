@@ -49,11 +49,10 @@ Currently, you can export curves as `.wav` files.
 - Catmull Rom Spline
 
 
-
 ## How to use it 
 
 
-There are two ways to use it : in C++ or in Lua. The CMake build system builds two libraries that can be used in both languages. You will find C++ example under hypercurve_test/test.cpp, and Lua example under lua_module/test.lua.  
+There are two ways to use it : in C++ or in Lua. The CMake build system builds two libraries that can be used in both languages. You will find C++ example under hypercurve_test/test.cpp, and Lua example under lua_module/test.lua. 
 
 
 ## A simple C++ example 
@@ -124,10 +123,15 @@ cmake .. -DLUA_INCLUDE_DIR=/your/path/to/lua/headers -DLUA_LIBRARIES=/your/path/
 
 # TODO
 
+* Introduce Modulators (Noise, Chebyshev) to allow a modulation of the curve. Find a way to modulate with modularity, without requiring any extra computation (extra loop). For now they are available with curve operators (*, /). At the end, it should be implemented inside segments, or as an extension of segment or curve (segment could pass it to the curve, that would then use it to modulate) 
+
+* Improve  CMake config (one CMakeLitst.txt per target)
+
+* Submodule [LuaJIT](https://github.com/WohlSoft/LuaJIT) with CMake support
 * Waveform mode (make sure to rescale y between -1 and 1)
-* Lua improvements (OOP for curve class) and tests (Reaper)
 * Csound RT opcode
-* FindLua.cmake for MacOS
+
+* Once all done -> a proper documentation for C++/Lua, and Csound implementations
 
 ## Curves to implement
 

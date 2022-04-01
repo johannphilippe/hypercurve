@@ -29,7 +29,7 @@ public:
         double max = 0.0;
         for(size_t i = 0; i < size; ++i)
         {
-            double res =  process(frac(i, size));
+            double res = scale(process(frac(i, size)));
             if( std::abs(res) > max) max = std::abs(res);
             *it = res;
             ++it;
@@ -69,7 +69,7 @@ public:
     {}
     inline double process(double x) override
     {
-        return scale(std::sqrt( std::pow(x, 3) / (2 * a - x) ));
+        return std::sqrt( std::pow(x, 3) / (2 * a - x) );
     }
 
 private:
@@ -83,11 +83,11 @@ class cubic_curve: public curve_base
 public:
     inline double process(double x) override
     {
-        return scale(std::pow(x, 3));
+        return std::pow(x, 3);
     }
 };
 
-// Custom homemade curve
+// Choose the exponent of X
 class exponent_curve  : public curve_base
 {
 public:
@@ -96,13 +96,57 @@ public:
     {}
     inline double process(double x) override
     {
-        double res = scale(std::pow(x, exponent) );
+        double res = std::pow(x, exponent) ;
         return res;
     }
 
 private:
     double exponent;
 };
+
+//////////////////////////////////////////////////
+// Chebyshev
+// -- pretty experimental, no idea to make it go from one point(y) to another(y)
+// -- could be a modulator instead
+//////////////////////////////////////////////////
+
+template<int T = 1>
+class chebyshev_curve : public curve_base
+{
+public:
+    chebyshev_curve(int n_)
+        : n(n_)
+    {}
+
+
+    inline double process(double x) override
+    {
+
+        const double t = std::acos(( x * 2.0) - 1.0 );
+        if constexpr(T == 1)
+        {
+            return scale_chebyshev(std::cos(n * t));
+        } else // T == 2
+        {
+            return scale_chebyshev(std::sin( (n + 1) * t) / std::sin(t));
+        }
+    }
+private:
+
+    // T = 1 stays between -1 and 1
+    // T = 2
+    double scale_chebyshev(double y)
+    {
+        return (y) ;
+    }
+
+    const double n;
+};
+
+//////////////////////////////////////////////////
+// Cardioid
+// Idea : user could just give a segment in degrees with a rotation offset, and give y_start and y_dest.
+//////////////////////////////////////////////////
 
 //////////////////////////////////////////////////
 // User defined curve Curves
@@ -120,7 +164,7 @@ public:
 
     inline double process(double x) override
     {
-        return scale(callback(x));
+        return callback(x);
     }
 protected:
     std::function<double(double)> callback;
@@ -270,7 +314,7 @@ public:
         }
     }
 
-    inline virtual double process_all(size_t size, std::vector<double>::iterator &it)
+    inline virtual double process_all(size_t size, std::vector<double>::iterator &it) override
     {
         std::vector<double>& res = spl.interpolate_from_points(_control_points, size, point{1.0, 1.0});
         double max = 0.0;
@@ -310,7 +354,7 @@ public:
     }
 
 
-    inline virtual double process_all(size_t size, std::vector<double>::iterator &it)
+    inline virtual double process_all(size_t size, std::vector<double>::iterator &it) override
     {
         size_t cnt = 0;
         std::pair<double, double> r1, r2;

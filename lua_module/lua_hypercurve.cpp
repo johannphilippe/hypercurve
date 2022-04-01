@@ -1,5 +1,7 @@
+extern "C" {
 #include"lauxlib.h"
 #include"lua.h"
+}
 #include<unistd.h>
 #include<memory.h>
 #include<functional>
@@ -287,9 +289,14 @@ int luahc_curve_get_sample_at(lua_State *lua)
 // Returns a lua table
 int luahc_curve_get_samples(lua_State *lua)
 {
-
-
-    return 0;
+    hypercurve::curve *crv = *(hypercurve::curve **) luaL_checkudata(lua, 1, "hypercurve.curve");
+    lua_newtable(lua);
+    for(size_t i = 0; i < crv->get_definition(); ++i)
+    {
+        lua_pushnumber(lua, crv->get_sample_at(i));
+        lua_rawseti(lua, -2, i+1);
+    }
+    return 1;
 }
 
 extern "C" {
@@ -320,8 +327,18 @@ static const luaL_Reg luahc_curve_class_meta[] =
 };
 static const luaL_Reg luahc_curve_class_meth[] =
 {
-    { "ascii_display" ,luahc_curve_ascii_display },
-    { "write_as_wav" ,luahc_curve_write_as_wav },
+    {"ascii_display" ,luahc_curve_ascii_display },
+    {"write_as_wav" ,luahc_curve_write_as_wav },
+    {"get_samples", luahc_curve_get_samples},
+    {"get_sample_at", luahc_curve_get_sample_at},
+    { NULL          ,NULL            }
+};
+
+static const luaL_Reg luahc_control_point_class_meth[] =
+{
+    {"x", luahc_control_point_x},
+    {"y", luahc_control_point_y},
+    {"xy", luahc_control_point_xy},
     { NULL          ,NULL            }
 };
 
@@ -335,7 +352,7 @@ static const luaL_Reg luahc_static_meta[] =
 };
 static const luaL_Reg luahc_static_meth[] =
 {
-    {"new" , luahc_curve },
+    {"curve" , luahc_curve },
     {"segment", luahc_segment},
     {"control_point", luahc_control_point},
 
@@ -363,14 +380,23 @@ int luaopen_liblua_hypercurve (lua_State *lua)
     lua_pushstring(lua, "__index");
     lua_pushvalue(lua, -2);
     lua_settable(lua, -3);
+
+    /*
     luaL_newmetatable(lua, "hypercurve.control_point");
     lua_pushstring(lua, "__index");
     lua_pushvalue(lua, -2);
     lua_settable(lua, -3);
+    */
 
     luaL_newmetatable(lua, "hypercurve.curve");
     luaL_setfuncs(lua, luahc_curve_class_meta, 0);
     luaL_newlib(lua, luahc_curve_class_meth);
+    lua_setfield(lua, -2, "__index");
+    lua_pop(lua, 1);
+
+    luaL_newmetatable(lua, "hypercurve.control_point");
+    luaL_setfuncs(lua, luahc_curve_class_meta, 0);
+    luaL_newlib(lua, luahc_control_point_class_meth);
     lua_setfield(lua, -2, "__index");
     lua_pop(lua, 1);
 

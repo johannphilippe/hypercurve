@@ -1,9 +1,10 @@
-cmake_minimum_required(VERSION 3.18)
+cmake_minimum_required(VERSION 3.19)
 
 project(hypercurve LANGUAGES CXX)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
 #############################################
 ##### 	Build libsndfile
@@ -56,17 +57,22 @@ else()
    set(Lua_FOUND TRUE)
 endif()
 
+message(STATUS ${LUA_INCLUDE_DIR})
+message(STATUS ${LUA_LIBRARIES})
+
 if(NOT ${Lua_FOUND})
    message(FATAL_ERROR "Lua not found")
 endif()
 
 add_library(lua_hypercurve SHARED
    lua_module/lua_hypercurve.cpp
+   lua_module/lua-compat-5.3/c-api/compat-5.3.h
    )
 target_include_directories(lua_hypercurve PUBLIC
    ${LUA_INCLUDE_DIR}
    lua_module/lua-compat-5.3/c-api/
    )
+
 target_link_libraries(lua_hypercurve hypercurve sndfile ${LUA_LIBRARIES})
 set_target_properties(lua_hypercurve PROPERTIES LINKER_LANGUAGE CXX)
 target_compile_options(lua_hypercurve PRIVATE -fPIC)

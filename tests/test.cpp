@@ -24,7 +24,8 @@ int main()
     int def = 16384;
 
     const int fmt = SF_FORMAT_WAV | SF_FORMAT_PCM_32;
-    SndfileHandle sf("test_hypercurveCatmullRome.wav", SFM_WRITE, fmt, 1, 48000);
+    SndfileHandle sf("test_hypercurveChebyshev1.wav", SFM_WRITE, fmt, 1, 48000);
+    SndfileHandle sf2("test_hypercurveChebyshev2.wav", SFM_WRITE, fmt, 1, 48000);
 
     // Simple composite curve
     curve c(def, 0
@@ -102,7 +103,20 @@ int main()
 
     w.ascii_display("waveform", "w=cubic(x)", '.');
 
-    sf.writef(c.get_samples(), def);
+    const int n = 100;
+    curve c8(def, 0, {
+                segment(frac(1,1), 1, share(chebyshev_curve<1>(n)))
+             });
+
+    c8.ascii_display("Chebyshev type 1 n=10", "y=cheb(x)", '*');
+
+    curve c9(def, 0, {
+                segment(frac(1,1), 1, share(chebyshev_curve<2>(n)))
+             });
+
+    c9.ascii_display("Chebyshev type 2 n=10", "y=cheb(x)", '*');
+    sf.writef(c8.get_samples(), def);
+    sf2.writef(c9.get_samples(), def);
 
     return 0;
 }

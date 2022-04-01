@@ -8,7 +8,6 @@
 
 namespace hypercurve {
 
-
 double pos(double x)
 {
     return (x > 0) ? x : 0;
@@ -34,6 +33,15 @@ struct point
 
     point() {}
 
+    template<typename T>
+    double distance_to(T &p)
+    {
+        const double a2 = (p.x - x) * (p.x - x);
+        const double b2 = (p.y - y) * (p.y - y);
+        const double dist = sqrt(a2 + b2);
+        return dist;
+    }
+
     void print()
     {
         printf("point \n\tx = %f \n\ty = %f\n", x, y);
@@ -53,15 +61,6 @@ struct curve_point : public point
         point(p), curve(curve_)
     {}
 
-    template<typename T>
-    float distance_to(T &p)
-    {
-        const float a2 = (p.x - x) * (p.x - x);
-        const float b2 = (p.y - y) * (p.y - y);
-        const float dist = sqrt(a2 + b2);
-        return dist;
-    }
-
    float curve;
 };
 
@@ -71,6 +70,12 @@ inline double linear_interpolation(double y1, double y2, double x)
     return y1 + (x * (y2 - y1)) ;
 }
 
+// x must be between 0 and 1, 0 being the y1 x position, 1 the y2 x position
+// Not tested
+inline double cubic_interpolation(double y1, double y2, double x)
+{
+    return y1 + (std::pow(x,3) * (y2 - y1));
+}
 
 // returns x between 0 and 1 (1 being x == x2, 0 being x == x1)
 // make sure x1 <= x <= x2

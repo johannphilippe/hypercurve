@@ -110,7 +110,64 @@ public:
     }
 
     double *get_samples() {return samples.data();}
+    double get_sample_at(size_t i) {return samples[i];}
     size_t get_definition() {return definition;}
+
+    // Operators
+    curve& operator *=(curve &other)
+    {
+        for(size_t i = 0; i < samples.size(); ++i)
+            samples[i] *= other.get_sample_at(i);
+        return *this;
+    }
+    curve &operator *=(double k)
+    {
+        for(auto & it : samples)
+            it *= k;
+        return *this;
+    }
+
+    curve& operator /=(curve &other)
+    {
+        for(size_t i = 0; i < samples.size(); ++i)
+            samples[i] /= other.get_sample_at(i);
+        return *this;
+    }
+    curve &operator /=(double k)
+    {
+        for(auto & it : samples)
+            it /= k;
+        return *this;
+    }
+
+    curve operator *(curve &c2)
+    {
+        curve c(*this);
+        c *= c2;
+        return c;
+    }
+
+    curve operator *(double k)
+    {
+        curve c(*this);
+        c *= k;
+        return c;
+    }
+
+    curve operator /(curve &c2)
+    {
+        curve c(*this);
+        c /= c2;
+        return c;
+    }
+
+    curve operator /(double k)
+    {
+        curve c(*this);
+        c /= k;
+        return c;
+    }
+
 protected:
     void check_total_size()
     {
@@ -160,6 +217,17 @@ private:
     double waveform_scale(double y)
     {return (y * 2.0) - 1.0;}
 };
+
+///////////////////////////////////////////////////////////////
+// Modulator Isn't an overloaded operator called implicitly using first argument? Then if that first argument is a basic data type (float here), will it work?
+// Can be thought as a way to modulate a curve
+// Modulator exist in two flavors : with a constant amplitude,
+// or with an interpolator curve that will scale the content
+// The interpolator curve must be the same size as the target
+//
+///////////////////////////////////////////////////////////////
+
+
 
 }
 
