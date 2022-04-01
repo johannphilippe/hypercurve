@@ -119,9 +119,10 @@ make
 
 # TODO
 
-* Waveform mode (rescale in y between -1 and 1)
+* Waveform mode (make sure to rescale y between -1 and 1)
 * Lua improvements (OOP for curve class) and tests (Reaper)
 * Csound RT opcode
+* FindLua.cmake for MacOS
 
 ## Curves to implement
 

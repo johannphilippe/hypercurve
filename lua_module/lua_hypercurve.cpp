@@ -2,6 +2,7 @@
 #include"lua.h"
 #include<unistd.h>
 #include<memory.h>
+#include<functional>
 
 #include"../src/core.h"
 #include"../src/curve_lib.h"
@@ -15,14 +16,6 @@ struct luahc_curve_base_t
     std::shared_ptr<hypercurve::curve_base> crv;
 };
 
-struct luahc_bezier_curve_base_t
-{
-    luahc_bezier_curve_base_t(hypercurve::bezier_curve_base *cb)
-        : crv( cb )
-    {}
-    std::shared_ptr<hypercurve::bezier_curve_base> crv;
-};
-
 static luahc_curve_base_t** lua_curve_helper(lua_State *lua, hypercurve::curve_base *cb)
 {
     luahc_curve_base_t **crv = (luahc_curve_base_t **) lua_newuserdata(lua, sizeof(luahc_curve_base_t*));
@@ -30,12 +23,28 @@ static luahc_curve_base_t** lua_curve_helper(lua_State *lua, hypercurve::curve_b
     return crv;
 }
 
-static luahc_bezier_curve_base_t** lua_bezier_curve_helper(lua_State *lua, hypercurve::bezier_curve_base *cb)
+struct luahc_user_defined_curve_t : public hypercurve::user_defined_curve
 {
-    luahc_bezier_curve_base_t **crv = (luahc_bezier_curve_base_t **) lua_newuserdata(lua, sizeof(luahc_bezier_curve_base_t*));
-    *crv = new luahc_bezier_curve_base_t(cb);
-    return crv;
-}
+    luahc_user_defined_curve_t(int reg, lua_State *lua)
+        : _lua_registry_index(reg)
+        , lua_state(lua)
+    {
+        callback = [&](double x)
+        {
+            lua_rawgeti(lua_state, LUA_REGISTRYINDEX, _lua_registry_index );
+            lua_pushnumber(lua_state, x);
+            if ( 0 != lua_pcall( lua_state, 1, 1, 0 ) ) {
+              printf("Failed to call the callback!\n %s\n", lua_tostring(lua_state, -1 ) );
+              return 0.;
+            }
+            double res = lua_tonumber(lua_state, -1);
+            return res;
+
+        };
+    }
+    int _lua_registry_index;
+    lua_State *lua_state;
+};
 
 //extern "C" {
 ///////////////////////////////////////////:
@@ -129,7 +138,7 @@ int luahc_cissoid_curve(lua_State *lua)
 int luahc_quadratic_bezier_curve(lua_State *lua)
 {
     hypercurve::control_point *cp = *(hypercurve::control_point**) luaL_checkudata(lua, 1, "hypercurve.control_point");
-    luahc_bezier_curve_base_t **crv = lua_bezier_curve_helper(lua, new hypercurve::quadratic_bezier_curve(*cp));
+    luahc_curve_base_t **crv = lua_curve_helper(lua, new hypercurve::quadratic_bezier_curve(*cp));
     luaL_getmetatable(lua, "hypercurve.curve_base");
     lua_setmetatable(lua, -2);
     return 1;
@@ -139,10 +148,51 @@ int luahc_cubic_bezier_curve(lua_State *lua)
 {
     hypercurve::control_point *cp = *(hypercurve::control_point**) luaL_checkudata(lua, 1, "hypercurve.control_point");
     hypercurve::control_point *cp2 = *(hypercurve::control_point**) luaL_checkudata(lua, 2, "hypercurve.control_point");
-    luahc_bezier_curve_base_t **crv = lua_bezier_curve_helper(lua, new hypercurve::cubic_bezier_curve(*cp, *cp2));
+    luahc_curve_base_t **crv = lua_curve_helper(lua, new hypercurve::cubic_bezier_curve(*cp, *cp2));
     luaL_getmetatable(lua, "hypercurve.curve_base");
     lua_setmetatable(lua, -2);
     return 1;
+}
+
+int luahc_cubic_spline_curve(lua_State *lua)
+{
+    luaL_checktype(lua, 1, LUA_TTABLE);
+    size_t size = luaL_len(lua, 1); //lua_objlen(lua, 3);
+    std::vector<hypercurve::control_point> cps;
+    for(size_t i = 1; i <= size; i++)
+    {
+        lua_rawgeti(lua, 1, i);
+        hypercurve::control_point *cp = *(hypercurve::control_point **) luaL_checkudata(lua, -1, "hypercurve.control_point");
+        cps.push_back(*cp);
+        lua_pop(lua, 1);
+    }
+    luahc_curve_base_t ** l =lua_curve_helper(lua, new hypercurve::cubic_spline_curve(cps));
+    luaL_getmetatable(lua, "hypercurve.curve_base");
+    lua_setmetatable(lua, -2);
+    return 1;
+}
+
+int luahc_catmull_rom_spline_curve(lua_State *lua)
+{
+    hypercurve::control_point *cp = *(hypercurve::control_point**) luaL_checkudata(lua, 1, "hypercurve.control_point");
+    hypercurve::control_point *cp2 = *(hypercurve::control_point**) luaL_checkudata(lua, 2, "hypercurve.control_point");
+    luahc_curve_base_t **crv = lua_curve_helper(lua, new hypercurve::catmull_rom_spline_curve(0.5, *cp, *cp2));
+    luaL_getmetatable(lua, "hypercurve.curve_base");
+    lua_setmetatable(lua, -2);
+    return 1;
+}
+
+int luahc_user_defined_curve(lua_State *lua)
+{
+    if(lua_gettop(lua) == 1 && lua_isfunction(lua, -1))
+    {
+        int callback_reference = luaL_ref( lua, LUA_REGISTRYINDEX );
+        luahc_curve_base_t **crv = lua_curve_helper(lua, new luahc_user_defined_curve_t(callback_reference, lua));
+        luaL_getmetatable(lua, "hypercurve.curve_base");
+        lua_setmetatable(lua, -2);
+        return 1;
+    }
+    return 0;
 }
 
 ///////////////////////////////////////////:
@@ -157,9 +207,9 @@ int luahc_segment(lua_State *lua)
     //luahc_curve_base_t *curve = *(luahc_curve_base_t **)lua_touserdata(lua, 3);
     // Memory --> TO FIX
 
-    std::shared_ptr<hypercurve::segment> **l_seg = (std::shared_ptr<hypercurve::segment> **)
-            lua_newuserdata(lua, sizeof(std::shared_ptr<hypercurve::segment>*));
-    *l_seg = new std::shared_ptr<hypercurve::segment>(std::make_shared<hypercurve::segment>(frac, y_dest, curve->crv));
+    hypercurve::segment **l_seg = (hypercurve::segment **)
+            lua_newuserdata(lua, sizeof(hypercurve::segment*));
+    *l_seg = new hypercurve::segment(frac, y_dest, curve->crv);
 
     luaL_getmetatable(lua, "hypercurve.segment");
     lua_setmetatable(lua, -2);
@@ -179,12 +229,12 @@ int luahc_curve(lua_State *lua)
     luaL_checktype(lua, 3, LUA_TTABLE);
     size_t size = luaL_len(lua, 3); //lua_objlen(lua, 3);
 
-    std::vector< std::shared_ptr<hypercurve::segment> > segs;
-    std::shared_ptr<hypercurve::segment> *seg_ptr = segs.data();
+    std::vector< hypercurve::segment > segs;
+    hypercurve::segment *seg_ptr = segs.data();
     for(size_t i = 1; i <= size; i++)
     {
         lua_rawgeti(lua, 3, i);
-        std::shared_ptr<hypercurve::segment> *seg = *(std::shared_ptr<hypercurve::segment> **)luaL_checkudata(lua, -1, "hypercurve.segment");
+        hypercurve::segment *seg = *(hypercurve::segment **)luaL_checkudata(lua, -1, "hypercurve.segment");
         segs.push_back(*seg);
         seg_ptr++;
         lua_pop(lua, 1);
@@ -201,7 +251,7 @@ int luahc_curve(lua_State *lua)
 
 
 ///////////////////////////////////////////:
-// Curve to Soundfile
+// Curve methods
 // Syntax : hypercurve.write_as_wav(string path, curve c)
 ///////////////////////////////////////////:
 #include"sndfile.hh"
@@ -225,6 +275,23 @@ int luahc_curve_ascii_display(lua_State *lua)
     return 0;
 }
 
+// Return one sample
+int luahc_curve_get_sample_at(lua_State *lua)
+{
+    hypercurve::curve *crv = *(hypercurve::curve **) luaL_checkudata(lua, 1, "hypercurve.curve");
+    int index = lua_tonumber(lua, 2);
+    lua_pushnumber(lua, crv->get_samples()[index]);
+    return 1;
+}
+
+// Returns a lua table
+int luahc_curve_get_samples(lua_State *lua)
+{
+
+
+    return 0;
+}
+
 extern "C" {
 ///////////////////////////////////////////:
 // Methods registration
@@ -242,11 +309,6 @@ static int luahc_index(lua_State *L) {
     int i = luaL_checkinteger(L, 2);
     lua_pushinteger(L, i);
     return 1;
-}
-
-static int luahc_newindex(lua_State *L) {
-    //printf("## index\n");
-    return 0;
 }
 
 static const luaL_Reg luahc_curve_class_meta[] =
@@ -284,6 +346,9 @@ static const luaL_Reg luahc_static_meth[] =
     {"diocles", luahc_cissoid_curve},
     {"quadratic_bezier", luahc_quadratic_bezier_curve},
     {"cubic_bezier", luahc_cubic_bezier_curve},
+    {"cubic_spline", luahc_cubic_spline_curve},
+    {"catmull_rom", luahc_catmull_rom_spline_curve},
+    {"user_defined", luahc_user_defined_curve},
     { NULL      ,NULL      }
 };
 

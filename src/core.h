@@ -57,10 +57,10 @@ protected:
 class curve
 {
 public:
-    curve(size_t definition_, double y_start_, std::vector< std::shared_ptr<segment> > segs_)
+    curve(size_t definition_, double y_start_, std::vector< segment > segs_)
         : definition(definition_)
         , y_start(y_start_)
-        , segs(segs_)
+        , segs( std::move(segs_) )
         , samples(definition)
     {
         init();
@@ -68,12 +68,14 @@ public:
         process();
     }
 
-    void init()
+    virtual  ~curve() {}
+
+    virtual void init()
     {
-        segs[0]->set_y_start(y_start);
+        segs[0].set_y_start(y_start);
         for(size_t i = 1; i < segs.size(); i++)
         {
-            segs[i]->set_y_start(segs[i - 1]->y_destination);
+            segs[i].set_y_start(segs[i - 1].y_destination);
         }
     }
 
@@ -84,8 +86,8 @@ public:
         for(size_t i = 0; i < segs.size(); i++)
         {
             // For each segment, we must give it a real size (size_t), and an iterator position
-            size_t seg_size = std::floor(segs[i]->fractional_size * definition);
-            double seg_max = segs[i]->process(it, seg_size);
+            size_t seg_size = std::floor(segs[i].fractional_size * definition);
+            double seg_max = segs[i].process(it, seg_size);
             if(seg_max > max) max = seg_max;
         }
     }
@@ -109,12 +111,12 @@ public:
 
     double *get_samples() {return samples.data();}
     size_t get_definition() {return definition;}
-private:
+protected:
     void check_total_size()
     {
         double x = 0;
         for(auto & it : segs)
-            x += it->fractional_size;
+            x += it.fractional_size;
         if( (x > 1.0) ||  (x < 1.0) )
         {
             this->rescale(x);
@@ -125,15 +127,38 @@ private:
     {
         double factor = (1 + (1 - x));
         for(auto & it : segs) {
-            it->rescale_x(factor);
+            it.rescale_x(factor);
         }
     }
 
-    double max = -1.0;
+    double max = 0.0;
     size_t definition;
     double y_start;
-    std::vector< std::shared_ptr<segment> > segs;
+    std::vector< segment > segs;
     std::vector<double> samples;
+};
+
+class waveform : public curve
+{
+public:
+    waveform(size_t definition_, double y_start_, std::vector< segment > segs_)
+        : curve(definition_, y_start_, segs_)
+    {}
+
+    void init() override
+    {
+        //segs[0].y_destination = waveform_scale(segs[0].y_destination);
+        segs[0].set_y_start( y_start );
+        for(size_t i = 1; i < segs.size(); i++)
+        {
+            //segs[i].y_destination = waveform_scale(segs[0].y_destination);
+            segs[i].set_y_start(segs[i - 1].y_destination);
+        }
+    }
+
+private:
+    double waveform_scale(double y)
+    {return (y * 2.0) - 1.0;}
 };
 
 }

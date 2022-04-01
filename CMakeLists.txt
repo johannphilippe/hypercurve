@@ -49,12 +49,16 @@ target_link_libraries(hypercurve_test
 #############################################
 ##### 	Build Lua Module
 #############################################
-find_package(Lua REQUIRED)
+
+if(NOT DEFINED LUA_INCLUDE_DIR OR NOT DEFINED LUA_LIBRARIES)
+   find_package(Lua REQUIRED)
+else()
+   set(Lua_FOUND TRUE)
+endif()
 
 if(NOT ${Lua_FOUND})
    message(FATAL_ERROR "Lua not found")
 endif()
-
 
 add_library(lua_hypercurve SHARED
    lua_module/lua_hypercurve.cpp

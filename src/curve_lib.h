@@ -26,7 +26,7 @@ public:
     inline virtual double process(size_t i, size_t size) {return process(frac(i, size));}
     inline virtual double process_all(size_t size, std::vector<double>::iterator &it)
     {
-        double max = -999;
+        double max = 0.0;
         for(size_t i = 0; i < size; ++i)
         {
             double res =  process(frac(i, size));
@@ -113,6 +113,7 @@ private:
 class user_defined_curve : public curve_base
 {
 public:
+    user_defined_curve() {}
     user_defined_curve(std::function<double(double)> f)
         : callback(f)
     {}
@@ -121,7 +122,7 @@ public:
     {
         return scale(callback(x));
     }
-private:
+protected:
     std::function<double(double)> callback;
 };
 
@@ -135,7 +136,7 @@ class bezier_curve_base : public curve_base
 public:
     inline double process_all(size_t size, std::vector<double>::iterator &it) override
     {
-        double max = -1;
+        double max = 0.0;
         size_t cnt = 0;
         std::pair<double, double> r1, r2;
         r1 = process_bezier(double(cnt) / double(size));
@@ -155,7 +156,7 @@ public:
 
             double relative_x = relative_position(r1.first, r2.first, x);
             double linear_interp = linear_interpolation(r1.second, r2.second, relative_x);
-            if(linear_interp > max) max = linear_interp;
+            if(std::abs(linear_interp) > max) max = std::abs(linear_interp);
             *it = linear_interp;
             ++it;
         }
@@ -248,13 +249,7 @@ private:
 // Spline Curves
 //////////////////////////////////////////////////
 
-class spline_curve_base : public curve_base
-{
-public:
-    virtual std::vector<double>& interpolate(size_t size) {}
-};
-
-class cubic_spline_curve : public virtual spline_curve_base
+class cubic_spline_curve : public virtual curve_base
 {
 public:
     cubic_spline_curve(std::vector<point> cp)
@@ -278,10 +273,10 @@ public:
     inline virtual double process_all(size_t size, std::vector<double>::iterator &it)
     {
         std::vector<double>& res = spl.interpolate_from_points(_control_points, size, point{1.0, 1.0});
-        double max = -999;
+        double max = 0.0;
         for(size_t i = 0; i < size; i++)
         {
-            if(res[i] > max) max = res[i];
+            if( std::abs(res[i]) > max ) max = std::abs(res[i]);
             *it = res[i];
             ++it;
         }
@@ -298,10 +293,10 @@ private:
 
 // To get a real centripetal or chordal, we should be based on https://www.desmos.com/calculator/9kazaxavsf?lang=fr
 // alpha =  Parametric constant: 0.5 for the centripetal spline, 0.0 for the uniform spline, 1.0 for the chordal spline.
-class catmull_rom_spline : public spline_curve_base
+class catmull_rom_spline_curve : public curve_base
 {
 public:
-    catmull_rom_spline(double alpha_, point p0, point p3)
+    catmull_rom_spline_curve(double alpha_, point p0, point p3)
         : alpha(alpha_)
         , _cp0(p0)
         , _cp3(p3)
@@ -321,7 +316,7 @@ public:
         std::pair<double, double> r1, r2;
         r1 = process_catmul_rom(0);
         r2 = process_catmul_rom(1.0 / double(size));
-        double max = -999;
+        double max = 0.0;
         for(size_t i =0; i < size; i++)
         {
             const double x = double(i) / double(size);
@@ -336,7 +331,7 @@ public:
 
             double relative_x = relative_position(r1.first, r2.first, x);
             double linear_interp = linear_interpolation(r1.second, r2.second, relative_x);
-            if(linear_interp > max) max = linear_interp;
+            if(std::abs(linear_interp) > max) max = std::abs(linear_interp);
             *it = linear_interp;
             ++it;
         }

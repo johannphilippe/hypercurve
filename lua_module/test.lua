@@ -1,8 +1,10 @@
+-- Find package if not in standard Lua CPATH
 package.cpath = package.cpath .. ";/home/johann/Documents/GitHyb/build-hypercurve-Clang10-Debug"
 
 local hc =  require("liblua_hypercurve")
-local div = 6
 
+
+print("Print Lua module components")
 function tp(v, str)
 
 	for k,v in pairs(v) do
@@ -13,12 +15,11 @@ function tp(v, str)
 		end
 	end
 end
-print("Print Lua module components")
 tp(hc, "")
 
-
--- Here a simple composite curve example
-local ccc = hc.new(16384, 0, 
+-- Here a simple hybrid curve example
+local div = 6
+local hybrid = hc.new(16384, 0, 
 	{
 		hc.segment(1/div, 1, hc.cubic()),
 		hc.segment(1/div, 0.8, hc.diocles(1)),
@@ -29,12 +30,10 @@ local ccc = hc.new(16384, 0,
 
 	})
 	
-
-	ccc:ascii_display("luacurve", "y = luacurve(x)", "*")
-
-
---ccc:write_as_wav("/home/johann/Documents/GitHub/build-hypercurve-Clang10-Debug/ttt.wav")
-
+-- Display in terminal
+hybrid:ascii_display("luacurve", "y = luacurve(x)", "*")
+--The following writes as wave file with specified number of points (definition)
+--hybrid:write_as_wav("/home/johann/Documents/GitHub/build-hypercurve-Clang10-Debug/ttt.wav")
 
 -- Then a bezier curve example
 local bez = hc.new(16384, 0, 
@@ -45,5 +44,33 @@ local bez = hc.new(16384, 0,
 					hc.control_point(1/4, 0.9), hc.control_point(0.5, 0.9))),
 	})
 
---hc.write_as_wav("/home/johann/Documents/GitHub/build-hypercurve-Clang10-Debug/bezier_lua.wav", bez)
 bez:ascii_display("bezier", "y=bezier", "-")
+--hc:write_as_wav("/home/johann/Documents/GitHub/build-hypercurve-Clang10-Debug/bezier_lua.wav", bez)
+
+--
+-- User defined curve with user defined function
+
+function cube(x)
+	return x*x*x
+end
+
+local crv = hc.user_defined(cube)
+local seg = hc.segment(1, 1, crv)
+local full_curve = hc.new(16384, 0, {seg} )
+full_curve:ascii_display("user defined", "user(x)", "*")
+
+-- other curve types that can be  passed as segment argument
+
+-- Spline : takes a list of control points as argument (any number of control points)
+local spl = hc.cubic_spline({hc.control_point(0.2, 0.6), hc.control_point(0.5, 0.1), hc.control_point(0.3, 0.345)})
+
+-- Catmull Rom : takes two control points : P0 and P3 (P0.x must be negative, and P3.x must be more than 1)
+local cm = hc.catmull_rom(hc.control_point(-2, 1), hc.control_point(3, 5))
+local cm_seg = hc.segment(1, 1, cm)
+local cm_crv = hc.new( 16384, 0, 
+	{
+		cm_seg
+	})
+
+cm_crv:ascii_display("catmullrom", "cm(x)", "*")
+
