@@ -116,6 +116,11 @@ cmake ..
 make
 ```
 
+On MacOS, CMake might not find Lua. You can then pass it Lua paths as arguments 
+```
+cmake .. -DLUA_INCLUDE_DIR=/your/path/to/lua/headers -DLUA_LIBRARIES=/your/path/to/liblua.dylib
+```
+
 
 # TODO
 
