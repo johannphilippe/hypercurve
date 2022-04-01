@@ -56,8 +56,13 @@ if(NOT ${Lua_FOUND})
 endif()
 
 
-add_library(lua_hypercurve SHARED lua_module/lua_hypercurve.cpp)
-target_include_directories(lua_hypercurve PUBLIC ${LUA_INCLUDE_DIR})
+add_library(lua_hypercurve SHARED
+   lua_module/lua_hypercurve.cpp
+   )
+target_include_directories(lua_hypercurve PUBLIC
+   ${LUA_INCLUDE_DIR}
+   lua_module/lua-compat-5.3/c-api/
+   )
 target_link_libraries(lua_hypercurve hypercurve sndfile ${LUA_LIBRARIES})
 set_target_properties(lua_hypercurve PROPERTIES LINKER_LANGUAGE CXX)
 target_compile_options(lua_hypercurve PRIVATE -fPIC)

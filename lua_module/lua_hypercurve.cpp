@@ -5,26 +5,7 @@
 
 #include"../src/core.h"
 #include"../src/curve_lib.h"
-
-// From lua 5.2
-static void luaL_setfuncs (lua_State *L, const luaL_Reg *l, int nup) {
-  luaL_checkstack(L, nup+1, "too many upvalues");
-  for (; l->name != NULL; l++) {  /* fill the table with given functions */
-    int i;
-    lua_pushstring(L, l->name);
-    for (i = 0; i < nup; i++)  /* copy upvalues to the top */
-      lua_pushvalue(L, -(nup+1));
-    lua_pushcclosure(L, l->func, nup);  /* closure with those upvalues */
-    lua_settable(L, -(nup + 3));
-  }
-  lua_pop(L, nup);  /* remove upvalues */
-}
-
-
-#define luaL_newlibtable(L,l)   \
-  lua_createtable(L, 0, sizeof(l)/sizeof((l)[0]) - 1)
-
-#define luaL_newlib(L,l)        (luaL_newlibtable(L,l), luaL_setfuncs(L,l,0))
+#include"compat-5.3.h"
 
 struct luahc_curve_base_t
 {
@@ -196,7 +177,7 @@ int luahc_curve(lua_State *lua)
     int definition = lua_tointeger(lua, 1);
     double y_start = lua_tonumber(lua, 2);
     luaL_checktype(lua, 3, LUA_TTABLE);
-    size_t size = lua_objlen(lua, 3);
+    size_t size = luaL_len(lua, 3); //lua_objlen(lua, 3);
 
     std::vector< std::shared_ptr<hypercurve::segment> > segs;
     std::shared_ptr<hypercurve::segment> *seg_ptr = segs.data();

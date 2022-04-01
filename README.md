@@ -133,5 +133,6 @@ make
 # External libraries
 
 This library uses libsndfile as an external submodule.
-It also includes [AsciiPlot](https://github.com/joehood/asciiplotter) source code with license under src/asciiplot folder.
-
+It also includes source files from several open-source projects : 
+*  [AsciiPlot](https://github.com/joehood/asciiplotter) source code with license under src/asciiplot folder.
+* [lua-compat-5.3](https://github.com/keplerproject/lua-compat-5.3) which provides an API compatibility from 5.1 to 5.3.
