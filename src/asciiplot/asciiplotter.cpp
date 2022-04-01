@@ -24,7 +24,7 @@ SOFTWARE.
 
 #include<iostream>
 #include<stdio.h>
-#include<math.h>
+#include<cmath>
 #include<vector>
 #include"asciiplotter.h"
 

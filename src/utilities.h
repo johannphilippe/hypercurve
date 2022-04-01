@@ -1,7 +1,7 @@
 #ifndef UTILITIES_H
 #define UTILITIES_H
 
-#include<math.h>
+#include<cmath>
 #include<iostream>
 #include<vector>
 #include<memory>

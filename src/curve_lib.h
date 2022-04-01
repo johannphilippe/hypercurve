@@ -2,7 +2,7 @@
 #define CURVE_LIB_H
 
 #include"utilities.h"
-#include<math.h>
+#include<cmath>
 #include<iostream>
 #include<functional>
 #include<vector>

@@ -1,7 +1,7 @@
 #ifndef CORE_H
 #define CORE_H
 
-#include<math.h>
+#include<cmath>
 #include<vector>
 #include<memory>
 #include"curve_lib.h"

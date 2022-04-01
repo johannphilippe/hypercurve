@@ -9,7 +9,7 @@
 #include<iostream>
 #include<vector>
 #include<unordered_map>
-#include<math.h>
+#include<cmath>
 #include<functional>
 #include<memory.h>
 #include"utilities.h"

@@ -1,5 +1,5 @@
 -- Find package if not in standard Lua CPATH
-package.cpath = package.cpath .. ";/home/johann/Documents/GitHyb/build-hypercurve-Clang10-Debug"
+package.cpath = package.cpath .. ";/home/johann/Documents/GitHyb/build-hypercurve-Clang10-Debug/;"
 
 local hc =  require("liblua_hypercurve")
 
