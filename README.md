@@ -120,14 +120,13 @@ make
 # TODO
 
 * Waveform mode (rescale in y between -1 and 1)
-* Ruby gem 
 * Lua improvements (OOP for curve class) and tests (Reaper)
 * Csound RT opcode
 
 ## Curves to implement
 
 * Cardioid / hypercardioid
-* Spline
+* Chebyshev
 
 
 # External libraries
