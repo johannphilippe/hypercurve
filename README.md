@@ -66,8 +66,8 @@ double y_start = 0;
 curve c(definition, y_start, 
 	{
 		// segment(fractional_size, y_destination, curve
-		segment(frac(1,2), 1.0, cissoid_curve(1)),
-		segment(0.5, 0.0, cubic_curve())
+		segment(frac(1,2), 1.0, share(cissoid_curve(1))),
+		segment(0.5, 0.0, share(cubic_curve()))
 	}); 
 
 // Then access samples with double *get_samples() 
