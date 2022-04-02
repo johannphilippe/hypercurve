@@ -66,7 +66,7 @@ using linear_curve = curve_base;
 class diocles_curve : public curve_base
 {
 public:
-    diocles_curve(const double a_)
+    diocles_curve(double a_)
         : a(a_)
     {}
     inline double process(double x) override
@@ -75,7 +75,7 @@ public:
     }
 
 private:
-    const double a;
+    double a;
 };
 
 using cissoid_curve = diocles_curve;

@@ -27,6 +27,8 @@ public:
         , y_destination(y_dest)
     {}
 
+    segment() {}
+
     virtual double process(std::vector<double>::iterator &it, size_t size)
     {
         return _curve->process_all(size, it);
@@ -67,6 +69,25 @@ public:
         check_total_size();
         process();
     }
+
+    curve(size_t definition_, double y_start_, segment *seg_ptr, size_t size)
+        : definition(definition_)
+        , y_start(y_start_)
+        , segs(size)
+        , samples(definition)
+    {
+        segment *ptr = seg_ptr;
+        for(size_t i = 0; i < size; ++i)
+        {
+            segs[i] = *ptr;
+            ++ptr;
+        }
+        init();
+        check_total_size();
+        process();
+    }
+
+    curve() {}
     virtual  ~curve() {}
 
     virtual void init()
@@ -160,7 +181,7 @@ public:
         return c;
     }
 
-    curve operator /(double k)
+    curve operator / (double k)
     {
         curve c(*this);
         c /= k;
@@ -173,6 +194,7 @@ public:
             it += k;
         return *this;
     }
+
     curve& operator +=(curve &other)
     {
         for(size_t i = 0; i < samples.size(); ++i)

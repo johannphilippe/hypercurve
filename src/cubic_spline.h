@@ -17,9 +17,6 @@
 using namespace std;
 namespace hypercurve {
 
-
-
-
 template<typename T>
 class cubic_spline
 {
