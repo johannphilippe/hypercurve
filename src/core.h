@@ -67,7 +67,6 @@ public:
         check_total_size();
         process();
     }
-
     virtual  ~curve() {}
 
     virtual void init()
@@ -168,6 +167,59 @@ public:
         return c;
     }
 
+    curve& operator+=(double k)
+    {
+        for(auto & it : samples)
+            it += k;
+        return *this;
+    }
+    curve& operator +=(curve &other)
+    {
+        for(size_t i = 0; i < samples.size(); ++i)
+            samples[i] += other.get_sample_at(i);
+        return *this;
+    }
+
+    curve operator +(double k)
+    {
+        curve c(*this);
+        c += k;
+        return c;
+    }
+    curve operator +(curve &other)
+    {
+        curve c(*this);
+        c += other;
+        return c;
+    }
+
+    curve& operator -=(double k)
+    {
+        for(auto & it : samples)
+            it -= k;
+        return *this;
+    }
+    curve& operator -=(curve &other)
+    {
+        for(size_t i = 0; i < samples.size(); ++i)
+            samples[i] -= other.get_sample_at(i);
+        return *this;
+    }
+
+    curve operator -(double k)
+    {
+        curve c(*this);
+        c -= k;
+        return c;
+    }
+
+    curve operator -(curve &other)
+    {
+        curve c(*this);
+        c -= other;
+        return c;
+    }
+
 protected:
     void check_total_size()
     {
@@ -194,41 +246,6 @@ protected:
     std::vector< segment > segs;
     std::vector<double> samples;
 };
-
-class waveform : public curve
-{
-public:
-    waveform(size_t definition_, double y_start_, std::vector< segment > segs_)
-        : curve(definition_, y_start_, segs_)
-    {}
-
-    void init() override
-    {
-        //segs[0].y_destination = waveform_scale(segs[0].y_destination);
-        segs[0].set_y_start( y_start );
-        for(size_t i = 1; i < segs.size(); i++)
-        {
-            //segs[i].y_destination = waveform_scale(segs[0].y_destination);
-            segs[i].set_y_start(segs[i - 1].y_destination);
-        }
-    }
-
-private:
-    double waveform_scale(double y)
-    {return (y * 2.0) - 1.0;}
-};
-
-///////////////////////////////////////////////////////////////
-// Modulator Isn't an overloaded operator called implicitly using first argument? Then if that first argument is a basic data type (float here), will it work?
-// Can be thought as a way to modulate a curve
-// Modulator exist in two flavors : with a constant amplitude,
-// or with an interpolator curve that will scale the content
-// The interpolator curve must be the same size as the target
-//
-///////////////////////////////////////////////////////////////
-
-
-
 }
 
 #endif // CORE_H

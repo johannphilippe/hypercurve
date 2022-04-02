@@ -37,6 +37,7 @@ public:
         return max;
     }
 
+    // Do not override this (or make sure to implement y_start and y_destination affectation)
     inline virtual void init(double y_start_, double y_dest_) {
         y_start = y_start_;
         y_destination = y_dest_;
@@ -45,12 +46,13 @@ public:
         on_init();
     };
 
-    // Override this one insted of init to avoid y_start and y_destination affectation repetition
+    // Override this one insted of init to avoid y_start and y_destination
+    // affectation repetition
     inline virtual void on_init() {}
 
 protected:
 
-    double scale(double y)
+    inline virtual double scale(double y)
     {
         if(y_start > y_destination) y = 1.0 - y;
         return (y * abs_diff) + offset;
@@ -105,51 +107,12 @@ private:
 };
 
 //////////////////////////////////////////////////
-// Chebyshev
-// -- pretty experimental, no idea to make it go from one point(y) to another(y)
-// -- could be a modulator instead
-//////////////////////////////////////////////////
-
-template<int T = 1>
-class chebyshev_curve : public curve_base
-{
-public:
-    chebyshev_curve(int n_)
-        : n(n_)
-    {}
-
-
-    inline double process(double x) override
-    {
-
-        const double t = std::acos(( x * 2.0) - 1.0 );
-        if constexpr(T == 1)
-        {
-            return scale_chebyshev(std::cos(n * t));
-        } else // T == 2
-        {
-            return scale_chebyshev(std::sin( (n + 1) * t) / std::sin(t));
-        }
-    }
-private:
-
-    // T = 1 stays between -1 and 1
-    // T = 2
-    double scale_chebyshev(double y)
-    {
-        return (y) ;
-    }
-
-    const double n;
-};
-
-//////////////////////////////////////////////////
 // Cardioid
 // Idea : user could just give a segment in degrees with a rotation offset, and give y_start and y_dest.
 //////////////////////////////////////////////////
 
 //////////////////////////////////////////////////
-// User defined curve Curves
+// User defined Curves
 //
 // Callback should return an y value between 0 and 1
 // for each x between 0 and 1

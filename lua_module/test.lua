@@ -1,5 +1,5 @@
 -- Find package if not in standard Lua CPATH
-package.cpath = package.cpath .. ";/home/johann/Documents/GitHyb/build-hypercurve-Clang10-Debug/;"
+package.cpath = package.cpath .. ";/home/johann/Documents/GitHub/build-hypercurve-Clang10-Debug/?.so;"
 
 local hc =  require("liblua_hypercurve")
 
@@ -74,8 +74,11 @@ function cube(x)
 end
 
 local crv = hc.user_defined(cube)
+print("ud ccc ok")
 local seg = hc.segment(1, 1, crv)
-local full_curve = hc.curve(16384, 0, {seg} )
+print("ud seg ok ")
+local full_curve = hc.curve(1024, 0, {seg} )
+print("ud curve ok")
 full_curve:ascii_display("user defined", "user(x)", "*")
 
 -- other curve types that can be  passed as segment argument

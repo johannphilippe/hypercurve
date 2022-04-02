@@ -1,5 +1,5 @@
 -- Path to liblua_hypercurve
-package.cpath = package.cpath .. ";/home/johann/Documents/GitHyb/build-hypercurve-Clang10-Debug"
+package.cpath = package.cpath .. ";/home/johann/Documents/GitHub/build-hypercurve-Clang10-Debug;"
 
 local hc =  require("liblua_hypercurve")
 

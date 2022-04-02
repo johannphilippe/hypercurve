@@ -17,18 +17,31 @@ target_compile_options(sndfile PRIVATE -fPIC)
 #############################################
 ##### 	Build Hypercurve library
 #############################################
-add_library(hypercurve
+set(HYPERCURVE_SOURCES
    src/core.h
    src/curve_lib.h
    src/utilities.h
    src/cubic_spline.h
+   src/modulator_lib.h
+   src/hypercurve.h
 
    # Include asciiplot library
    src/asciiplot/asciiplotter.h
    src/asciiplot/asciiplotter.cpp
    )
+
+add_library(hypercurve SHARED
+   ${HYPERCURVE_SOURCES}
+   )
 set_target_properties(hypercurve PROPERTIES LINKER_LANGUAGE CXX)
 target_compile_options(hypercurve PRIVATE -fPIC)
+
+add_library(hypercurve_static STATIC
+   ${HYPERCURVE_SOURCES}
+   )
+set_target_properties(hypercurve_static PROPERTIES LINKER_LANGUAGE CXX)
+target_compile_options(hypercurve_static PRIVATE -fPIC)
+
 
 #############################################
 ##### 	Build Test
@@ -57,6 +70,7 @@ else()
    set(Lua_FOUND TRUE)
 endif()
 
+message(STATUS ${LUA_VERSION_STRING})
 message(STATUS ${LUA_INCLUDE_DIR})
 message(STATUS ${LUA_LIBRARIES})
 
@@ -73,9 +87,9 @@ target_include_directories(lua_hypercurve PUBLIC
    lua_module/lua-compat-5.3/c-api/
    )
 
-target_link_libraries(lua_hypercurve hypercurve sndfile ${LUA_LIBRARIES})
+target_link_libraries(lua_hypercurve PUBLIC hypercurve sndfile ${LUA_LIBRARIES})
 set_target_properties(lua_hypercurve PROPERTIES LINKER_LANGUAGE CXX)
-target_compile_options(lua_hypercurve PRIVATE -fPIC)
+target_compile_options(lua_hypercurve PUBLIC -fPIC)
 
 ## Lua C Test
 

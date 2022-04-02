@@ -381,13 +381,6 @@ int luaopen_liblua_hypercurve (lua_State *lua)
     lua_pushvalue(lua, -2);
     lua_settable(lua, -3);
 
-    /*
-    luaL_newmetatable(lua, "hypercurve.control_point");
-    lua_pushstring(lua, "__index");
-    lua_pushvalue(lua, -2);
-    lua_settable(lua, -3);
-    */
-
     luaL_newmetatable(lua, "hypercurve.curve");
     luaL_setfuncs(lua, luahc_curve_class_meta, 0);
     luaL_newlib(lua, luahc_curve_class_meth);
