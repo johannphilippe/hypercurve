@@ -5,6 +5,7 @@
 #include<iostream>
 #include<vector>
 #include<memory>
+#include<cstring>
 
 namespace hypercurve {
 
@@ -102,6 +103,86 @@ std::vector<double> linspace(size_t size)
     return v;
 }
 
+// To allow external allocators
+template<typename T>
+struct memory_vector
+{
+   struct iterator : public std::iterator<std::forward_iterator_tag, T>
+   {
+      iterator() : ptr(nullptr) {}
+      iterator(T *ptr_)
+         : ptr(ptr_)
+      {}
+      iterator(const iterator&o)
+         : ptr(o.ptr)
+      {}
+      ~iterator() {
+      }
+      iterator& operator=(const iterator&o) {ptr = o.ptr; return *this;}
+      iterator& operator++() {++ptr; return *this;} //prefix increment
+      iterator& operator++(int) {return ptr++;}
+      T * operator->() {return ptr;}
+      T& operator*() const {return *ptr;}
+      bool operator==(const iterator& i) {return ptr == i.ptr;}
+      bool operator!=(const iterator& i) {return ptr != i.ptr;}
+
+      T *ptr;
+   };
+
+   memory_vector() {}
+   memory_vector(size_t size_)
+   {
+      _size = size_;
+      _data = new T[_size];
+   }
+   memory_vector(T *ptr, size_t size_)
+   {
+      _size = size_;
+      _data = ptr;
+   }
+
+   // Copy
+   memory_vector(std::vector<T> &v)
+   {
+      _size = v.size();
+      _data = new T[_size];
+      for(size_t i = 0; i < v.size(); ++i)
+          _data[i] = v[i];
+   }
+
+   void init(T *ptr, size_t size_)
+   {
+       _size = size_;
+       _data = ptr;
+   }
+
+    ~memory_vector()
+   {
+       delete[] _data;
+   }
+
+   void resize(size_t size_)
+   {
+      if(_size > 0)
+         delete[] _data;
+      _size=  size_;
+      _data = new T[_size];
+   }
+
+   T& operator[](size_t index)
+   {
+      return _data[index];
+   }
+
+   size_t size() {return _size;}
+
+   iterator begin() {return iterator(_data);}
+   iterator end() {return iterator(_data + _size);}
+   T* data() {return _data;}
+
+   T *_data;
+   size_t _size;
+};
 }
 
 #endif // UTILITIES_H

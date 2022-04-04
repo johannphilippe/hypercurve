@@ -53,7 +53,7 @@ public:
 	~AsciiPlotter();
 	void plot(const char *plotfile, const char *datafile);
 	void addPlot(vector<double> xdata, vector<double> ydata, string label, char marker);
-	void show();
+    void show();
 	void xlabel(string label);
 	void ylabel(string label);
 	void legend();

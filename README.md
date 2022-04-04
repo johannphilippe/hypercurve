@@ -58,8 +58,8 @@ There are two ways to use it : in C++ or in Lua. The CMake build system builds t
 ## A simple C++ example 
 
 ```c++
-#include"core.h"
-#include"curve_lib.h"
+#include"hypercurve.h"
+
 using namespace hypercurve;
 const int definition = 16384;
 double y_start = 0;
@@ -123,14 +123,14 @@ cmake .. -DLUA_INCLUDE_DIR=/your/path/to/lua/headers -DLUA_LIBRARIES=/your/path/
 
 # TODO
 
-* REAPER -> find a way to have a compatibility mode for Lua Version (build with 5.1, working with 5.2 or 5.3) : see https://forum.cockos.com/showthread.php?p=2543755#post2543755
+* REAPER/Reascript -> see https://forum.cockos.com/showthread.php?p=2543755#post2543755
 
 * Introduce Modulators (Noise, Chebyshev) to allow a modulation of the curve. Find a way to modulate with modularity, without requiring any extra computation (extra loop). For now they are available with curve operators (*, /). At the end, it could be implemented inside segments, or as an extension of segment or curve (segment could pass it to the curve, that would then use it to modulate) 
 * Reflection on modulators is not completed yet. What about a sine with moving frequency ? Or chebyshev with moving "n" ?
 
-* Improve  CMake config (one CMakeLitst.txt per target) and install (implement system lib path, and lua lib path)
+* Csound RT opcode -> started. Memory issue : when creating curve (hypercurve opcode), it creates some memory issues (segfault). Need to find a way to make it safer. It actually is a different problematic, since it is realtime. So perheaps it should be implemented as a fully init opcode ? Or adapt the library to support realtime, with memory safety.
 
-* Csound RT opcode -> started. Need to fix memory allocation (likely related to std::out_of_range issue)
+* Interpolator class -> implement segments inside it
 
 * Once all done -> a proper documentation for C++/Lua, and Csound implementations
 

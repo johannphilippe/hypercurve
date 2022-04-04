@@ -20,16 +20,13 @@ public:
         : fractional_size(frac)
         , y_destination(y_dest)
         , _curve( std::move(c) )
-    {}
-
-    segment(double frac, double y_dest)
-        : fractional_size(frac)
-        , y_destination(y_dest)
-    {}
+    {
+        std::cout << "create segment" << std::endl;
+    }
 
     segment() {}
 
-    virtual double process(std::vector<double>::iterator &it, size_t size)
+    virtual double process(memory_vector<double>::iterator &it, size_t size)
     {
         return _curve->process_all(size, it);
     }
@@ -62,26 +59,9 @@ public:
     curve(size_t definition_, double y_start_, std::vector< segment > segs_)
         : definition(definition_)
         , y_start(y_start_)
-        , segs( std::move(segs_) )
+        , segs(segs_)
         , samples(definition)
     {
-        init();
-        check_total_size();
-        process();
-    }
-
-    curve(size_t definition_, double y_start_, segment *seg_ptr, size_t size)
-        : definition(definition_)
-        , y_start(y_start_)
-        , segs(size)
-        , samples(definition)
-    {
-        segment *ptr = seg_ptr;
-        for(size_t i = 0; i < size; ++i)
-        {
-            segs[i] = *ptr;
-            ++ptr;
-        }
         init();
         check_total_size();
         process();
@@ -101,20 +81,20 @@ public:
 
     void process()
     {
-        std::vector<double>::iterator it = samples.begin();
-        //
+       memory_vector<double>::iterator it = samples.begin();
         for(size_t i = 0; i < segs.size(); i++)
         {
             // For each segment, we must give it a real size (size_t), and an iterator position
             size_t seg_size = std::floor(segs[i].fractional_size * definition);
             double seg_max = segs[i].process(it, seg_size);
-            if(seg_max > max) max = seg_max;
+            if(std::abs(seg_max)  > max) max = std::abs(seg_max);
         }
     }
 
+
+
     void normalize_y()
     {
-
         for(size_t i = 0; i < samples.size(); i++)
         {
             samples[i] = (samples[i] / max);
@@ -124,16 +104,19 @@ public:
     void ascii_display(std::string name, std::string label, char marker)
     {
         AsciiPlotter plot(name, 80, 15);
-        plot.addPlot(linspace(definition), samples, label, marker);
+        plot.addPlot(linspace(definition), std::vector<double>(samples.data(), samples.data() + definition), label, marker);
         plot.legend();
         plot.show();
     }
 
-    double *get_samples() {return samples.data();}
-    double get_sample_at(size_t i) {return samples[i];}
+    double *get_samples() {return nullptr; }//samples.data();}
+    double get_sample_at(size_t i) {return 0; } //samples[i];}
     size_t get_definition() {return definition;}
 
     // Operators
+
+    double& operator[](size_t index)  { return samples[index];}
+
     curve& operator *=(curve &other)
     {
         for(size_t i = 0; i < samples.size(); ++i)
@@ -265,9 +248,10 @@ protected:
     double max = 0.0;
     size_t definition;
     double y_start;
-    std::vector< segment > segs;
-    std::vector<double> samples;
+    memory_vector< segment > segs;
+    memory_vector<double> samples;
 };
+
 }
 
 #endif // CORE_H

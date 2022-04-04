@@ -95,7 +95,7 @@ public:
                 (c[i] * (xval - x_i)) + d[i];
     }
 
-    void calculate_interpolation(int n)
+    void calculate_interpolation(int)
     {
         int key_index = 0;
         T key = x[key_index];
@@ -132,7 +132,6 @@ public:
         {
             tridiagonal[i].resize(n);
         }
-
     }
 
     void reset(int n, vector<point> p)
@@ -180,7 +179,7 @@ public:
     }
 
     vector<T>& interpolate_from_points(vector<point> &p,
-                                            int precision, point size)
+                                            int precision, point)
     {
         int n = p.size() - 1;
         if(n_points != p.size())

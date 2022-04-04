@@ -125,12 +125,12 @@ int main()
     t.reset();
     curve c7(def, 0, {
                  segment(frac(1,2), 1, {
-                     share(catmull_rom_spline_curve(0.5,
+                     share(catmull_rom_spline_curve(
                         point(-2, -0.5),
                         point(2, 0.2)))
                  }),
                  segment(frac(1,2), 0, {
-                     share(catmull_rom_spline_curve(0.5,
+                     share(catmull_rom_spline_curve(
                      point(-1, 3),
                      point(3, -5)
                      ))

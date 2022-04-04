@@ -24,7 +24,7 @@ public:
     // When you want to retrieve a single sample from a curve, it is recommanded to use this one. It is not necessary to override it for simple curves,
     // but may be necessary for complex (bezier, spline, catmullrom ...)
     inline virtual double process(size_t i, size_t size) {return process(frac(i, size));}
-    inline virtual double process_all(size_t size, std::vector<double>::iterator &it)
+    inline virtual double process_all(size_t size, memory_vector<double>::iterator &it)
     {
         double max = 0.0;
         for(size_t i = 0; i < size; ++i)
@@ -141,7 +141,7 @@ protected:
 class bezier_curve_base : public curve_base
 {
 public:
-    inline double process_all(size_t size, std::vector<double>::iterator &it) override
+    inline double process_all(size_t size, memory_vector<double>::iterator &it) override
     {
         double max = 0.0;
         size_t cnt = 0;
@@ -171,7 +171,7 @@ public:
         return max;
     }
 
-    inline virtual double process(double x) override
+    inline virtual double process(double) override
     {
         throw(std::runtime_error("Unimplemented for Bezier curve"));
     }
@@ -182,7 +182,7 @@ public:
         return process(frac(i, size));
     }
 protected:
-    inline virtual std::pair<double, double> process_bezier(double x) {return {0,0};}
+    inline virtual std::pair<double, double> process_bezier(double x) {return {x,0};}
 };
 
 class quadratic_bezier_curve : public bezier_curve_base
@@ -277,7 +277,7 @@ public:
         }
     }
 
-    inline virtual double process_all(size_t size, std::vector<double>::iterator &it) override
+    inline virtual double process_all(size_t size, memory_vector<double>::iterator &it) override
     {
         std::vector<double>& res = spl.interpolate_from_points(_control_points, size, point{1.0, 1.0});
         double max = 0.0;
@@ -303,9 +303,8 @@ private:
 class catmull_rom_spline_curve : public curve_base
 {
 public:
-    catmull_rom_spline_curve(double alpha_, point p0, point p3)
-        : alpha(alpha_)
-        , _cp0(p0)
+    catmull_rom_spline_curve(point p0, point p3)
+        : _cp0(p0)
         , _cp3(p3)
     {}
 
@@ -317,7 +316,7 @@ public:
     }
 
 
-    inline virtual double process_all(size_t size, std::vector<double>::iterator &it) override
+    inline virtual double process_all(size_t size, memory_vector<double>::iterator &it) override
     {
         size_t cnt = 0;
         std::pair<double, double> r1, r2;
@@ -348,7 +347,6 @@ private:
 
     std::pair<double, double> process_catmul_rom(double x)
     {
-        const double y = linear_interpolation(y_start, y_destination, x);
         const double rx = 0.5 * ((_cp1.x * 2.0) + (-_cp0.x + _cp2.x) * x
                                  + ((_cp0.x * 2.0) - (_cp1.x * 5.0)
                                     + (_cp2.x * 4.0) - _cp3.x ) * (x*x)
@@ -360,9 +358,7 @@ private:
         return {rx, ry};
     }
 
-    double alpha = 0;
     control_point _cp0, _cp3, _cp1, _cp2;
-    double t0, t1, t2, t3;
 };
 
 

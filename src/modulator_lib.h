@@ -14,7 +14,7 @@ namespace hypercurve {
 class interpolator{
 
 public:
-    interpolator(std::vector<point> pts)
+    interpolator(std::vector<point>)
     {
         // scale points in x
     }
@@ -98,7 +98,7 @@ public:
         : Amp(itp)
     {}
 
-    double process_all(size_t size, std::vector<double>::iterator &it) override
+    double process_all(size_t size, memory_vector<double>::iterator &it) override
     {
         double max = 0.0;
         for(size_t i = 0; i < size; ++i)

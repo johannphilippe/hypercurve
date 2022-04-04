@@ -8,6 +8,7 @@ extern "C" {
 
 #include"../src/core.h"
 #include"../src/curve_lib.h"
+#include"../src/utilities.h"
 #include"compat-5.3.h"
 
 struct luahc_curve_base_t
@@ -178,7 +179,7 @@ int luahc_catmull_rom_spline_curve(lua_State *lua)
 {
     hypercurve::control_point *cp = *(hypercurve::control_point**) luaL_checkudata(lua, 1, "hypercurve.control_point");
     hypercurve::control_point *cp2 = *(hypercurve::control_point**) luaL_checkudata(lua, 2, "hypercurve.control_point");
-    luahc_curve_base_t **crv = lua_curve_helper(lua, new hypercurve::catmull_rom_spline_curve(0.5, *cp, *cp2));
+    luahc_curve_base_t **crv = lua_curve_helper(lua, new hypercurve::catmull_rom_spline_curve(*cp, *cp2));
     luaL_getmetatable(lua, "hypercurve.curve_base");
     lua_setmetatable(lua, -2);
     return 1;
