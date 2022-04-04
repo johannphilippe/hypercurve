@@ -171,6 +171,9 @@ int main()
     modulated.ascii_display("Modulated", "mod * catmullrom", '*');
 
 
+    curve c8(def, 0.0, {segment(1, 1, share(hanning_curve()))});
+    c8.ascii_display("Hanning", "hanning(x)", '.');
+
     sf.writef(mod.get_samples(), def);
     sf2.writef(modulated.get_samples(), def);
     return 0;

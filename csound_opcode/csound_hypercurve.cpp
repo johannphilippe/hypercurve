@@ -152,6 +152,68 @@ struct cs_cubic_curve : public csnd::Plugin<1, 0>
     std::shared_ptr<cubic_curve> _curve;
 };
 
+struct cs_hanning : public csnd::Plugin<1, 0>
+{
+
+    int init()
+    {
+        _curve = std::make_shared<hanning_curve>();
+        index = curve_base_map.map(_curve);
+        outargs[0] = index;
+        return OK;
+    }
+
+    int deinit()
+    {
+        curve_base_map.unmap(index);
+        return OK;
+    }
+
+    int index;
+    std::shared_ptr<hanning_curve> _curve;
+};
+
+struct cs_hamming : public csnd::Plugin<1, 0>
+{
+
+    int init()
+    {
+        _curve = std::make_shared<hamming_curve>();
+        index = curve_base_map.map(_curve);
+        outargs[0] = index;
+        return OK;
+    }
+
+    int deinit()
+    {
+        curve_base_map.unmap(index);
+        return OK;
+    }
+
+    int index;
+    std::shared_ptr<hamming_curve> _curve;
+};
+
+struct cs_blackman : public csnd::Plugin<1, 0>
+{
+
+    int init()
+    {
+        _curve = std::make_shared<blackman_curve>();
+        index = curve_base_map.map(_curve);
+        outargs[0] = index;
+        return OK;
+    }
+
+    int deinit()
+    {
+        curve_base_map.unmap(index);
+        return OK;
+    }
+
+    int index;
+    std::shared_ptr<blackman_curve> _curve;
+};
 
 struct cs_quad_bezier : csnd::Plugin<1, 1>
 {
@@ -339,7 +401,11 @@ void csnd::on_load(Csound *csound) {
 
     // Curve types
     csnd::plugin<cs_diocles_curve>(csound, "diocles_curve", "i", "i", csnd::thread::i);
+    csnd::plugin<cs_diocles_curve>(csound, "cissoid_curve", "i", "i", csnd::thread::i); // alias for diocles
     csnd::plugin<cs_cubic_curve>(csound, "cubic_curve", "i", "", csnd::thread::i);
+    csnd::plugin<cs_hanning>(csound, "hanning_curve", "i", "", csnd::thread::i);
+    csnd::plugin<cs_hamming>(csound, "hamming_curve", "i", "", csnd::thread::i);
+    csnd::plugin<cs_blackman>(csound, "blackman_curve", "i", "", csnd::thread::i);
     csnd::plugin<cs_quad_bezier>(csound, "quadratic_bezier_curve", "i", "i", csnd::thread::i);
     csnd::plugin<cs_cub_bezier>(csound, "cubic_bezier_curve", "i", "ii", csnd::thread::i);
     csnd::plugin<cs_catmull_rom>(csound, "catmull_rom_curve", "i" , "ii", csnd::thread::i);

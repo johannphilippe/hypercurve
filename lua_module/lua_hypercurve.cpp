@@ -143,6 +143,28 @@ int luahc_cissoid_curve(lua_State *lua)
     return 1;
 }
 
+int luahc_hanning_curve(lua_State *lua)
+{
+    lua_curve_helper(lua, new hypercurve::hanning_curve);
+    luaL_getmetatable(lua, "hypercurve.curve_base");
+    lua_setmetatable(lua, -2);
+    return 1;
+}
+int luahc_hamming_curve(lua_State *lua)
+{
+    lua_curve_helper(lua, new hypercurve::hamming_curve);
+    luaL_getmetatable(lua, "hypercurve.curve_base");
+    lua_setmetatable(lua, -2);
+    return 1;
+}
+int luahc_blackman_curve(lua_State *lua)
+{
+    lua_curve_helper(lua, new hypercurve::blackman_curve);
+    luaL_getmetatable(lua, "hypercurve.curve_base");
+    lua_setmetatable(lua, -2);
+    return 1;
+}
+
 int luahc_quadratic_bezier_curve(lua_State *lua)
 {
     hypercurve::control_point *cp = *(hypercurve::control_point**) luaL_checkudata(lua, 1, "hypercurve.control_point");
@@ -174,7 +196,7 @@ int luahc_cubic_spline_curve(lua_State *lua)
         cps.push_back(*cp);
         lua_pop(lua, 1);
     }
-    luahc_curve_base_t ** l =lua_curve_helper(lua, new hypercurve::cubic_spline_curve(cps));
+    lua_curve_helper(lua, new hypercurve::cubic_spline_curve(cps));
     luaL_getmetatable(lua, "hypercurve.curve_base");
     lua_setmetatable(lua, -2);
     return 1;
@@ -213,7 +235,7 @@ int luahc_segment(lua_State *lua)
     double y_dest = lua_tonumber(lua, 2);
     luahc_curve_base_t *curve = *(luahc_curve_base_t **)luaL_checkudata(lua, 3, "hypercurve.curve_base");
     //luahc_curve_base_t *curve = *(luahc_curve_base_t **)lua_touserdata(lua, 3);
-    // Memory --> TO FIX
+    // Memory --> TO FIX ?
 
     hypercurve::segment **l_seg = (hypercurve::segment **)
             lua_newuserdata(lua, sizeof(hypercurve::segment*));
@@ -365,8 +387,11 @@ static const luaL_Reg luahc_static_meth[] =
     {"curve_base", luahc_curve_base},
     {"linear", luahc_curve_base},
     {"cubic", luahc_cubic_curve},
-    {"cissoid", luahc_cissoid_curve},
     {"diocles", luahc_cissoid_curve},
+    {"cissoid", luahc_cissoid_curve}, // alias for diocles
+    {"hanning", luahc_hanning_curve},
+    {"hamming", luahc_hamming_curve},
+    {"blackman", luahc_blackman_curve},
     {"quadratic_bezier", luahc_quadratic_bezier_curve},
     {"cubic_bezier", luahc_cubic_bezier_curve},
     {"cubic_spline", luahc_cubic_spline_curve},

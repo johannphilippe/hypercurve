@@ -31,6 +31,7 @@ public:
     inline virtual double process(size_t i, size_t size) {return process(frac(i, size));}
     inline virtual double process_all(size_t size, memory_vector<double>::iterator &it)
     {
+        definition = size;
         double max = 0.0;
         for(size_t i = 0; i < size; ++i)
         {
@@ -63,6 +64,7 @@ protected:
         return (y * abs_diff) + offset;
     }
 
+    size_t definition;
     double y_start, y_destination, abs_diff, offset;
 };
 
@@ -111,6 +113,33 @@ private:
     double exponent;
 };
 
+class hanning_curve : public curve_base
+{
+public:
+    inline double process(double x) override
+    {
+        return  hanning(x * definition, definition * 2);
+    }
+};
+
+class hamming_curve : public curve_base
+{
+public:
+    inline double process(double x) override
+    {
+        return  hamming(x * definition, definition * 2);
+    }
+};
+
+
+class blackman_curve : public curve_base
+{
+public:
+    inline double process(double x) override
+    {
+        return  blackman(x * definition, definition * 2);
+    }
+};
 //////////////////////////////////////////////////
 // Cardioid
 // Idea : user could just give a segment in degrees with a rotation offset, and give y_start and y_dest.

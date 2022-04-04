@@ -108,6 +108,19 @@ std::vector<double> linspace(size_t size)
     return v;
 }
 
+// Windows
+inline double hanning(int index, int length) {
+    return  0.5 * (1 - cos(2 * M_PI * index / (length - 1 )));
+}
+
+inline double hamming(int index, int length) {
+    return 0.54 - (0.46 * cos(2 * M_PI * index / (length - 1)));
+}
+
+inline double blackman(int index, int length) {
+    return 0.42 - (0.5 * cos(2 * M_PI * index / (length - 1))) + (0.08 * cos(4 * M_PI * index / (length - 1)));
+}
+
 // To allow external allocators
 template<typename T>
 struct memory_vector
