@@ -310,8 +310,6 @@ struct cs_curve : public csnd::Plugin<1,64>, public cs_rt_hypercurve
 {
   int init()
   {
-      mtx = csound->get_csound()->Create_Mutex(0);
-      csound::LockGuard g(csound->get_csound(), mtx);
       _mem.allocate(csound, (int)inargs[0]);
       _initialize(inargs[0], inargs[1], _mem.data());
       process_init();

@@ -273,6 +273,8 @@ public:
     memory_vector<double> samples;
 };
 
+using hypercurve = curve;
+
 }
 
 #endif // CORE_H

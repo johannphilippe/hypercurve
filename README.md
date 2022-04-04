@@ -52,6 +52,12 @@ Currently, you can export curves as `.wav` files, or us it directly in C++, Csou
 
 There are three ways to use it : in C++, Csound or in Lua. Cmake will help you build libraries that can be used in those languages. You will find C++ example under hypercurve_test/test.cpp, Csound example under csound_opcode/test.csd, and Lua example under lua_module/test.lua. 
 
+The basic syntax stands as follow : 
+* `hypercurve(integer size, double y_start, {segment_list});`
+Where `size` is the size in samples, `y_start` is the starting point of the curve, and segment list is a list of segments. 
+*  `segment(double frac, double y_destination, curve_type crv);`
+Where `frac` is the fractional size of the segment (fraction between 0 and 1), `y_destination` is the target point, and `crv`  a curve picked from hypercurve.
+
 
 ## A simple C++ example 
 
@@ -94,10 +100,10 @@ local hc = require("liblua_hypercurve")
 
 local definition = 16384
 local y_start = 0
-local crv = hc.curve(definition, y_start, 
+local crv = hc.hypercurve(definition, y_start, 
 	{
 		hc.segment(1/2, 1.0, hc.cissoid_curve(1.0)),
-		hc.segment(1/2, 0.0, hc.cubic_curve(0.0))
+		hc.sement(1/2, 0.0, hc.cubic_curve(0.0))
 	})
 
 // Write as 24 bits 48KHz wav
@@ -156,4 +162,4 @@ This library uses libsndfile as an external submodule.
 It also includes source files from several open-source projects : 
 *  [AsciiPlot](https://github.com/joehood/asciiplotter) source code with license under src/asciiplot folder.
 * [lua-compat-5.3](https://github.com/keplerproject/lua-compat-5.3) which provides an API compatibility from 5.1 to 5.3
-
+g

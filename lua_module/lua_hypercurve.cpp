@@ -379,7 +379,9 @@ static const luaL_Reg luahc_static_meta[] =
 };
 static const luaL_Reg luahc_static_meth[] =
 {
-    {"curve" , luahc_curve },
+    {"hypercurve" , luahc_curve },
+    {"curve" , luahc_curve },  // alias for hypercurve
+
     {"segment", luahc_segment},
     {"control_point", luahc_control_point},
 
