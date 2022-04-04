@@ -174,14 +174,12 @@ struct memory_vector
           _data[i] = v[i];
    }
 
-
    // operators
 
    memory_vector<T> operator=(const memory_vector<T> &other)
    {
        return memory_vector<T>(other);
    }
-
 
    void init(T *ptr, size_t size_)
    {

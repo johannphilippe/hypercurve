@@ -23,9 +23,6 @@ using namespace hypercurve;
 //
 /////////////////////////////////////////////////////////////
 
-void *mtx;
-
-
 #include<cstdarg>
 
 // Csound runtime hypercurve
@@ -106,7 +103,6 @@ struct cs_control_point : public csnd::Plugin<1, 2>
   int index;
   std::shared_ptr<control_point> cp;
 };
-
 
 //////////////////////////////////////////////////
 // Curve lib
@@ -390,7 +386,6 @@ private:
   size_t i_phasor;
   int index;
 };
-
 
 #include <modload.h>
 

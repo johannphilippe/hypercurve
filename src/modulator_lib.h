@@ -28,8 +28,6 @@ public:
             itps[i].x += itps[i-1].x;
     }
 
-
-
     virtual double interpolate(double x)
     {
         int seg = which_segment(x);
@@ -68,7 +66,6 @@ public:
         return cubic_interpolation(y1, y2, x);
     }
 };
-
 
 ////////////////////////////////////////////////////
 // Amplitude can be static (double between 0 and 1)

@@ -279,7 +279,6 @@ int luahc_curve(lua_State *lua)
     return 1;
 }
 
-
 ///////////////////////////////////////////:
 // Curve methods
 // Syntax : hypercurve.write_as_wav(string path, curve c)
@@ -399,7 +398,6 @@ static const luaL_Reg luahc_static_meth[] =
     {"user_defined", luahc_user_defined_curve},
     { NULL      ,NULL      }
 };
-
 
 int luaopen_liblua_hypercurve (lua_State *lua)
 {
