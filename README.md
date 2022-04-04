@@ -1,8 +1,6 @@
 
 # hypercurve
 
-A set of 2D polynomial curves functions that can be used  to control audio. 
-
 
 ```
                                             CatmullRom
@@ -52,7 +50,7 @@ Currently, you can export curves as `.wav` files.
 ## How to use it 
 
 
-There are two ways to use it : in C++ or in Lua. The CMake build system builds two libraries that can be used in both languages. You will find C++ example under hypercurve_test/test.cpp, and Lua example under lua_module/test.lua. 
+There are three ways to use it : in C++, Csound or in Lua. Cmake will help you build libraries that can be used in those languages. You will find C++ example under hypercurve_test/test.cpp, Csound example under csound_opcode/test.csd, and Lua example under lua_module/test.lua. 
 
 
 ## A simple C++ example 
@@ -115,12 +113,6 @@ cmake ..
 make
 ```
 
-On MacOS, CMake might not find Lua. You can then pass it Lua paths as arguments 
-```
-cmake .. -DLUA_INCLUDE_DIR=/your/path/to/lua/headers -DLUA_LIBRARIES=/your/path/to/liblua.dylib
-```
-
-
 # TODO
 
 * REAPER/Reascript -> see https://forum.cockos.com/showthread.php?p=2543755#post2543755
@@ -128,7 +120,9 @@ cmake .. -DLUA_INCLUDE_DIR=/your/path/to/lua/headers -DLUA_LIBRARIES=/your/path/
 * Introduce Modulators (Noise, Chebyshev) to allow a modulation of the curve. Find a way to modulate with modularity, without requiring any extra computation (extra loop). For now they are available with curve operators (*, /). At the end, it could be implemented inside segments, or as an extension of segment or curve (segment could pass it to the curve, that would then use it to modulate) 
 * Reflection on modulators is not completed yet. What about a sine with moving frequency ? Or chebyshev with moving "n" ?
 
-* Csound RT opcode -> started. Memory issue : when creating curve (hypercurve opcode), it creates some memory issues (segfault). Need to find a way to make it safer. It actually is a different problematic, since it is realtime. So perheaps it should be implemented as a fully init opcode ? Or adapt the library to support realtime, with memory safety.
+* Csound RT opcode : cubic spline (mem alloc)
+
+* Lagrange interpolation for curve extraction.
 
 * Interpolator class -> implement segments inside it
 

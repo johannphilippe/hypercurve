@@ -93,6 +93,12 @@ struct cs_control_point : public csnd::Plugin<1, 2>
       return OK;
   }
 
+  int deinit()
+  {
+      control_point_map.unmap(index);
+      return OK;
+  }
+
   int index;
   std::shared_ptr<control_point> cp;
 };
@@ -154,6 +160,12 @@ struct cs_quad_bezier : csnd::Plugin<1, 1>
         return OK;
     }
 
+    int deinit()
+    {
+        curve_base_map.unmap(index);
+        return OK;
+    }
+
     int index;
     std::shared_ptr<control_point> cp1;
     std::shared_ptr<quadratic_bezier_curve> _curve;
@@ -168,6 +180,12 @@ struct cs_cub_bezier : csnd::Plugin<1,2>
         _curve = std::make_shared<cubic_bezier_curve>(*cp1, *cp2);
         index = curve_base_map.map(_curve);
         outargs[0] = index;
+        return OK;
+    }
+
+    int deinit()
+    {
+        curve_base_map.unmap(index);
         return OK;
     }
 
@@ -189,10 +207,14 @@ struct cs_catmull_rom : csnd::Plugin<1, 2>
         return OK;
     }
 
+    int deinit()
+    {
+        curve_base_map.unmap(index);
+        return OK;
+    }
+
     int index;
-
     std::shared_ptr<control_point> cp1, cp2;
-
     std::shared_ptr<catmull_rom_spline_curve> _curve;
 };
 
@@ -254,7 +276,7 @@ struct cs_curve : public csnd::Plugin<1,64>, public cs_rt_hypercurve
 
   int deinit()
   {
-      //curve_map.unmap(index);
+      curve_map.unmap(index);
       return OK;
   }
 
