@@ -34,8 +34,8 @@
 # What is it ? 
 
 
-A set of classes to create hypbrid curves and use them for audio and music (or whatever). 
-Currently, you can export curves as `.wav` files. 
+A set of classes to create hybrid curves and use them for audio and music (or whatever). 
+Currently, you can export curves as `.wav` files, or us it directly in C++, Csound or Lua.
 
 ## Implemented curves 
 
@@ -134,7 +134,7 @@ make
 
 * Lagrange interpolation for curve extraction.
 
-* Once all done -> a proper documentation for C++/Lua, and Csound implementations
+* Once all done -> a proper documentation for C++/Csound/Lua, and Csound implementations
 
 ## Curves to implement
 

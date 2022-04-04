@@ -119,7 +119,7 @@ int luahc_control_point_xy(lua_State *lua)
 ///////////////////////////////////////////:
 int luahc_curve_base(lua_State *lua)
 {
-    luahc_curve_base_t **crv = lua_curve_helper(lua, new hypercurve::curve_base);
+    lua_curve_helper(lua, new hypercurve::curve_base);
     luaL_getmetatable(lua, "hypercurve.curve_base");
     lua_setmetatable(lua, -2);
     return 1;
@@ -127,7 +127,7 @@ int luahc_curve_base(lua_State *lua)
 
 int luahc_cubic_curve(lua_State *lua)
 {
-    luahc_curve_base_t **crv = lua_curve_helper(lua, new hypercurve::cubic_curve);
+    lua_curve_helper(lua, new hypercurve::cubic_curve);
     luaL_getmetatable(lua, "hypercurve.curve_base");
     lua_setmetatable(lua, -2);
     return 1;
@@ -136,7 +136,7 @@ int luahc_cubic_curve(lua_State *lua)
 int luahc_cissoid_curve(lua_State *lua)
 {
     const double a = lua_tonumber(lua, 1);
-    luahc_curve_base_t **crv = lua_curve_helper(lua, new hypercurve::cissoid_curve(a));
+    lua_curve_helper(lua, new hypercurve::cissoid_curve(a));
     //hypercurve::cissoid_curve **crv = (hypercurve::cissoid_curve **) lua_newuserdata(lua, sizeof(hypercurve::cissoid_curve*));
     luaL_getmetatable(lua, "hypercurve.curve_base");
     lua_setmetatable(lua, -2);
@@ -146,7 +146,7 @@ int luahc_cissoid_curve(lua_State *lua)
 int luahc_quadratic_bezier_curve(lua_State *lua)
 {
     hypercurve::control_point *cp = *(hypercurve::control_point**) luaL_checkudata(lua, 1, "hypercurve.control_point");
-    luahc_curve_base_t **crv = lua_curve_helper(lua, new hypercurve::quadratic_bezier_curve(*cp));
+    lua_curve_helper(lua, new hypercurve::quadratic_bezier_curve(*cp));
     luaL_getmetatable(lua, "hypercurve.curve_base");
     lua_setmetatable(lua, -2);
     return 1;
@@ -156,7 +156,7 @@ int luahc_cubic_bezier_curve(lua_State *lua)
 {
     hypercurve::control_point *cp = *(hypercurve::control_point**) luaL_checkudata(lua, 1, "hypercurve.control_point");
     hypercurve::control_point *cp2 = *(hypercurve::control_point**) luaL_checkudata(lua, 2, "hypercurve.control_point");
-    luahc_curve_base_t **crv = lua_curve_helper(lua, new hypercurve::cubic_bezier_curve(*cp, *cp2));
+    lua_curve_helper(lua, new hypercurve::cubic_bezier_curve(*cp, *cp2));
     luaL_getmetatable(lua, "hypercurve.curve_base");
     lua_setmetatable(lua, -2);
     return 1;
@@ -184,7 +184,7 @@ int luahc_catmull_rom_spline_curve(lua_State *lua)
 {
     hypercurve::control_point *cp = *(hypercurve::control_point**) luaL_checkudata(lua, 1, "hypercurve.control_point");
     hypercurve::control_point *cp2 = *(hypercurve::control_point**) luaL_checkudata(lua, 2, "hypercurve.control_point");
-    luahc_curve_base_t **crv = lua_curve_helper(lua, new hypercurve::catmull_rom_spline_curve(*cp, *cp2));
+    lua_curve_helper(lua, new hypercurve::catmull_rom_spline_curve(*cp, *cp2));
     luaL_getmetatable(lua, "hypercurve.curve_base");
     lua_setmetatable(lua, -2);
     return 1;
@@ -195,7 +195,7 @@ int luahc_user_defined_curve(lua_State *lua)
     if(lua_gettop(lua) == 1 && lua_isfunction(lua, -1))
     {
         int callback_reference = luaL_ref( lua, LUA_REGISTRYINDEX );
-        luahc_curve_base_t **crv = lua_curve_helper(lua, new luahc_user_defined_curve_t(callback_reference, lua));
+        lua_curve_helper(lua, new luahc_user_defined_curve_t(callback_reference, lua));
         luaL_getmetatable(lua, "hypercurve.curve_base");
         lua_setmetatable(lua, -2);
         return 1;

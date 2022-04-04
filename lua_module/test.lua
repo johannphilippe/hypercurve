@@ -56,6 +56,7 @@ local bez = hc.curve(16384, 0,
 		hc.segment(1/2, 0, hc.cubic_bezier(
 					hc.control_point(1/4, 0.9), hc.control_point(0.5, 0.9))),
 	})
+bez:ascii_display("bezier", "y=bezier", "-")
 
 -- Control points also have class methods, that can be used as setters and/or getters
 -- local cp = control_point(1,0.5)
@@ -63,7 +64,6 @@ local bez = hc.curve(16384, 0,
 -- local y = cp:y(0.5)
 -- local xx, yy = cp:xy(1.5, 2.5)
 
-bez:ascii_display("bezier", "y=bezier", "-")
 --hc:write_as_wav("/home/johann/Documents/GitHub/build-hypercurve-Clang10-Debug/bezier_lua.wav", bez)
 
 --
