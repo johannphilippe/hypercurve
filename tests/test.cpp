@@ -158,7 +158,7 @@ int main()
                       });
 
     cubic_interpolator itp(0, { point(0.5, 0.2), point(0.5, 0)});
-    curve mod(16384, 0, {
+    ::hypercurve::hypercurve mod(16384, 0, {
                   segment(1, 1, share(chebyshev_modulator<amplitude_interpolated>(share(itp), 15)))
             });
 

@@ -12,7 +12,6 @@
 #include"curve_lib.h"
 #include"asciiplot/asciiplotter.h"
 #include<iostream>
-
 namespace hypercurve {
 ///////////////////////////////////////////////////
 // The segment class
@@ -276,5 +275,4 @@ public:
 using hypercurve = curve;
 
 }
-
 #endif // CORE_H

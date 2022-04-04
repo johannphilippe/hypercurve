@@ -14,6 +14,13 @@ set(BUILD_SHARED_LIBS ON CACHE BOOL "Build Shared libs")
 add_subdirectory(libsndfile)
 target_compile_options(sndfile PRIVATE -fPIC)
 
+
+if(DEFINED BUILD_ALL)
+   set(BUILD_CSOUND_OPCODE TRUE)
+   set(BUILD_LUA_MODULE TRUE)
+endif()
+
+
 #############################################
 ##### 	Build Hypercurve library
 #############################################
@@ -64,16 +71,19 @@ target_link_libraries(hypercurve_test
 ##### 	Build Lua Module
 #############################################
 
-add_subdirectory(lua_module)
-target_link_libraries(lua_hypercurve PUBLIC hypercurve_static sndfile ${LUA_LIBRARIES})
-
-
+if(${BUILD_LUA_MODULE})
+   message(STATUS "Building Lua module")
+   add_subdirectory(lua_module)
+   target_link_libraries(lua_hypercurve PUBLIC hypercurve_static sndfile ${LUA_LIBRARIES})
+endif()
 
 #############################################
 ##### 	Build Csound Opcode
 #############################################
 
-add_subdirectory(csound_opcode)
-target_link_libraries(csound_hypercurve PUBLIC hypercurve_static)
-
+if(${BUILD_CSOUND_OPCODE})
+   message(STATUS "Building Csound opcode")
+   add_subdirectory(csound_opcode)
+   target_link_libraries(csound_hypercurve PUBLIC hypercurve_static)
+endif()
 
