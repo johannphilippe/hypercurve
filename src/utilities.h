@@ -1,3 +1,8 @@
+/*=============================================================================
+   Copyright (c) 2022 Johann Philippe
+   Distributed under the MIT License (https://opensource.org/licenses/MIT)
+=============================================================================*/
+
 #ifndef UTILITIES_H
 #define UTILITIES_H
 

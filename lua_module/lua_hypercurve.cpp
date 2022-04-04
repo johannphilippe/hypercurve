@@ -1,3 +1,8 @@
+/*=============================================================================
+   Copyright (c) 2022 Johann Philippe
+   Distributed under the MIT License (https://opensource.org/licenses/MIT)
+=============================================================================*/
+
 extern "C" {
 #include"lauxlib.h"
 #include"lua.h"

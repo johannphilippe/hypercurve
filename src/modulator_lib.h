@@ -1,3 +1,8 @@
+/*=============================================================================
+   Copyright (c) 2022 Johann Philippe
+   Distributed under the MIT License (https://opensource.org/licenses/MIT)
+=============================================================================*/
+
 #ifndef MODULATOR_LIB_H
 #define MODULATOR_LIB_H
 
@@ -14,10 +19,11 @@ namespace hypercurve {
 class interpolator
 {
 public:
-    interpolator(std::vector<point> pts)
+    interpolator(double y_start, std::vector<point> pts)
         : itps(std::move(pts))
     {
         // add point 0
+        itps.insert(itps.begin(), point(0, y_start));
         for(size_t i = 1; i < itps.size(); ++i)
             itps[i].x += itps[i-1].x;
     }
@@ -54,8 +60,8 @@ using linear_interpolator = interpolator;
 class cubic_interpolator : public interpolator
 {
 public:
-    cubic_interpolator(std::vector<point> pts)
-        : interpolator(std::move(pts))
+    cubic_interpolator(double y_start ,std::vector<point> pts)
+        : interpolator( y_start, std::move(pts) )
     {}
     double process(double y1, double y2, double x) override
     {

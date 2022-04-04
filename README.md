@@ -130,14 +130,9 @@ make
 
 * REAPER/Reascript -> see https://forum.cockos.com/showthread.php?p=2543755#post2543755
 
-* Introduce Modulators (Noise, Chebyshev) to allow a modulation of the curve. Find a way to modulate with modularity, without requiring any extra computation (extra loop). For now they are available with curve operators (*, /). At the end, it could be implemented inside segments, or as an extension of segment or curve (segment could pass it to the curve, that would then use it to modulate) 
-* Reflection on modulators is not completed yet. What about a sine with moving frequency ? Or chebyshev with moving "n" ?
-
 * Csound RT opcode : cubic spline (mem alloc). Also missing X rescale, y_rescale.
 
 * Lagrange interpolation for curve extraction.
-
-* Interpolator class -> implement segments inside it
 
 * Once all done -> a proper documentation for C++/Lua, and Csound implementations
 

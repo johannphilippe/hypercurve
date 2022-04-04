@@ -1,3 +1,8 @@
+/*=============================================================================
+   Copyright (c) 2022 Johann Philippe
+   Distributed under the MIT License (https://opensource.org/licenses/MIT)
+=============================================================================*/
+
 #include"../src/hypercurve.h"
 //#include"../src/curve_lib.h"
 #include<plugin.h>

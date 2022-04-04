@@ -34,7 +34,6 @@ struct timer
         t1 = std::chrono::high_resolution_clock::now();
     }
 
-
     std::chrono::high_resolution_clock::time_point first, t1, t2;
 };
 
@@ -158,7 +157,7 @@ int main()
 
                       });
 
-    linear_interpolator itp({point(0.0, 0), point(0.5, 0.2), point(0.5, 0)});
+    cubic_interpolator itp(0, { point(0.5, 0.2), point(0.5, 0)});
     curve mod(16384, 0, {
                   segment(1, 1, share(chebyshev_modulator<amplitude_interpolated>(share(itp), 15)))
             });
