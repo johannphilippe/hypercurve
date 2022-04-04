@@ -318,7 +318,7 @@ struct cs_curve : public csnd::Plugin<1,64>, public cs_rt_hypercurve
       for(size_t i = 2; i < in_count(); ++i)
       {
           if(segment_map.find(int(inargs[i])) == segment_map.end())
-              throw(std::runtime_error("Segment not found in data"));
+              return NOTOK;
 
           y_start = (double) ((i > 2) ?  segment_map[inargs[i - 1] ]->y_destination : inargs[1]);
           segment_map[inargs[i]]->set_y_start(y_start);
@@ -354,7 +354,7 @@ struct cs_run_curve : public csnd::Plugin<1, 2>
   {
       index = inargs[0];
       if(curve_map.find(index) == curve_map.end())
-          throw(std::runtime_error("This curve does not exist"));
+          return NOTOK;
       return OK;
   }
 
