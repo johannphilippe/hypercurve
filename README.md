@@ -71,7 +71,7 @@ curve c(definition, y_start,
 	{
 		// segment(fractional_size, y_destination, curve
 		segment(frac(1,2), 1.0, share(cissoid_curve(1))),
-		segment(0.5, 0.0, share(cubic_curve()))
+		segment(0.5, 0.0, share(blackman_curve()))
 	}); 
 
 // Then access samples with double *get_samples() 
@@ -84,7 +84,7 @@ c.get_samples();
 instr 1
 	icrv = hypercurve(2048, 0, 
 				segment(1/2, 1, diocles_curve(1)),
-				segment(1/2, 0, diocles_curve(1)))
+				segment(1/2, 0, hanning_curve()))
 	kenv = run_hypercurve(icrv, linseg(0, p3, 1))
 	ao = vco2(0.3, 300) * kenv
 	outs(ao, ao)
@@ -95,15 +95,15 @@ endin
 ## A simple Lua example
 
 ```lua
-package.cpath = package.cpath .. ";/your/path/to/hypercurve"
+package.cpath = package.cpath .. ";/your/path/to/hypercurve/?.so;"
 local hc = require("liblua_hypercurve")
 
 local definition = 16384
 local y_start = 0
 local crv = hc.hypercurve(definition, y_start, 
 	{
-		hc.segment(1/2, 1.0, hc.cissoid_curve(1.0)),
-		hc.sement(1/2, 0.0, hc.cubic_curve(0.0))
+		hc.segment(1/2, 1.0, hc.cissoid(1.0)),
+		hc.sement(1/2, 0.0, hc.cubic(0.0))
 	})
 
 // Write as 24 bits 48KHz wav
