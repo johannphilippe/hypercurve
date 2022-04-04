@@ -129,9 +129,17 @@ Then :
 ```
 cd hypercurve
 mkdir build && cd build
-cmake ..
+cmake .. -DBUILD_ALL=TRUE
 make
 ```
+
+If you just want to build Lua module or Csound opcode, then just use 
+
+```
+cmake .. -DBUILD_CSOUND_OPCODE=TRUE
+cmake .. -DBUILD_LUA_MODULE=TRUE
+```
+
 
 # TODO
 
