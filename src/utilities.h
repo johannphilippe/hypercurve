@@ -130,6 +130,12 @@ struct memory_vector
    };
 
    memory_vector() {}
+   memory_vector(const memory_vector<T>& other)
+   {
+       _size = other._size;
+       _data = new T[_size];
+       std::copy(other._data, other._data + other._size, _data );
+   }
    memory_vector(size_t size_)
    {
       _size = size_;
@@ -141,7 +147,7 @@ struct memory_vector
       _data = ptr;
    }
 
-   // Copy
+   // Copy std::vector
    memory_vector(std::vector<T> &v)
    {
       _size = v.size();
@@ -149,6 +155,15 @@ struct memory_vector
       for(size_t i = 0; i < v.size(); ++i)
           _data[i] = v[i];
    }
+
+
+   // operators
+
+   memory_vector<T> operator=(const memory_vector<T> &other)
+   {
+       return memory_vector<T>(other);
+   }
+
 
    void init(T *ptr, size_t size_)
    {

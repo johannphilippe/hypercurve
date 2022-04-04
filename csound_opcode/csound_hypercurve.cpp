@@ -50,7 +50,6 @@ protected:
     memory_vector<double>::iterator it;
 };
 
-
 // Make it derive from AuxMem
 template<typename T>
 struct increment_map  : public std::unordered_map<int, T>
@@ -253,6 +252,8 @@ struct cs_curve : public csnd::Plugin<1,64>, public cs_rt_hypercurve
       _mem.allocate(csound, (int)inargs[0]);
       _initialize(inargs[0], inargs[1], _mem.data());
       process_init();
+
+      // missing x and y rescale
       for(size_t i = 2; i < in_count(); ++i)
       {
           if(segment_map.find(int(inargs[i])) == segment_map.end())

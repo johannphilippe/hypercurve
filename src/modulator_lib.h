@@ -11,40 +11,55 @@ namespace hypercurve {
 // Interpolator is a purely algorithmic curve
 // it is used to scale modulators
 ////////////////////////////////////////////////////
-class interpolator{
-
+class interpolator
+{
 public:
-    interpolator(std::vector<point>)
+    interpolator(std::vector<point> pts)
+        : itps(std::move(pts))
     {
-        // scale points in x
+        // add point 0
+        for(size_t i = 1; i < itps.size(); ++i)
+            itps[i].x += itps[i-1].x;
     }
 
-    virtual double interpolate(double)
+
+
+    virtual double interpolate(double x)
     {
-        return 0;
+        int seg = which_segment(x);
+        double relative_x = relative_position(itps[seg].x, itps[seg + 1].x, x);
+        return process(itps[seg].y, itps[seg + 1].y, relative_x);
+    }
+
+    virtual double process(double y1, double y2, double x)
+    {
+        return linear_interpolation(y1, y2, x);
     }
 
 private:
+    int which_segment(double x)
+    {
+        for(size_t i = 0; i < itps.size() - 1; ++i)
+        {
+            if(x >= itps[i].x && x <  itps[i + 1].x)
+                return i;
+        }
+        return -1;
+    }
     std::vector<point> itps;
 };
 
-
-class linear_interpolator : public interpolator
-{
-public:
-    double interpolate(double x) override
-    {
-        return linear_interpolation(0, 1, x);
-    }
-
-};
+using linear_interpolator = interpolator;
 
 class cubic_interpolator : public interpolator
 {
 public:
-    double interpolate(double x) override
+    cubic_interpolator(std::vector<point> pts)
+        : interpolator(std::move(pts))
+    {}
+    double process(double y1, double y2, double x) override
     {
-        return cubic_interpolation(0, 1, x);
+        return cubic_interpolation(y1, y2, x);
     }
 };
 
@@ -115,7 +130,7 @@ public:
 protected:
 };
 
-template<typename Amp>
+template<typename Amp = amplitude_fixed>
 class noise_modulator : public modulator_base<Amp>
 {
 public:

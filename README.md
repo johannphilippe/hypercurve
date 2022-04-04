@@ -34,7 +34,7 @@
 # What is it ? 
 
 
-A set of classes to create composite curves and export them in various format. 
+A set of classes to create hypbrid curves and use them for audio and music (or whatever). 
 Currently, you can export curves as `.wav` files. 
 
 ## Implemented curves 
@@ -45,7 +45,6 @@ Currently, you can export curves as `.wav` files.
 - Bezier (Cubic & Quadratic)
 - Cubic Spline
 - Catmull Rom Spline
-
 
 ## How to use it 
 
@@ -70,6 +69,20 @@ curve c(definition, y_start,
 
 // Then access samples with double *get_samples() 
 c.get_samples();
+```
+
+## A simple Csound example
+
+```csound
+instr 1
+	icrv = hypercurve(2048, 0, 
+				segment(1/2, 1, diocles_curve(1)),
+				segment(1/2, 0, diocles_curve(1)))
+	kenv = run_hypercurve(icrv, linseg(0, p3, 1))
+	ao = vco2(0.3, 300) * kenv
+	outs(ao, ao)
+endin
+
 ```
 
 ## A simple Lua example
@@ -103,7 +116,7 @@ The  `curve`  takes a list of segments, each having a fractional size. If the su
 First clone the repo with submodules : 
 ``` git clone https://github.com/johannphilippe/hypercurve.git --recurse-submodules ```
 
-You should check that Lua is installed on your system. If it is not, or if compilation returns error, you should install a Lua 5.1 version to the standard installation path. Make sure you have the dynamic library installed, and the headers `lauxlib.h` and `lua.h` are available on your system.
+You should check that Lua is installed on your system. If it is not, or if compilation retrns error, you should install a Lua 5.1 version to the standard installation path. Make sure you have the dynamic library installed, and the headers `lauxlib.h` and `lua.h` are available on your system.
 
 Then : 
 ```
@@ -120,7 +133,7 @@ make
 * Introduce Modulators (Noise, Chebyshev) to allow a modulation of the curve. Find a way to modulate with modularity, without requiring any extra computation (extra loop). For now they are available with curve operators (*, /). At the end, it could be implemented inside segments, or as an extension of segment or curve (segment could pass it to the curve, that would then use it to modulate) 
 * Reflection on modulators is not completed yet. What about a sine with moving frequency ? Or chebyshev with moving "n" ?
 
-* Csound RT opcode : cubic spline (mem alloc)
+* Csound RT opcode : cubic spline (mem alloc). Also missing X rescale, y_rescale.
 
 * Lagrange interpolation for curve extraction.
 
@@ -131,6 +144,7 @@ make
 ## Curves to implement
 
 * Cardioid / hypercardioid
+* Hanning, Hamming, Blackmann (half)
 
 
 # External libraries
@@ -138,4 +152,5 @@ make
 This library uses libsndfile as an external submodule.
 It also includes source files from several open-source projects : 
 *  [AsciiPlot](https://github.com/joehood/asciiplotter) source code with license under src/asciiplot folder.
-* [lua-compat-5.3](https://github.com/keplerproject/lua-compat-5.3) which provides an API compatibility from 5.1 to 5.3.
+* [lua-compat-5.3](https://github.com/keplerproject/lua-compat-5.3) which provides an API compatibility from 5.1 to 5.3
+

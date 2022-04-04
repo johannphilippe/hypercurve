@@ -93,12 +93,28 @@ public:
 
 
 
-    void normalize_y()
+    void normalize_y(double target_min, double target_max)
     {
+        find_extremeness();
+
         for(size_t i = 0; i < samples.size(); i++)
         {
-            samples[i] = (samples[i] / max);
+            samples[i] = ((samples[i] + std::abs(min) ) / ambitus )  * std::abs(target_max - target_min) + target_min;
         }
+    }
+
+    std::pair<double, double> find_extremeness()
+    {
+        min = samples[0], max = samples[0];
+        for(auto & it : samples)
+        {
+            if(it < min)
+                min = it;
+            if(it > max)
+                max = it;
+        }
+        ambitus = std::abs(max - min);
+        return {min, max};
     }
 
     void ascii_display(std::string name, std::string label, char marker)
@@ -109,8 +125,8 @@ public:
         plot.show();
     }
 
-    double *get_samples() {return nullptr; }//samples.data();}
-    double get_sample_at(size_t i) {return 0; } //samples[i];}
+    double *get_samples() {return samples.data();}
+    double get_sample_at(size_t i) {return samples[i];}
     size_t get_definition() {return definition;}
 
     // Operators
@@ -225,7 +241,7 @@ public:
         return c;
     }
 
-protected:
+//protected:
     void check_total_size()
     {
         double x = 0;
@@ -245,7 +261,7 @@ protected:
         }
     }
 
-    double max = 0.0;
+    double max = 0.0, min = 0.0, ambitus = 0.0;
     size_t definition;
     double y_start;
     memory_vector< segment > segs;

@@ -34,7 +34,6 @@ struct timer
         t1 = std::chrono::high_resolution_clock::now();
     }
 
-
     std::chrono::high_resolution_clock::time_point first, t1, t2;
 };
 
