@@ -47,12 +47,14 @@ add_library(hypercurve_static STATIC
 set_target_properties(hypercurve_static PROPERTIES LINKER_LANGUAGE CXX)
 target_compile_options(hypercurve_static PRIVATE -fPIC)
 
-
 #############################################
 ##### 	Build Test
 #############################################
+
 add_executable(hypercurve_test
    tests/test.cpp
+   fpng/src/fpng.h
+   fpng/src/fpng.cpp
    )
 
 target_include_directories(hypercurve_test PUBLIC
@@ -63,6 +65,11 @@ target_include_directories(hypercurve_test PUBLIC
 target_link_libraries(hypercurve_test
    hypercurve
    sndfile
+   )
+
+target_compile_options(hypercurve_test
+   PUBLIC
+   -msse4.1 -mpclmul
    )
 
 #############################################

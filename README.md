@@ -184,4 +184,5 @@ Currently, [libsndfile](https://github.com/libsndfile/libsndfile) is only used i
 It also includes source files from several open-source projects : 
 *  [AsciiPlot](https://github.com/joehood/asciiplotter) source code with license under src/asciiplot folder.
 * [lua-compat-5.3](https://github.com/keplerproject/lua-compat-5.3) which provides an API compatibility from 5.1 to 5.3
+* [fpng](https://github.com/richgel999/fpng) - a great C++ PNG reader/writer.
 
