@@ -37,15 +37,31 @@ struct timer
     std::chrono::high_resolution_clock::time_point first, t1, t2;
 };
 
+
+
 using namespace hypercurve;
+
+void check_equality(curve &c1, curve &c2)
+{
+    for(size_t i = 0; i < c1.definition; i++)
+    {
+        if(c1.get_sample_at(i) != c2.get_sample_at(i))
+        {
+            std::cout << "ARE NOT IDENTICAL" << std::endl;
+            return;
+        }
+    }
+    std::cout << "IDENTICAL "  << std::endl;
+
+}
 
 int main()
 {
     int def = 16384;
 
     const int fmt = SF_FORMAT_WAV | SF_FORMAT_PCM_32;
-    SndfileHandle sf("test_hypercurveMod.wav", SFM_WRITE, fmt, 1, 48000);
-    SndfileHandle sf2("test_hypercurveModulated.wav", SFM_WRITE, fmt, 1, 48000);
+    SndfileHandle sf("test_hypercurve_Gauss1.wav", SFM_WRITE, fmt, 1, 48000);
+    SndfileHandle sf2("test_hypercurveGauss2.wav", SFM_WRITE, fmt, 1, 48000);
 
     timer t;
 
@@ -99,11 +115,11 @@ int main()
     t.reset();
     // homemade exponent
     curve c5(def, 0, {
-                segment(1, 1, share(exponent_curve(9)))
+                segment(1, 1, share(power_curve(9)))
              });
 
-    t.time_since_last("Homemade exponent");
-    c5.ascii_display("Smooth exponent", "y = hsmooth(x)", '*');
+    t.time_since_last("Homemade power of 9");
+    c5.ascii_display("Power curve", "y = x^9", '*');
 
     // Cubic spline
     t.reset();
@@ -171,10 +187,36 @@ int main()
     modulated.ascii_display("Modulated", "mod * catmullrom", '*');
 
 
-    curve c8(def, 0.0, {segment(1, 1, share(hanning_curve()))});
+    curve c8(def, 0.0, {
+                 segment(frac(1,2), 1, share(hanning_curve())),
+                 segment(frac(1,2), 0, share(hanning_curve()))
+             });
     c8.ascii_display("Hanning", "hanning(x)", '.');
 
-    sf.writef(mod.get_samples(), def);
-    sf2.writef(modulated.get_samples(), def);
+
+    curve c9(def, 0.0, {
+                segment(1, 1, share(gauss_curve(10, 0.5	)))
+             });
+    c9.ascii_display("gauss", "A = 10, c = 0.5", '*');
+    curve c10(def, 0.0, {
+                segment(1, 1, share(gauss_curve(1, 0.5)))
+             });
+    c10.ascii_display("gauss", "A = 1, c = 0.5", '*');
+
+    check_equality(c9, c10);
+
+    curve c11(def, 0, {
+                 segment(frac(1,2), 1, share(typed_curve(10))),
+                 segment(frac(1,2), 0, share(typed_curve(10)))
+              });
+    c11.ascii_display("typed curve" , "type = 10", '*');
+    curve c12(def, 0, {
+                 segment(frac(1,2), 1, share(typed_curve(-10))),
+                 segment(frac(1,2), 0, share(typed_curve(-10)))
+              });
+    c12.ascii_display("typed curve" , "type = -10", '*');
+
+    sf.writef(c9.get_samples(), def);
+    sf2.writef(c10.get_samples(), def);
     return 0;
 }

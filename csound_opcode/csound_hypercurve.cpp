@@ -211,6 +211,48 @@ struct cs_blackman : public csnd::Plugin<1, 0>
     std::shared_ptr<blackman_curve> _curve;
 };
 
+struct cs_gaussian : csnd::Plugin<1,2>
+{
+    int init()
+    {
+        _curve = std::make_shared<gauss_curve>(inargs[0], inargs[1]);
+        index = curve_base_map.map(_curve);
+        outargs[0] = index;
+        return OK;
+    }
+
+    int index;
+    std::shared_ptr<gauss_curve> _curve;
+};
+
+struct cs_typed : csnd::Plugin<1,1>
+{
+    int init()
+    {
+        _curve = std::make_shared<typed_curve>(inargs[0]);
+        index = curve_base_map.map(_curve);
+        outargs[0] = index;
+        return OK;
+    }
+
+    int index;
+    std::shared_ptr<typed_curve> _curve;
+};
+
+struct cs_power : csnd::Plugin<1,1>
+{
+    int init()
+    {
+        _curve = std::make_shared<power_curve>(inargs[0]);
+        index = curve_base_map.map(_curve);
+        outargs[0] = index;
+        return OK;
+    }
+
+    int index;
+    std::shared_ptr<power_curve> _curve;
+};
+
 struct cs_quad_bezier : csnd::Plugin<1, 1>
 {
     int init()
@@ -394,14 +436,21 @@ void csnd::on_load(Csound *csound) {
 
     // Curve types
     csnd::plugin<cs_diocles_curve>(csound, "diocles_curve", "i", "i", csnd::thread::i);
-    csnd::plugin<cs_diocles_curve>(csound, "cissoid_curve", "i", "i", csnd::thread::i); // alias for diocles
     csnd::plugin<cs_cubic_curve>(csound, "cubic_curve", "i", "", csnd::thread::i);
+    csnd::plugin<cs_power>(csound, "power_curve", "i", "i", csnd::thread::i);
     csnd::plugin<cs_hanning>(csound, "hanning_curve", "i", "", csnd::thread::i);
     csnd::plugin<cs_hamming>(csound, "hamming_curve", "i", "", csnd::thread::i);
     csnd::plugin<cs_blackman>(csound, "blackman_curve", "i", "", csnd::thread::i);
+    csnd::plugin<cs_gaussian>(csound, "gauss_curve", "i", "ii", csnd::thread::i);
+    csnd::plugin<cs_typed>(csound, "typed_curve", "i", "i", csnd::thread::i);
     csnd::plugin<cs_quad_bezier>(csound, "quadratic_bezier_curve", "i", "i", csnd::thread::i);
     csnd::plugin<cs_cub_bezier>(csound, "cubic_bezier_curve", "i", "ii", csnd::thread::i);
     csnd::plugin<cs_catmull_rom>(csound, "catmull_rom_curve", "i" , "ii", csnd::thread::i);
+
+    // Aliases
+    csnd::plugin<cs_diocles_curve>(csound, "cissoid_curve", "i", "i", csnd::thread::i); // alias for diocles
+    csnd::plugin<cs_gaussian>(csound, "gaussian_curve", "i", "ii", csnd::thread::i);
+    csnd::plugin<cs_typed>(csound, "transeg_curve", "i", "i", csnd::thread::i);
 
     // Core
     csnd::plugin<cs_segment>(csound, "segment", "i", "iii", csnd::thread::i);

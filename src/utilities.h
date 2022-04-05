@@ -24,6 +24,14 @@ double frac(double x1, double x2)
     return double(x1) / double(x2);
 }
 
+
+inline double limit(double min, double max, double v)
+{
+    if(v > max) return max;
+    if(v < min) return min;
+    return v;
+}
+
 template<typename T>
 std::shared_ptr<T> share(T t)
 {
@@ -83,6 +91,22 @@ inline double cubic_interpolation(double y1, double y2, double x)
     return y1 + (std::pow(x,3) * (y2 - y1));
 }
 
+inline double cubic_root(double x) {return std::pow(x, 1.0 / 3.0);}
+inline double squared(double x) {return x*x;}
+inline double cubed(double x) {return x*x*x;}
+
+// Linear or exp interpolation, based on Csound GEN16 algorithm
+template<typename T>
+inline T log_exp_point(T beg, T ending, int dur, int idx, double typ)
+{
+    if(typ == 0) {
+        return beg + (idx * (( ending - beg) / dur));
+    }else {
+        double type = limit(-10, 10, typ);
+        return beg + (ending - beg) * (1 - std::exp(idx * type / (dur - 1))) / (1 - std::exp(type));
+    }
+}
+
 // returns x between 0 and 1 (1 being x == x2, 0 being x == x1)
 // make sure x1 <= x <= x2
 inline double relative_position(double x1, double x2, double x)
@@ -91,13 +115,6 @@ inline double relative_position(double x1, double x2, double x)
         throw(std::runtime_error("Make sure x1 <= x <= x2 and x1 < x2"));
     const double factor = 1.0 / (x2 - x1);
     return (x * factor) - (x1 * factor);
-}
-
-inline double limit(double min, double max, double v)
-{
-    if(v > max) return max;
-    if(v < min) return min;
-    return v;
 }
 
 std::vector<double> linspace(size_t size)

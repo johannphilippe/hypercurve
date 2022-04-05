@@ -42,10 +42,12 @@ Currently, you can export curves as `.wav` files, or us it directly in C++, Csou
 
 - Cissoid (Diocles) 
 - Cubic 
+- Power curve (choose your power of x)
 - Bezier (Cubic & Quadratic)
 - Cubic Spline (Not in Csound yet)
 - Catmull Rom Spline
 - Hanning / Hamming / Blackamn
+- Gauss 
 
 ## How to use it 
 
@@ -145,12 +147,10 @@ cmake .. -DBUILD_LUA_MODULE=TRUE
 
 * REAPER/Reascript -> see https://forum.cockos.com/showthread.php?p=2543755#post2543755
 
-* Implement exponent in frontends as a replacement of cubic 
 * Implement a polynomial with varargs (like a, b, c  : ax^3 + bx^2 + c)
 
 * Csound RT opcode : cubic spline (mem alloc). Also missing X rescale, y_rescale, and user_defined curve
-
-* Lua -> fix user defined curves
+* Implement rescale (Lua, Csound)
 
 * Lagrange interpolation for curve extraction.
 
@@ -161,8 +161,10 @@ cmake .. -DBUILD_LUA_MODULE=TRUE
 ## Curves to implement
 
 * Cardioid / hypercardioid
-* Elastic curve
+* Elastic curve : https://mathcurve.com/courbes2d.gb/linteaire/linteaire.shtml
+* Simple log/exp ?
 
+* Ideas here https://mathcurve.com/courbes2d/courbes2d.shtml
 
 # External libraries
 

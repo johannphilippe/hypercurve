@@ -72,7 +72,6 @@ bez:ascii_display("bezier", "y=bezier", "-")
 function cube(x)
 	return x*x*x
 end
-
 local crv = hc.user_defined(cube)
 print("ud ccc ok")
 local seg = hc.segment(1, 1, crv)

@@ -133,6 +133,14 @@ int luahc_cubic_curve(lua_State *lua)
     return 1;
 }
 
+int luahc_power_curve(lua_State *lua)
+{
+    lua_curve_helper(lua, new hypercurve::power_curve(lua_tonumber(lua, 1)));
+    luaL_getmetatable(lua, "hypercurve.curve_base");
+    lua_setmetatable(lua, -2);
+    return 1;
+}
+
 int luahc_cissoid_curve(lua_State *lua)
 {
     const double a = lua_tonumber(lua, 1);
@@ -160,6 +168,24 @@ int luahc_hamming_curve(lua_State *lua)
 int luahc_blackman_curve(lua_State *lua)
 {
     lua_curve_helper(lua, new hypercurve::blackman_curve);
+    luaL_getmetatable(lua, "hypercurve.curve_base");
+    lua_setmetatable(lua, -2);
+    return 1;
+}
+
+int luahc_gauss_curve(lua_State *lua)
+{
+    lua_curve_helper(lua, new hypercurve::gauss_curve(
+                         lua_tonumber(lua, 1), lua_tonumber(lua, 2)));
+    luaL_getmetatable(lua, "hypercurve.curve_base");
+    lua_setmetatable(lua, -2);
+    return 1;
+}
+
+int luahc_typed_curve(lua_State *lua)
+{
+    lua_curve_helper(lua, new hypercurve::typed_curve(
+                         lua_tonumber(lua, 1)));
     luaL_getmetatable(lua, "hypercurve.curve_base");
     lua_setmetatable(lua, -2);
     return 1;
@@ -338,6 +364,13 @@ static int luahc_curve_class_gc(lua_State *lua) {
     return 0;
 }
 
+static int luahc_control_point_class_gc(lua_State *lua)
+{
+    hypercurve::control_point *cp = *(hypercurve::control_point **) luaL_checkudata(lua, 1, "hypercurve.control_point");
+    delete cp;
+    return 0;
+}
+
 static int luahc_index(lua_State *L) {
     //printf("## index\n");
     int i = luaL_checkinteger(L, 2);
@@ -348,10 +381,15 @@ static int luahc_index(lua_State *L) {
 static const luaL_Reg luahc_curve_class_meta[] =
 {
     { "__gc"        ,luahc_curve_class_gc          },
-    //{ "__newindex"        ,luahc_newindex          },
-    //{ "__index"        ,luahc_index          },
     { NULL          ,NULL            }
 };
+
+static const luaL_Reg luahc_control_point_class_meta[] =
+{
+    { "__gc"        ,luahc_control_point_class_gc          },
+    { NULL          ,NULL            }
+};
+
 static const luaL_Reg luahc_curve_class_meth[] =
 {
     {"ascii_display" ,luahc_curve_ascii_display },
@@ -383,21 +421,29 @@ static const luaL_Reg luahc_static_meth[] =
     {"curve" , luahc_curve },  // alias for hypercurve
 
     {"segment", luahc_segment},
+
     {"control_point", luahc_control_point},
 
     {"curve_base", luahc_curve_base},
     {"linear", luahc_curve_base},
     {"cubic", luahc_cubic_curve},
+    {"power", luahc_power_curve},
     {"diocles", luahc_cissoid_curve},
-    {"cissoid", luahc_cissoid_curve}, // alias for diocles
     {"hanning", luahc_hanning_curve},
     {"hamming", luahc_hamming_curve},
     {"blackman", luahc_blackman_curve},
+    {"gauss", luahc_gauss_curve},
+    {"typed", luahc_typed_curve},
     {"quadratic_bezier", luahc_quadratic_bezier_curve},
     {"cubic_bezier", luahc_cubic_bezier_curve},
     {"cubic_spline", luahc_cubic_spline_curve},
     {"catmull_rom", luahc_catmull_rom_spline_curve},
     {"user_defined", luahc_user_defined_curve},
+
+
+    // Aliases
+    {"cissoid", luahc_cissoid_curve},
+    {"gaussian", luahc_gauss_curve},
     { NULL      ,NULL      }
 };
 
@@ -419,7 +465,7 @@ int luaopen_liblua_hypercurve (lua_State *lua)
     lua_pop(lua, 1);
 
     luaL_newmetatable(lua, "hypercurve.control_point");
-    luaL_setfuncs(lua, luahc_curve_class_meta, 0);
+    luaL_setfuncs(lua, luahc_control_point_class_meta, 0);
     luaL_newlib(lua, luahc_control_point_class_meth);
     lua_setfield(lua, -2, "__index");
     lua_pop(lua, 1);
