@@ -410,9 +410,9 @@ struct cs_run_curve : public csnd::Plugin<1, 2>
 
   int aperf()
   {
-      for(size_t i = 0; i < ksmps(); ++i)
+      for(size_t i = 0; i < nsmps; ++i)
       {
-          phasor = inargs.vector_data<MYFLT>(0)[i];
+          phasor = inargs(1)[i];
           i_phasor = floor(phasor * curve_map[index]->get_definition());
           outargs(0)[i] = limit(-1, 1, curve_map[index]->get_sample_at(i_phasor));
 

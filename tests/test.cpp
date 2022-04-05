@@ -43,7 +43,7 @@ using namespace hypercurve;
 
 void check_equality(curve &c1, curve &c2)
 {
-    for(size_t i = 0; i < c1.definition; i++)
+    for(size_t i = 0; i < c1.get_definition(); i++)
     {
         if(c1.get_sample_at(i) != c2.get_sample_at(i))
         {

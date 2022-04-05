@@ -95,8 +95,6 @@ public:
         }
     }
 
-
-
     void normalize_y(double target_min, double target_max)
     {
         find_extremeness();
@@ -245,7 +243,7 @@ public:
         return c;
     }
 
-//protected:
+protected:
     void check_total_size()
     {
         double x = 0;

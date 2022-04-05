@@ -280,7 +280,6 @@ public:
 
             double relative_x = relative_position(r1.first, r2.first, x);
             double linear_interp = linear_interpolation(r1.second, r2.second, relative_x);
-            std::cout << "linear interp " << linear_interp << std::endl;
             if(std::abs(linear_interp) > max) max = std::abs(linear_interp);
             *it = linear_interp;
             ++it;

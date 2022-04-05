@@ -37,19 +37,21 @@
 
 
 A set of classes to create hybrid curves and use them for audio and music (or whatever). 
-Currently, you can export curves as `.wav` files, or us it directly in C++, Csound or Lua.
+It can be used in C++, Lua or Csound.
 
 ## Implemented curves 
 
 
-- Cissoid (Diocles) 
+- Cissoid (Diocles curve) 
 - Cubic 
 - Power curve (choose your power of x)
 - Bezier (Cubic & Quadratic)
-- Cubic Spline (Not in Csound yet)
+- Cubic Spline - Not implemented in Csound yet
 - Catmull Rom Spline
 - Hanning / Hamming / Blackamn
 - Gauss 
+- Typed curves : inspired from Csounds [GEN16](http://www.csounds.com/manual/html/GEN16.html)
+- User defined curves - pass it a function (or a lambda in C++), that returns y for any x between 0 and 1. Not implemented in Csound.
 
 ## How to use it 
 
@@ -147,9 +149,15 @@ cmake .. -DBUILD_LUA_MODULE=TRUE
 
 # TODO
 
+* PNG drawer : candidate https://github.com/richgel999/fpng
+
 * REAPER/Reascript -> see https://forum.cockos.com/showthread.php?p=2543755#post2543755
 
 * Implement a polynomial with varargs (like a, b, c  : ax^3 + bx^2 + c)
+
+* Operator for curves in Lua and Csound. In Csound it should be functions (sum_hypercurve, substract, multiply, div) that create a new one. In Lua just a layer on top of C++ operators with metatables.
+
+* A real good picture in README to show what it actually looks like
 
 * Csound RT opcode : cubic spline (mem alloc). Also missing X rescale, y_rescale, and user_defined curve
 * Implement rescale (Lua, Csound)
@@ -171,7 +179,9 @@ cmake .. -DBUILD_LUA_MODULE=TRUE
 # External libraries
 
 This library uses libsndfile as an external submodule.
+Currently, [libsndfile](https://github.com/libsndfile/libsndfile) is only used in Lua and in test.cpp. So hypercurve C++ library itself does not have any external dependency.
+
 It also includes source files from several open-source projects : 
 *  [AsciiPlot](https://github.com/joehood/asciiplotter) source code with license under src/asciiplot folder.
 * [lua-compat-5.3](https://github.com/keplerproject/lua-compat-5.3) which provides an API compatibility from 5.1 to 5.3
-g
+
