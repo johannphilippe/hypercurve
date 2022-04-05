@@ -60,7 +60,7 @@ int main()
     int def = 16384;
 
     const int fmt = SF_FORMAT_WAV | SF_FORMAT_PCM_32;
-    SndfileHandle sf("test_hypercurve_Gauss1.wav", SFM_WRITE, fmt, 1, 48000);
+    SndfileHandle sf("test_hypercurve_HYBRID.wav", SFM_WRITE, fmt, 1, 48000);
     SndfileHandle sf2("test_hypercurveGauss2.wav", SFM_WRITE, fmt, 1, 48000);
 
     timer t;
@@ -216,7 +216,18 @@ int main()
               });
     c12.ascii_display("typed curve" , "type = -10", '*');
 
-    sf.writef(c9.get_samples(), def);
+    double hdiv = 9;
+    curve c13(def, 0, {
+                 segment(frac(1, hdiv), 1, share(gauss_curve(5, 1))),
+                 segment(frac(1, hdiv), 0.8, share(cissoid_curve(2))),
+                 segment(frac(1, hdiv), 0.1, share(power_curve(9))),
+                 segment(frac(6, hdiv), 0, share(cubic_bezier_curve(point(0.2, 0.9), point(0.8, 0.8))))
+                 //segment(frac(6, hdiv), 0, share(cissoid_curve(1)))
+              });
+
+    c13.ascii_display("awesome hybrid curve", "A combination of gaussian, cissoid, power of 9, and cubic bezier curve", '*');
+
+    sf.writef(c13.get_samples(), def);
     sf2.writef(c10.get_samples(), def);
     return 0;
 }

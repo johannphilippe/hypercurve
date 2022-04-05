@@ -142,12 +142,6 @@ public:
 };
 
 
-
-
-//////////////////////////////////////////////////
-// Log Exp
-//////////////////////////////////////////////////
-
 //////////////////////////////////////////////////
 // Typed curve - inspired by Csound GEN 16
 //////////////////////////////////////////////////
@@ -209,9 +203,9 @@ using gaussian_curve = gauss_curve;
 //////////////////////////////////////////////////
 
 //////////////////////////////////////////////////
-// User defined Curves
+// user defined curves
 //
-// Callback should return an y value between 0 and 1
+// callback should return an y value between 0 and 1
 // for each x between 0 and 1
 //////////////////////////////////////////////////
 class user_defined_curve : public curve_base
@@ -232,6 +226,32 @@ protected:
 
 
 //////////////////////////////////////////////////
+// vararg polynomial
+//
+// If you give three parameters a, b, c
+// it will return ax^3 + bx^2 + cx
+//////////////////////////////////////////////////
+class vararg_polynomial : public curve_base
+{
+public:
+    vararg_polynomial(memory_vector<double> args)
+        : constants(args)
+    {}
+
+    double process(double x) override
+    {
+        double res = 0;
+        for(size_t i = 0; i < constants.size(); ++i)
+        {
+            res += std::pow(x, constants.size() - i) * constants[i];
+        }
+        // then scale.
+    }
+
+    memory_vector<double> constants;
+};
+
+//////////////////////////////////////////////////
 // Bezier Curves
 //////////////////////////////////////////////////
 
@@ -246,7 +266,7 @@ public:
         r1 = process_bezier(double(cnt) / double(size));
         r2 = process_bezier(double(cnt + 1) / double(size));
 
-        for(size_t i = 1; i <= size; i++)
+        for(size_t i = 0; i < size ; i++)
         {
             const double x = double(i) / double(size);
             while(cnt < size)
@@ -260,6 +280,7 @@ public:
 
             double relative_x = relative_position(r1.first, r2.first, x);
             double linear_interp = linear_interpolation(r1.second, r2.second, relative_x);
+            std::cout << "linear interp " << linear_interp << std::endl;
             if(std::abs(linear_interp) > max) max = std::abs(linear_interp);
             *it = linear_interp;
             ++it;
@@ -350,10 +371,12 @@ public:
         a_y = ((-3) * y_start + 3 * _control_point1.y);
     }
 
+    /*
     double process(double x) override
     {
         return y_from_t(calculate_t(x));
     }
+    */
 private:
 
     double y_from_t(double t)
