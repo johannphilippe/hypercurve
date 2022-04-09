@@ -182,6 +182,22 @@ int luahc_gauss_curve(lua_State *lua)
     return 1;
 }
 
+int luahc_catenary_curve(lua_State *lua)
+{
+    lua_curve_helper(lua, new hypercurve::catenary_curve(lua_tonumber(lua, 1)));
+    luaL_getmetatable(lua, "hypercurve.curve_base");
+    lua_setmetatable(lua, -2);
+    return 1;
+}
+
+int luahc_toxoid_curve(lua_State *lua)
+{
+    lua_curve_helper(lua, new hypercurve::toxoid_curve(lua_tonumber(lua, 1)));
+    luaL_getmetatable(lua, "hypercurve.curve_base");
+    lua_setmetatable(lua, -2);
+    return 1;
+}
+
 int luahc_typed_curve(lua_State *lua)
 {
     lua_curve_helper(lua, new hypercurve::typed_curve(
@@ -433,17 +449,22 @@ static const luaL_Reg luahc_static_meth[] =
     {"hamming", luahc_hamming_curve},
     {"blackman", luahc_blackman_curve},
     {"gauss", luahc_gauss_curve},
-    {"typed", luahc_typed_curve},
+    {"toxoid", luahc_toxoid_curve},
+    {"catenary", luahc_catenary_curve},
     {"quadratic_bezier", luahc_quadratic_bezier_curve},
     {"cubic_bezier", luahc_cubic_bezier_curve},
     {"cubic_spline", luahc_cubic_spline_curve},
     {"catmull_rom", luahc_catmull_rom_spline_curve},
+
+    {"typed", luahc_typed_curve},
     {"user_defined", luahc_user_defined_curve},
 
 
     // Aliases
     {"cissoid", luahc_cissoid_curve},
     {"gaussian", luahc_gauss_curve},
+    {"duplicatrix_cubic", luahc_toxoid_curve},
+    {"funicular", luahc_catenary_curve},
     { NULL      ,NULL      }
 };
 

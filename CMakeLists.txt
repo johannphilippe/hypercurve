@@ -30,22 +30,50 @@ set(HYPERCURVE_SOURCES
    src/modulator_lib.h
    src/hypercurve.h
 
-   # Include asciiplot library
+   # fpng library
+   src/fpng/src/fpng.h
+   src/fpng/src/fpng.cpp
+
+   # asciiplot library
    src/asciiplot/asciiplotter.h
    src/asciiplot/asciiplotter.cpp
    )
 
+option(SSE, "SSE support for FPNG")
+
 add_library(hypercurve SHARED
    ${HYPERCURVE_SOURCES}
    )
+
 set_target_properties(hypercurve PROPERTIES LINKER_LANGUAGE CXX)
-target_compile_options(hypercurve PRIVATE -fPIC)
+# To disable SSE use the following and remove -msse4.1 -mpclmul
+set(HYPERCURVE_OPTIONS -fPIC)
+if(SSE)
+   list(APPEND HYPERCURVE_OPTIONS -msse4.1 -mpclmul)
+endif()
+
+target_compile_options(hypercurve
+   PRIVATE
+   ${HYPERCURVE_OPTIONS}
+   )
 
 add_library(hypercurve_static STATIC
    ${HYPERCURVE_SOURCES}
    )
 set_target_properties(hypercurve_static PROPERTIES LINKER_LANGUAGE CXX)
-target_compile_options(hypercurve_static PRIVATE -fPIC)
+
+# To disable SSE use the following and remove -msse4.1 -mpclmul
+target_compile_definitions(hypercurve_static PUBLIC FPNG_NO_SSE)
+target_compile_options(hypercurve_static
+   PRIVATE
+   ${HYPERCURVE_OPTIONS}
+   )
+
+if(NOT SSE)
+   target_compile_definitions(hypercurve PUBLIC FPNG_NO_SSE)
+   target_compile_definitions(hypercurve_static PUBLIC FPNG_NO_SSE)
+endif()
+
 
 #############################################
 ##### 	Build Test
@@ -53,23 +81,17 @@ target_compile_options(hypercurve_static PRIVATE -fPIC)
 
 add_executable(hypercurve_test
    tests/test.cpp
-   fpng/src/fpng.h
-   fpng/src/fpng.cpp
    )
 
 target_include_directories(hypercurve_test PUBLIC
    src/
    src/asciiplot
+   src/fpng/src
    )
 
 target_link_libraries(hypercurve_test
    hypercurve
    sndfile
-   )
-
-target_compile_options(hypercurve_test
-   PUBLIC
-   -msse4.1 -mpclmul
    )
 
 #############################################

@@ -4,8 +4,6 @@
 #include"../src/hypercurve.h"
 #include"sndfile.hh"
 #include<chrono>
-#include"../fpng/src/fpng.h"
-#define FPNG_NO_SSE
 using namespace std;
 
 struct timer
@@ -41,33 +39,14 @@ struct timer
 
 
 
-
 using namespace hypercurve;
-void write_as_png(curve &c, std::string path = "")
+void write_as_png(curve &c, bool waveform = true, std::string name = "h.png")
 {
-    size_t h = 1024;
-    size_t w = 2048;
-    size_t chnls = 3;
-    size_t size = h * w * chnls;
-    std::vector<uint8_t> vec(size);
-
-    ::memset(vec.data(), 0, sizeof(uint8_t) * size);
-
-    for(size_t i = 0; i < c.get_definition(); ++i)
-    {
-        size_t  x =  frac(i, c.get_definition())  * w;
-        size_t y  = c.get_sample_at(i) * h;
-
-        uint8_t *ptr = vec.data() + ( (w * ( h - y ) + x) * chnls);
-        for(size_t i = 0; i < 3; ++i)
-            *(ptr++) = 255;
-        ptr = vec.data() + ( (w * ( h - y + 1 ) + x) * chnls);
-        for(size_t i = 0; i < 3; ++i)
-            *(ptr++) = 255;
-    }
-
-    fpng::fpng_encode_image_to_file("/home/johann/Documents/hypercurve.png", (void*)vec.data(), w, h, chnls);
-
+    png p(2048, 1024);
+    p.draw_curve(c.get_samples(), c.get_definition(), true, waveform);
+    p.draw_grid(10, 10, color{{255, 255, 255, 100}});
+    std::string concat("/home/johann/Documents/" + name);
+    p.write_as_png(concat);
 }
 
 void check_equality(curve &c1, curve &c2)
@@ -203,7 +182,7 @@ int main()
                       });
 
     cubic_interpolator itp(0, { point(0.5, 0.2), point(0.5, 0)});
-    ::hypercurve::hypercurve mod(16384, 0, {
+    curve mod(16384, 0, {
                   segment(1, 1, share(chebyshev_modulator<amplitude_interpolated>(share(itp), 15)))
             });
 
@@ -256,7 +235,39 @@ int main()
 
     c13.ascii_display("awesome hybrid curve", "A combination of gaussian, cissoid, power of 9, and cubic bezier curve", '*');
 
-    write_as_png(c13);
+
+    curve c14(def, 0,
+    {
+                segment(frac(1,2), 1, share(diocles_curve(1))),
+                segment(frac(1,2), 0, share(diocles_curve(1)))
+              });
+
+    curve cheb(def, 0,
+    {
+                  segment(1, 1, share( chebyshev_modulator<amplitude_fixed>(1, 20)))
+               });
+
+
+
+    curve cat(def, 0,
+    {
+                 segment(1, 1, share(catenary_curve(0.1)))
+              });
+
+    write_as_png(cat, false, "catenary_a1");
+    curve cat2(def, 0,
+    {
+                 segment(1, 1, share(catenary_curve(100000)))
+              });
+
+    write_as_png(cat2, false, "catenary_a100");
+
+
+    curve tox(def, 0, {
+                 segment(frac(1, 2), 1, share(toxoid_curve(10))),
+                 segment(frac(1, 2), 0, share(toxoid_curve(0)))
+              });
+    write_as_png(tox, false, "toxoid");
 
     sf.writef(c13.get_samples(), def);
     sf2.writef(c10.get_samples(), def);

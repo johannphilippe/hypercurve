@@ -39,6 +39,8 @@
 A set of classes to create hybrid curves and use them for audio and music (or whatever). 
 It can be used in C++, Lua or Csound.
 
+On a mathematical point of view, it has to be noticed that since curves needs to be scaled in and mapped together, there must be a few approximations inherent to the application.
+
 ## Implemented curves 
 
 
@@ -50,8 +52,12 @@ It can be used in C++, Lua or Csound.
 - Catmull Rom Spline
 - Hanning / Hamming / Blackamn
 - Gauss 
+- Toxoid (aka duplicatrix_cubic)
+- Catenary (aka funicular)
+
 - Typed curves : inspired from Csounds [GEN16](http://www.csounds.com/manual/html/GEN16.html)
 - User defined curves - pass it a function (or a lambda in C++), that returns y for any x between 0 and 1. Not implemented in Csound.
+
 
 ## How to use it 
 
@@ -146,10 +152,19 @@ cmake .. -DBUILD_CSOUND_OPCODE=TRUE
 cmake .. -DBUILD_LUA_MODULE=TRUE
 ```
 
+On some platforms (e.g. Windows) you might need to set the Lua paths with the following options :
+```
+cmake .. -DBUILD_LUA_MODULE=TRUE -DLUA_INCLUDE_DIR=/you/dir/include -DLUA_LIBRARIES=/path/to/lua.lib
+```
+
+
+The PNG writer [fpng](https://github.com/richgel999/fpng) used for hypercurve has SSE support. This can be enabled with `-DSSE=1`.
+
+
 
 # TODO
 
-* PNG drawer : candidate https://github.com/richgel999/fpng
+* PNG drawer : implement helper class with indexes, allow waveforms, and optional grid.
 
 * REAPER/Reascript -> see https://forum.cockos.com/showthread.php?p=2543755#post2543755
 
@@ -173,6 +188,7 @@ cmake .. -DBUILD_LUA_MODULE=TRUE
 * Cardioid / hypercardioid
 * Elastic curve : https://mathcurve.com/courbes2d.gb/linteaire/linteaire.shtml
 * Simple log/exp ?
+* Kulp quartic
 
 * Ideas here https://mathcurve.com/courbes2d/courbes2d.shtml
 

@@ -12,6 +12,8 @@
 #include<memory>
 #include<cstring>
 
+#include"fpng/src/fpng.h"
+
 namespace hypercurve {
 
 double pos(double x)
@@ -23,7 +25,6 @@ double frac(double x1, double x2)
 {
     return double(x1) / double(x2);
 }
-
 
 inline double limit(double min, double max, double v)
 {
@@ -231,6 +232,115 @@ struct memory_vector
    T *_data;
    size_t _size;
 };
+
+
+// PNG utils
+
+//using color = std::array<uint8_t, 4>;
+struct color : public std::array<uint8_t, 4>
+{
+};
+
+constexpr const color white{{255, 255, 255, 255}};
+constexpr const color black{{0, 0, 0, 255}};
+constexpr const color red{{192, 9,9, 255}};
+constexpr const color purple{{106, 9, 192, 255}};
+
+
+struct png
+{
+    png(size_t width_ = 2048, size_t height_ = 1024, color background_ = black, color foreground_ = purple)
+        : width(width_)
+        , height(height_)
+        , background(background_)
+        , foreground(foreground_)
+        , data(width * height, background)
+    {}
+
+    void set(size_t x, size_t y, color c)
+    {
+        data[ width * (height - y - 1) + x] = c;
+    }
+
+    void set_curve_point(double x, double y)
+    {
+        size_t ix = x * width;
+        size_t iy = y * height;
+        set(ix, iy, foreground);
+    }
+
+    void fill_curve_point(double x, double y, bool waveform = false)
+    {
+        size_t ix = x * width;
+        size_t iy = y * height; // y position of point
+
+        size_t half = height / 2;
+        if(!waveform)
+        {
+            for(size_t i = 0; i < iy; ++i)
+            {
+                set(ix, i, foreground);
+            }
+        } else
+        {
+            for(size_t i = std::min(iy, half); i < std::max(iy, half); ++i)
+            {
+                set(ix, i, foreground);
+            }
+        }
+    }
+
+    void draw_grid(size_t xdiv = 10, size_t ydiv = 10, color c = white)
+    {
+        for(size_t i = 1; i < xdiv; ++i)
+        {
+            size_t yb = 0;
+            size_t ye = height;
+            size_t x = i * frac(width, xdiv);
+            for(size_t y = yb; y < ye; ++y)
+            {
+                set(x, y, c);
+            }
+        }
+        for(size_t i = 1; i < ydiv; ++i)
+        {
+            size_t xb = 0;
+            size_t xe = width;
+            size_t y = i * frac(height, ydiv);
+            for(size_t x = xb; x < xe; ++x)
+            {
+                set(x, y, c);
+            }
+        }
+
+    }
+
+    void draw_curve(double *samples, size_t size, bool fill = true, bool waveform = false )
+    {
+        for(size_t i = 0; i < size; ++i)
+        {
+            double x = frac(i,size);
+            double y = (waveform) ? (samples[i] + 1.0) / 2.0 : samples[i];
+            if(fill)
+                fill_curve_point(x, y, waveform);
+            else
+                set_curve_point(x, y);
+        }
+
+    }
+
+    void write_as_png(std::string path)
+    {
+        fpng::fpng_encode_image_to_file(path.c_str(), (void *) data.data(), width, height, 4);
+    }
+
+protected:
+    size_t width, height;
+    color background, foreground;
+    std::vector<color> data;
+};
+
+
 }
 
 #endif // UTILITIES_H

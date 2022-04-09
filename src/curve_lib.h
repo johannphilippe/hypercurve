@@ -198,6 +198,112 @@ using gaussian_curve = gauss_curve;
 
 
 //////////////////////////////////////////////////
+// Catenary (funicular) curve
+// In french "courbe de chainette"
+// https://mathcurve.com/courbes2d.gb/chainette/chainette.shtml
+// The more 'a' is important, the more this curve is straight
+//////////////////////////////////////////////////
+class catenary_curve : public curve_base
+{
+public:
+    catenary_curve(double a_)
+        : a(a_)
+        , height(catenary_process(1))
+    {
+        if(!(a>0))
+            throw (std::runtime_error("Catenary curve : a must be > 0"));
+    }
+    double process(double x) override
+    {
+        return catenary_process(x) / height;
+    }
+protected:
+    double catenary_process(double x)
+    {
+        return a * (std::cosh(x/a)) - a;
+    }
+
+    double a, height;
+
+    constexpr static const double mult = 12;
+};
+using funicular_curve = catenary_curve;
+
+
+//////////////////////////////////////////////////
+// Conchal curve
+// https://mathcurve.com/courbes2d.gb/conchale/conchale.shtml
+// x must be scaled from -a to max_x
+// Must be scaled and axis inverted
+// Still to do
+//////////////////////////////////////////////////
+class conchal_curve : public curve_base
+{
+public:
+    conchal_curve(double a_, double c_)
+        : a(a_)
+        , c(c_)
+    {
+        if( (a > c) || (a <= 0) || (c <= 0) )
+            throw(std::runtime_error("Conchal curve : a must be < c, a and c must be > 0"));
+        max_x = a + (std::sqrt((a*a) + (c*c)));
+    }
+
+    double process(double x) override
+    {
+
+    }
+
+protected:
+    inline double conchal_process(double x)
+    {
+        return sqrt(((c*c)+ (a*a) -(x*x	)) * (c*c) - (a*a) + (x*x)) / (x+a);
+    }
+
+    inline double scaled_conchal(double x)
+    {
+        double _x = (x * (max_x + a)) - a;
+        double _conchal_res = conchal_process(_x);
+        return x + (_conchal_res + a);
+    }
+
+    double a, c, max_x;
+
+};
+
+
+//////////////////////////////////////////////////
+// Toxoid curve
+// AKA duplicatrix cubic
+// https://mathcurve.com/courbes2d/cubicduplicatrice/cubicduplicatrice.shtml
+// a needs to be <= 0 (see constructor)
+//////////////////////////////////////////////////
+class toxoid_curve : public curve_base
+{
+
+public:
+    toxoid_curve(double a_)
+        : a(-std::abs(a_))
+        , height(toxoid_process(1))
+    {}
+
+    double process(double x) override
+    {
+       return toxoid_process(x) / height;
+    }
+
+protected:
+
+    inline double toxoid_process(double x)
+    {
+        return std::sqrt(x * std::pow(x - a/2, 2));
+    }
+
+    double a, height;
+};
+using duplicatrix_cubic = toxoid_curve;
+
+//////////////////////////////////////////////////
 // Cardioid
 // Idea : user could just give a segment in degrees with a rotation offset, and give y_start and y_dest.
 //////////////////////////////////////////////////

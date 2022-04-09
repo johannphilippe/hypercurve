@@ -253,6 +253,34 @@ struct cs_power : csnd::Plugin<1,1>
     std::shared_ptr<power_curve> _curve;
 };
 
+struct cs_toxoid : csnd::Plugin<1, 1>
+{
+    int init()
+    {
+        _curve = std::make_shared<toxoid_curve>(inargs[0]);
+        index = curve_base_map.map(_curve);
+        outargs[0] = index;
+        return OK;
+    }
+
+    int index;
+    std::shared_ptr<toxoid_curve> _curve;
+};
+
+struct cs_catenary : csnd::Plugin<1, 1>
+{
+    int init()
+    {
+        _curve = std::make_shared<catenary_curve>(inargs[0]);
+        index = curve_base_map.map(_curve);
+        outargs[0] = index;
+        return OK;
+    }
+
+    int index;
+    std::shared_ptr<catenary_curve> _curve;
+};
+
 struct cs_quad_bezier : csnd::Plugin<1, 1>
 {
     int init()
@@ -442,12 +470,17 @@ void csnd::on_load(Csound *csound) {
     csnd::plugin<cs_hamming>(csound, "hamming_curve", "i", "", csnd::thread::i);
     csnd::plugin<cs_blackman>(csound, "blackman_curve", "i", "", csnd::thread::i);
     csnd::plugin<cs_gaussian>(csound, "gauss_curve", "i", "ii", csnd::thread::i);
+    csnd::plugin<cs_catenary>(csound, "catenary_curve", "i", "i", csnd::thread::i);
+    csnd::plugin<cs_toxoid>(csound, "toxoid_curve", "i", "i", csnd::thread::i);
+
     csnd::plugin<cs_typed>(csound, "typed_curve", "i", "i", csnd::thread::i);
     csnd::plugin<cs_quad_bezier>(csound, "quadratic_bezier_curve", "i", "i", csnd::thread::i);
     csnd::plugin<cs_cub_bezier>(csound, "cubic_bezier_curve", "i", "ii", csnd::thread::i);
     csnd::plugin<cs_catmull_rom>(csound, "catmull_rom_curve", "i" , "ii", csnd::thread::i);
 
     // Aliases
+    csnd::plugin<cs_toxoid>(csound, "duplicatrix_cubic_curve", "i", "i", csnd::thread::i);
+    csnd::plugin<cs_catenary>(csound, "funicular_curve", "i", "i", csnd::thread::i);
     csnd::plugin<cs_diocles_curve>(csound, "cissoid_curve", "i", "i", csnd::thread::i); // alias for diocles
     csnd::plugin<cs_gaussian>(csound, "gaussian_curve", "i", "ii", csnd::thread::i);
     csnd::plugin<cs_typed>(csound, "transeg_curve", "i", "i", csnd::thread::i);
