@@ -260,6 +260,8 @@ Csound :
     hc_funicular_curve(float ia)
 ```
 
+
+
 ### Tightrope Walker curve 
 
 C++ : 
@@ -274,6 +276,8 @@ Csound :
 ```Csound
     hc_tightrope_walker_curve(float ia, float ib)
 ```
+
+
 ### Quadratic Bezier curve
 C++ : 
 ```c++
@@ -287,6 +291,8 @@ Csound :
 ```Csound
     hc_quadratic_bezier_curve( hc_control_point cp )
 ```
+
+
 ### Cubic Bezier curve
 
 C++ : 
@@ -302,6 +308,7 @@ Csound :
     hc_cubic_bezier_curve(hc_control_point cp1, hc_control_point cp2)
 ```
 
+
 ### Cubic spline curve
 
 C++ : 
@@ -316,6 +323,7 @@ Csound :
 ```Csound
     // Not implemented yet
 ```
+
 
 ### Catmull Rom pline curve
 
