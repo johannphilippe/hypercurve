@@ -54,6 +54,7 @@ On a mathematical point of view, it has to be noticed that since curves needs to
 - Gauss 
 - Toxoid (aka duplicatrix_cubic)
 - Catenary (aka funicular)
+- Tightrope Walker curve  
 
 - Typed curves : inspired from Csounds [GEN16](http://www.csounds.com/manual/html/GEN16.html)
 - User defined curves - pass it a function (or a lambda in C++), that returns y for any x between 0 and 1. Not implemented in Csound.
@@ -164,24 +165,23 @@ The PNG writer [fpng](https://github.com/richgel999/fpng) used for hypercurve ha
 
 # TODO
 
-* PNG drawer : implement helper class with indexes, allow waveforms, and optional grid.
-
 * REAPER/Reascript -> see https://forum.cockos.com/showthread.php?p=2543755#post2543755
 
 * Implement a polynomial with varargs (like a, b, c  : ax^3 + bx^2 + c)
 
-* Operator for curves in Lua and Csound. In Csound it should be functions (sum_hypercurve, substract, multiply, div) that create a new one. In Lua just a layer on top of C++ operators with metatables.
-
 * A real good picture in README to show what it actually looks like
 
+* Operator for curves in Lua and Csound. In Csound it should be functions (sum_hypercurve, substract, multiply, div) that create a new one. In Lua just a layer on top of C++ operators with metatables.
 * Csound RT opcode : cubic spline (mem alloc). Also missing X rescale, y_rescale, and user_defined curve
-* Implement rescale (Lua, Csound)
+* Implement rescale (Lua, Csound) a
 
 * Lagrange interpolation for curve extraction.
 
-* Once all done -> a proper documentation for C++/Csound/Lua, and Csound implementations
+* Documentation : add pictures of each curve.
 
-* Hard one -> all curves allowing one sample processing (including cubic spline)
+* Hard one -> all curves allowing one sample processing (including cubic spline) to allow no-table processing.
+
+* Semantic : keep curve in "diocles_curve" or remove it ? (choose btw lua or csound style)
 
 ## Curves to implement
 
