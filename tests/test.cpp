@@ -49,6 +49,16 @@ void write_as_png(curve &c, bool waveform = true, std::string name = "h.png")
     p.write_as_png(concat);
 }
 
+void write_doc_png(curve &c, std::string name)
+{
+    png p(1024, 256);
+    p.draw_curve(c.get_samples(), c.get_definition(), true, false);
+    p.draw_grid(10, 10, color{{255, 255, 255, 100}});
+    std::string concat("/home/johann/Documents/GitHub/hypercurve/doc/png/" + name);
+    std::cout << concat << std::endl;
+    p.write_as_png(concat);
+}
+
 void check_equality(curve &c1, curve &c2)
 {
     for(size_t i = 0; i < c1.get_definition(); i++)
@@ -61,6 +71,39 @@ void check_equality(curve &c1, curve &c2)
     }
     std::cout << "IDENTICAL "  << std::endl;
 
+}
+
+
+void generate_curve_pictures()
+{
+    curve dioc(2048, 0, {segment(1, 1, share(diocles_curve(1)))});
+    write_doc_png(dioc, "diocles.png");
+    curve cubic(2048, 0, {segment(1, 1, share(cubic_curve()))});
+    write_doc_png(cubic, "cubic.png");
+    curve power(2048, 0, {segment(1, 1, share(power_curve(9)))});
+    write_doc_png(power, "power9.png");
+    curve hann(2048, 0, {segment(1, 1, share(hanning_curve()))});
+    write_doc_png(hann, "hanning.png");
+    curve hamm(2048, 0, {segment(1, 1, share(hamming_curve()))});
+    write_doc_png(hamm, "hamming.png");
+    curve black(2048, 0, {segment(1, 1, share(blackman_curve()))});
+    write_doc_png(black, "blackman.png");
+    curve gauss(2048, 0, {segment(1, 1, share(gauss_curve(10, 0.5)))});
+    write_doc_png(gauss, "gaussian.png");
+    curve tox(2048, 0, {segment(1, 1, share(toxoid_curve(10)))});
+    write_doc_png(tox, "toxoid.png");
+    curve cat(2048, 0, {segment(1, 1, share(catenary_curve(0.1)))});
+    write_doc_png(cat, "catenary.png");
+    curve tight(2048, 0, {segment(1, 1, share(tightrope_walker_curve(1.1, 0.1)))});
+    write_doc_png(tight, "tightrope.png");
+    curve quadbez(2048, 0, {segment(1, 1, share(quadratic_bezier_curve(point(0.2, 0.1))))});
+    write_doc_png(quadbez, "quadratic_bezier.png");
+    curve cubbez(2048, 0, {segment(1, 1, share(cubic_bezier_curve(point(0.1, 0.1), point(0.5, 0.8))))});
+    write_doc_png(cubbez, "cubic_bezier.png");
+    curve spl(2048, 0, {segment(1, 1, share(cubic_spline_curve( { point(0.2, 0.7), point(0.3, 0.2), point(0.5, 0.8)} )))});
+    write_doc_png(spl, "cubic_spline.png");
+    curve catmul(2048, 0, {segment(1, 1, share(catmull_rom_spline_curve(point(-1,-0.5), point(2, 3.5))))});
+    write_doc_png(catmul, "catmul_rom.png");
 }
 
 int main()
@@ -295,5 +338,8 @@ int main()
 
     sf.writef(c13.get_samples(), def);
     sf2.writef(c10.get_samples(), def);
+
+    generate_curve_pictures();
+
     return 0;
 }

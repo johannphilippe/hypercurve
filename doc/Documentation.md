@@ -6,10 +6,29 @@ Hypercurve is a library of 2D curves designed to process audio envelopes, applie
 
 It is available in several frontends : C++, Lua, and Csound.
 
-  
-  
+1. [Hypercurve basic syntax](#hypercurve-basic-syntax)
+2. [Import Hypercurve](#import-hypercurve)
+3. [Hypercurve class](#hypercurve-class)
+3.1.1 [Hypercurve operators](#hypercurve-operators)
+3.1.2 [Hypercurve invert curve base](#hypercurve-invert-curve-base)
+3.1.3 [Normalize hypercurve](#normalize-hypercurve)
+4. [Hypercurve Segment](#segment)
+5. [Curve types](#curve-base)
+5.1. [Diocles cissoid curve](#diocles-cissoid-curve)
+5.2. [Cubic curve](#cubic-curve)
+5.3. [Power curve](#power-curve)
+5.4 [FFT Window curves](#hamming-hanning-blackman-curves)
+5.5 [Gaussian curve](#gaussian-curve)
+5.6 [Toxoid curve](#toxoid-curve)
+5.7 [Catenary curve](#catenary-curve)
+5.8 [Tightrope Walker curve](#tightrope-walker-curve)
+5.9 [Quadratic bezier curve](#quadratic-bezier-curve)
+5.10 [Cubic bezier curve](#cubic-bezier-curve)
+5.11 [Cubic spline curve](#cubic-spline-curve)
+5.12 [Catmull Rom Spline curve](#catmull-rom-spline-curve)
 
-## Hypercurve syntax
+
+## Hypercurve basic syntax
 
   
 
@@ -148,7 +167,7 @@ In csound you can manually import the library like below, or simply put the libr
 
   
 
-## Hypercurve
+## Hypercurve class
 
  
 C++ :
@@ -182,10 +201,9 @@ icrv = hc_hypercurve(int isize_in_samples, float iy_start, isegment1 , [isegment
 
 ### Methods
 
-#### Operators : +, -, *, /
+#### Hypercurve Operators 
 
-
-Hypercurves can be combined through operators. 
+Hypercurves can be combined with + - * / operators
 
 
 C++ :
@@ -354,6 +372,7 @@ In Hypercurve, a Curve base represents the algorithm of a specific curve. Some o
 
 #### Diocles cissoid curve
 
+![Diocles cissoid](png/diocles.png)
   
 
 C++ :
@@ -397,6 +416,7 @@ hc_cissoid(float iarg_a)
 #### Cubic curve
 
   
+![Cubic curve](png/cubic.png)
 
 C++ :
 
@@ -427,6 +447,7 @@ hc_cubic_curve()
 #### Power curve
 
   
+![Power curve](png/power9.png)
 
 C++ :
 
@@ -452,9 +473,15 @@ hc_power_curve(float ipower)
 
 ```
 
-#### Hamming / Hanning / Blackman curves
+#### Hamming Hanning Blackman curves
 
   
+* Hanning 
+![Hanning curve](png/hanning.png)
+* Hamming 
+![Hamming curve](png/hamming.png)
+* Blackman
+![Blackman curve](png/blackman.png)
 
 C++ :
 
@@ -492,9 +519,9 @@ hc_blackman_curve()
 
 ```
 
-#### Gaussian curve (bell)
-
+#### Gaussian curve
   
+![Gaussian curve](png/gaussian.png)
 
 C++ :
 
@@ -536,9 +563,9 @@ hc_gauss_curve(float iA, float ic)
 
   
 
-#### Toxoid curve (duplicatrix cubic curve)
+#### Toxoid curve
 
-  
+![Toxoid curve](png/toxoid.png)
 
 C++ :
 
@@ -578,9 +605,9 @@ hc_duplicatrix_cubic_curve(float ia)
 
   
 
-#### Catenary curve (funicular)
+#### Catenary curve
 
-  
+![Catenary curve](png/catenary.png)
 
 C++ :
 
@@ -625,6 +652,7 @@ hc_funicular_curve(float ia)
 #### Tightrope Walker curve
 
   
+![Tightrope Walker curve](png/tightrope.png)
 
 C++ :
 
@@ -655,6 +683,8 @@ hc_tightrope_walker_curve(float ia, float ib)
 
 #### Quadratic Bezier curve
 
+![Quadratic Bezier curve](png/quadratic_bezier.png)
+
 C++ :
 
 ```c++
@@ -684,7 +714,7 @@ hc_quadratic_bezier_curve( hc_control_point cp )
 
 #### Cubic Bezier curve
 
-  
+![Cubic bezier curve](png/cubic_bezier.png)
 
 C++ :
 
@@ -715,7 +745,7 @@ hc_cubic_bezier_curve(hc_control_point cp1, hc_control_point cp2)
 
 #### Cubic spline curve
 
-  
+![Cubic Spline curve](png/cubic_spline.png)
 
 C++ :
 
@@ -744,8 +774,9 @@ Csound :
   
   
 
-#### Catmull Rom pline curve
+#### Catmull Rom spline curve
 
+![Catmull Rom Spline curve](png/catmul_rom.png)
   
 
 C++ :
