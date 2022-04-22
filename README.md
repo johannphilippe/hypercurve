@@ -1,804 +1,174 @@
-# Hypercurve documentation
 
-  
-
-Hypercurve is a library of 2D curves designed to process audio envelopes, applied to any audio parameter.
-
-It is available in several frontends : C++, Lua, and Csound.
-
-1. [Hypercurve basic syntax](#hypercurve-basic-syntax)
-2. [Import Hypercurve](#import-hypercurve)
-3. [Hypercurve class](#hypercurve-class)
-3.1.1 [Hypercurve operators](#hypercurve-operators)
-3.1.2 [Hypercurve invert curve base](#hypercurve-invert-curve-base)
-3.1.3 [Normalize hypercurve](#normalize-hypercurve)
-4. [Hypercurve Segment](#segment)
-5. [Curve types](#curve-base)
-5.1. [Diocles cissoid curve](#diocles-cissoid-curve)
-5.2. [Cubic curve](#cubic-curve)
-5.3. [Power curve](#power-curve)
-5.4 [FFT Window curves](#hamming-hanning-blackman-curves)
-5.5 [Gaussian curve](#gaussian-curve)
-5.6 [Toxoid curve](#toxoid-curve)
-5.7 [Catenary curve](#catenary-curve)
-5.8 [Tightrope Walker curve](#tightrope-walker-curve)
-5.9 [Quadratic bezier curve](#quadratic-bezier-curve)
-5.10 [Cubic bezier curve](#cubic-bezier-curve)
-5.11 [Cubic spline curve](#cubic-spline-curve)
-5.12 [Catmull Rom Spline curve](#catmull-rom-spline-curve)
+# hypercurve
 
 
-## Hypercurve basic syntax
+```
+                                       awesome hybrid curve
+	1 +--------------------------------------------------------------------------------+
+          |        ********                                                                |
+          |       *        **                                                              |
+          |                                                                                |
+          |      *           *******                                                       |
+          |                         *                                                      |
+          |     *                                     ******************                   |
+          |                                      *****                  *****              |
+          |                                    **                            ***           |
+          |    *                     *      ***                                 ***        |
+          |                               **                                       **      |
+          |   *                          *                                           **    |
+          |                             *                                              *   |
+          |  *                         *                                                *  |
+          | *                         *                                                  * |
+          |*                                                                              *|
+        0 +--------------------------------------------------------------------------------+
+          0                                                                                 1
+          +--------------------------------------------------------------------------------+
+          |   * A combination of gaussian, cissoid, power of 9, and cubic bezier curve     |
+          +--------------------------------------------------------------------------------+
+```
 
-  
 
-Here is a simple example of syntax with possible use cases :
 
-  
 
-C++ :
+# What is it ? 
+
+Hypercurve is a library allowing you to use several curve algorithms into a single 2D envelope. It is designed to be used in audio applications, for people who know how to enjoy a finely shaped curve. 
+As shown above, you can perfectly combine gaussian curve with bezier curve, and plenty of other curve algorithms. 
+It can be used in C++, Lua or Csound.
+
+Every curve algorithm is different. In an audio application, you can assign an envelope to any kind of parameter. For some parameters (like frequency), the way a value goes up and down in time changes everything to the perception of sound. Thus, the possibility of having a finely shaped envelope is truly essential. This, is the purpose of Hypercurve. 
+
+## Implemented curves 
+
+
+- Cissoid (Diocles curve) 
+- Cubic 
+- Power curve (choose your power of x)
+- Bezier (Cubic & Quadratic)
+- Cubic Spline - Not implemented in Csound yet
+- Catmull Rom Spline
+- Hanning / Hamming / Blackamn
+- Gauss 
+- Toxoid (aka duplicatrix_cubic)
+- Catenary (aka funicular)
+- Tightrope Walker curve  
+
+- Typed curves : inspired from Csounds [GEN16](http://www.csounds.com/manual/html/GEN16.html)
+- User defined curves - pass it a function (or a lambda in C++), that returns y for any x between 0 and 1. Not implemented in Csound.
+
+
+## How to use it 
+
+
+There are three ways to use it : in C++, Csound or in Lua. Cmake will help you build libraries that can be used in those languages. You will find C++ example under hypercurve_test/test.cpp, Csound example under csound_opcode/test.csd, and Lua example under lua_module/test.lua. 
+
+The basic syntax stands as follow : 
+* `hypercurve(integer size, double y_start, {segment_list});`
+Where `size` is the size in samples, `y_start` is the starting point of the curve, and segment list is a list of segments. 
+*  `segment(double frac, double y_destination, curve_type crv);`
+Where `frac` is the fractional size of the segment (fraction between 0 and 1), `y_destination` is the target point, and `crv`  a curve picked from hypercurve.
+
+
+## A simple C++ example 
 
 ```c++
-
-auto crv = hypercurve::hypercurve( 2048, 0, {
-    // In C++, segment is expecting a curve_base of type shared_ptr
-
-hypercurve::segment(0.5, 1, hypercurve::share(hypercurve::cubic_curve())),
-
-hypercurve::segment(0.5, 0, hypercurve::share(hypercurve::diocles_curve(1)))
-
-});
-
-  // Get samples values like below
-
-double sample = crv.get_sample_at(1024);
-
-double *samples = crv.get_samples();
-
-  
-
-hypercurve::png png;
-
-bool fill = true;
-
-bool waveform = false;
-
-png.draw_curve(samples, crv.get_definition(), fill, waveform);
-
-png.write_png("my/path/to.png");
-
-```
-
-  
-
-Lua :
-
-```Lua
-
-local  crv = hc.hypercurve(2048, 0, {
-
-hc.segment(0.5, 1, hc.cubic())
-
-hc.segment(0.5, 0, hc.cissoid(1))
-
-})
-
-  
-
-crv:ascii_display("MyHybridCurve", "half cubic, half cissoid", "*")
-
-local  fill = true
-
-local  is_waveform = false -- waveform will scale the png from -1 to 1
-
-crv:write_as_png("path_to/curve.png", fill, is_waveform)
-
-crv:write_as_wav( "path/curve.wav" )
-  
-
--- rescale the curve
-
-crv:normalize_y(-1, 1)
-
-local  samp = crv:get_sample_at(1024)
-
-local  samps = crv:get_samples()
-
-```
-
-  
-
-Csound :
-
-```Csound
-
-icrv = hc_hypercurve(2048, 0,
-
-hc_segment(0.5, 1, hc_cubic_curve()),
-
-hc_segment(0.5, 0, hc_cissoid_curve(1)))
-
-// Will run the curve in the time of the i event in an instrument
-
-kenv = hc_run(icrv, linseg:k(0, p3, 1))
-
-```
-
-  
-  
-
-## Import hypercurve
-
-  
-
-C++ :
-
-```c++
-
 #include"hypercurve.h"
-
+using namespace hypercurve;
+const int definition = 16384;
+double y_start = 0;
+curve c(definition, y_start, 
+	{
+		// segment(fractional_size, y_destination, curve
+		segment(frac(1,2), 1.0, share(cissoid_curve(1))),
+		segment(0.5, 0.0, share(blackman_curve()))
+	}); 
+// Then access samples with double *get_samples() 
+c.get_samples();
 ```
 
-Lua :
+## A simple Csound example
 
-```Lua
-
--- In the following line, replace .so with your library extension (dll on Windows or dylib on Macos)
-
-package.cpath = package.cpath .. ";/your/path/to/hypercurve/?.so"
-
-local  hc = require("liblua_hypercurve")
-
+```csound
+instr 1
+	icrv = hc_hypercurve(2048, 0, 
+				hc_segment(1/2, 1, hc_diocles_curve(1)),
+				hc_segment(1/2, 0, hc_hanning_curve()))
+	kenv = hc_run(icrv, linseg(0, p3, 1))
+	ao = vco2(0.3, 300) * kenv
+	outs(ao, ao)
+endin
 ```
 
-Csound :
+## A simple Lua example
 
-In csound you can manually import the library like below, or simply put the library in csound plugins path.
-
-```Csound
-
-<CsOptions>
-
---opcode-lib=/your/path/to/libcsound_hypercurve.so
-
-</CsOptions>
-
+```lua
+package.cpath = package.cpath .. ";/your/path/to/hypercurve/?.so;"
+local hc = require("liblua_hypercurve")
+local definition = 16384
+local y_start = 0
+local crv = hc.hypercurve(definition, y_start, 
+	{
+		hc.segment(1/2, 1.0, hc.cissoid(1.0)),
+		hc.sement(1/2, 0.0, hc.cubic(0.0))
+	})
+// Write as 24 bits 48KHz wav
+hc.write_as_wav("path/to/outfile.wav", crv)
 ```
 
-  
+## Features 
 
-## Hypercurve class
+The  `curve`  takes a list of segments, each having a fractional size. If the sum of all these segments is not exactly one, they will be rescaled so that they fit 0-1 range. 
 
- 
-C++ :
 
-```c++
 
-auto crv = hypercurve::curve(size_t size_in_samples, double y_start, std::vector<hypercurve::segment> segment_list);
 
-// With possible alias
+# Build
 
-auto crv = hypercurve::curve(size_t size_in_samples, double y_start, std::vector<hypercurve::segment> segment_list);
 
+First clone the repo with submodules : 
+``` git clone https://github.com/johannphilippe/hypercurve.git --recurse-submodules ```
+You should check that Lua is installed on your system. If it is not, or if compilation retrns error, you should install a Lua 5.1 version to the standard installation path. Make sure you have the dynamic library installed, and the headers `lauxlib.h` and `lua.h` are available on your system.
+Then : 
 ```
-
-Lua :
-
-```Lua
-
-local  crv = hc.hypercurve(integer  size_in_samples, number  y_start, table {segments})
-
+cd hypercurve
+mkdir build && cd build
+cmake .. -DBUILD_ALL=TRUE
+make
 ```
-
-Csound :
-
-```Csound
-
-icrv = hc_hypercurve(int isize_in_samples, float iy_start, isegment1 , [isegment2, isegment3...])
-
+If you just want to build Lua module or Csound opcode, then just use 
 ```
-
-
-### Methods
-
-#### Hypercurve Operators 
-
-Hypercurves can be combined with + - * / operators
-
-
-C++ :
-
-```c++
-
-  hypercurve::curve c1(2048, 0, {hypercurve::segment(1, 1, hypercurve::share(hypercurve::cubic_curve()))});
-  hypercurve::curve c2(2048, 0, {hypercurve::segment(1, 1, hypercurve::share(hypercurve::diocles_curve(1)))});
-  hypercurve::curve sum = c1 + c2; 
-  // Or 
-  c1 += c2;
-
-  // It works for all mathematic operators +, -, /, *
+cmake .. -DBUILD_CSOUND_OPCODE=TRUE
+cmake .. -DBUILD_LUA_MODULE=TRUE
 ```
-
-Lua :
-
-```Lua
-
-  local c1 = hc.hypercurve(2048, 0, {hc.segment(1, 1, hc.cubic())})
-  local c2 = hc.hypercurve(2048, 0, {hc.segment(1, 1, hc.diocles(1))})
-  local sub = c1 - c2
-  local prod = c1 * c2
+On some platforms (e.g. Windows) you might need to set the Lua paths with the following options :
 ```
-
-Csound :
-
-```Csound
-  icrv1 = hc_hypercurve(2048, 0, hc_segment(1, 1, hc_cubic_curve()))
-  icrv2 = hc_hypercurve(2048, 0, hc_segment(1, 1, hc_diocles_curve(1)))
-  icrv_sum = hc_add(icrv1, icrv2)
-  icrv_sub = hc_sub(icrv1, icrv2)
-  icrv_prod = hc_mult(icrv1, icrv2)
-  icrv_div = hc_div(icrv1, icrv2)
+cmake .. -DBUILD_LUA_MODULE=TRUE -DLUA_INCLUDE_DIR=/you/dir/include -DLUA_LIBRARIES=/path/to/lua.lib
 ```
-
-#### Invert curve base 
-
-This function will make a symetry of the curve on a x_start/y_start - x_destination/y_destination axis
-
-
-
-C++ :
-
-```c++
-
-hypercurve::invert(hypercurve::share( hypercurve::cubic_curve() ));
-
-```
-
-Lua :
-
-```Lua
-
-hc.invert(hc.cubic())
-
-```
-
-Csound :
-
-```Csound
-
-hc_invert(hc_cubic_curve())
-
-```
-
-
-#### Normalize hypercurve
-
-This function will allow you to normalize an hypercurve between min and max y values
-
-
-C++ :
-
-```c++
-  hypercurve::curve c(4096, 0, {hypercurve::segment(1, 1, hypercurve::cubic_curve())});
-  c.normalize_y(-1, 1);
-  // Now "c" curve y start is -1 and its destination is 1
-
-```
-
-Lua :
-
-```Lua
-  local crv = hc.hypercurve(4096, 0, {hc.segment(1, 1, hc.cubic())})
-  crv:normalize_y(-1, 1)
-```
-
-Csound :
-
-```Csound
-
-  icrv = hc_hypercurve(4096, 0, hc_segment(1, 1, hc_cubic_curve()))
-  // This function won't make a copy, it will only scale the corresponding curve
-  hc_normalize_y(icrv, -1, 1)
-``` 
-
-## Segment
-
-  
-
-C++ :
-
-```c++
-
-auto seg = hypercurve::segment(double fractional_size, double y_destination, std::shared_ptr<curve_base> curve_type);
-
-```
-
-Lua :
-
-```Lua
-
-local  seg = hc.segment(number  fractional_size, number  y_destination, curve_base)
-
-```
-
-Csound :
-
-```Csound
-
-iseg = hc_segment(float fractional_size, float y_destination, curve_base icrv_base)
-
-```
-
-  
-
-<!---
-
-C++ :
-
-```c++
-
-hypercurve::share( )
-
-```
-
-Lua :
-
-```Lua
-
-hc.
-
-```
-
-Csound :
-
-```Csound
-
-hc_
-
-```
-
--->
-
-  
-  
-
-## Curve Base
-
-  
-
-In Hypercurve, a Curve base represents the algorithm of a specific curve. Some of them take one or several constant parameters.
-
-  
-
-#### Diocles cissoid curve
-
-![Diocles cissoid](png/diocles.png)
-  
-
-C++ :
-
-```c++
-
-hypercurve::share( hypercurve::diocles_curve(double a) );
-
-// Alias
-
-hypercurve::share( hypercurve::cissoid_curve(double a) );
-
-```
-
-Lua :
-
-```Lua
-
-hc.diocles(number  a)
-
--- Alias
-
-hc.cissoid(a)
-
-```
-
-Csound :
-
-```Csound
-
-hc_diocles(float iarg_a)
-
-// Alias
-
-hc_cissoid(float iarg_a)
-
-```
-
-  
-
-#### Cubic curve
-
-  
-![Cubic curve](png/cubic.png)
-
-C++ :
-
-```c++
-
-hypercurve::share( hypercurve::cubic_curve() );
-
-```
-
-Lua :
-
-```Lua
-
-hc.cubic()
-
-```
-
-Csound :
-
-```Csound
-
-hc_cubic_curve()
-
-```
-
-  
-
-#### Power curve
-
-  
-![Power curve](png/power9.png)
-
-C++ :
-
-```c++
-
-hypercurve::share( hypercurve::power_curve(double power) );
-
-```
-
-Lua :
-
-```Lua
-
-hc.power(number  power)
-
-```
-
-Csound :
-
-```Csound
-
-hc_power_curve(float ipower)
-
-```
-
-#### Hamming Hanning Blackman curves
-
-  
-* Hanning 
-![Hanning curve](png/hanning.png)
-* Hamming 
-![Hamming curve](png/hamming.png)
-* Blackman
-![Blackman curve](png/blackman.png)
-
-C++ :
-
-```c++
-
-hypercurve::share( hypercurve::hamming_curve() );
-
-hypercurve::share( hypercurve::hanning_curve() );
-
-hypercurve::share( hypercurve::blackman_curve() );
-
-```
-
-Lua :
-
-```Lua
-
-hc.hamming()
-
-hc.hanning()
-
-hc.blackman()
-
-```
-
-Csound :
-
-```Csound
-
-hc_hamming_curve()
-
-hc_hanning_curve()
-
-hc_blackman_curve()
-
-```
-
-#### Gaussian curve
-  
-![Gaussian curve](png/gaussian.png)
-
-C++ :
-
-```c++
-
-hypercurve::share( hypercurve::gaussian_curve(double A, double c) );
-
-// Alias
-
-hypercurve::share( hypercurve::gauss_curve(double A, double c) );
-
-  
-
-```
-
-Lua :
-
-```Lua
-
-hc.gaussian(number  A, number  c)
-
--- Alias
-
-hc.gauss(number  A, number  c)
-
-```
-
-Csound :
-
-```Csound
-
-hc_gaussian_curve(float iA, float ic)
-
-// Alias
-
-hc_gauss_curve(float iA, float ic)
-
-```
-
-  
-
-#### Toxoid curve
-
-![Toxoid curve](png/toxoid.png)
-
-C++ :
-
-```c++
-
-hypercurve::share( hypercurve::toxoid_curve(double a) );
-
-// Alias
-
-hypercurve::share( hypercurve::duplicatrix_cubic_curve(double a) );
-
-```
-
-Lua :
-
-```Lua
-
-hc.toxoid(number  a)
-
--- Alias
-
-hc.duplicatrix_cubic(number  a)
-
-```
-
-Csound :
-
-```Csound
-
-hc_toxoid_curve(float ia)
-
-// Alias
-
-hc_duplicatrix_cubic_curve(float ia)
-
-```
-
-  
-
-#### Catenary curve
-
-![Catenary curve](png/catenary.png)
-
-C++ :
-
-```c++
-
-hypercurve::share( hypercurve::catenary_curve(double a) );
-
-// Alias
-
-hypercurve::share( hypercurve::funicular_curve(double a) );
-
-```
-
-Lua :
-
-```Lua
-
-hc.catenary(number  a)
-
--- Alias
-
-hc.funicular(number  a)
-
-```
-
-Csound :
-
-```Csound
-
-hc_catenary_curve(float ia)
-
-// Alias
-
-hc_funicular_curve(float ia)
-
-```
-
-  
-  
-  
-
-#### Tightrope Walker curve
-
-  
-![Tightrope Walker curve](png/tightrope.png)
-
-C++ :
-
-```c++
-
-hypercurve::share( hypercurve::tightrope_walker_curve(double a, double b) );
-
-```
-
-Lua :
-
-```Lua
-
-hc.tightrope_walker(number  a, number  b)
-
-```
-
-Csound :
-
-```Csound
-
-hc_tightrope_walker_curve(float ia, float ib)
-
-```
-
-  
-  
-
-#### Quadratic Bezier curve
-
-![Quadratic Bezier curve](png/quadratic_bezier.png)
-
-C++ :
-
-```c++
-
-hypercurve::share( hypercurve::quadratic_bezier_curve( hypercurve::control_point cp ) );
-
-```
-
-Lua :
-
-```Lua
-
-hc.quadratic_bezier( hc.control_point  cp )
-
-```
-
-Csound :
-
-```Csound
-
-hc_quadratic_bezier_curve( hc_control_point cp )
-
-```
-
-  
-  
-
-#### Cubic Bezier curve
-
-![Cubic bezier curve](png/cubic_bezier.png)
-
-C++ :
-
-```c++
-
-hypercurve::share( hypercurve::cubic_bezier_curve( hypercurve::control_point cp1, hypercurve::control_point cp2) );
-
-```
-
-Lua :
-
-```Lua
-
-hc.cubic_bezier(hc.control_point  cp1, hc.control_point  cp2)
-
-```
-
-Csound :
-
-```Csound
-
-hc_cubic_bezier_curve(hc_control_point cp1, hc_control_point cp2)
-
-```
-
-  
-  
-
-#### Cubic spline curve
-
-![Cubic Spline curve](png/cubic_spline.png)
-
-C++ :
-
-```c++
-
-hypercurve::share(hypercurve::cubic_spline_curve(std::vector<control_point> cp_list) );
-
-```
-
-Lua :
-
-```Lua
-
-hc.cubic_spline(table {hc.control_point})
-
-```
-
-Csound :
-
-```Csound
-
-// Not implemented yet
-
-```
-
-  
-  
-
-#### Catmull Rom spline curve
-
-![Catmull Rom Spline curve](png/catmul_rom.png)
-  
-
-C++ :
-
-```c++
-
-hypercurve::share( hypercurve::catmull_rom_spline_curve( hypercurve::control_point cp1, hypercurve::control_point cp2) );
-
-```
-
-Lua :
-
-```Lua
-
-hc.catmull_rom_spline(hc.control_point  cp1, hc.control_point  cp2)
-
-```
-
-Csound :
-
-```Csound
-
-hc_catmull_rom_spline_curve(hc_control_point cp1, hc_control_point cp2)
-
-```
+The PNG writer [fpng](https://github.com/richgel999/fpng) used for hypercurve has SSE support. This can be enabled with `-DSSE=1`.
+# TODO
+* Lua semantics : append "curve"  to curve_base methods
+* Test new functionnalities : Csound and Lua normalize (x, y) and operators
+* REAPER/Reascript -> see https://forum.cockos.com/showthread.php?p=2543755#post2543755
+* Implement a polynomial with varargs (like a, b, c  : ax^3 + bx^2 + c)
+* A real good picture in README to show what it actually looks like
+* Lagrange interpolation for curve extraction.
+* Documentation : add pictures of each curve.
+* Hard one -> all curves allowing one sample processing (including cubic spline) to allow no-table processing.
+* Semantic : keep curve in "diocles_curve" or remove it ? (choose btw lua or csound style)
+## Curves to implement
+* Cardioid / hypercardioid
+* Elastic curve : https://mathcurve.com/courbes2d.gb/linteaire/linteaire.shtml
+* Simple log/exp ?
+* Kulp quartic
+* Puntiforme https://mathcurve.com/courbes2d/puntiforme/puntiforme.shtml
+* Mouse https://mathcurve.com/courbes2d/bouche/bouche.shtml
+* Bicorn AKA cocked hat  https://mathcurve.com/courbes2d/bicorne/bicorne.shtml
+* Legendre polynome
+* Ideas here https://mathcurve.com/courbes2d/courbes2d.shtml
+# External libraries
+This library uses libsndfile as an external submodule.
+Currently, [libsndfile](https://github.com/libsndfile/libsndfile) is only used in Lua and in test.cpp. So hypercurve C++ library itself does not have any external dependency.
+It also includes source files from several open-source projects : 
+*  [AsciiPlot](https://github.com/joehood/asciiplotter) source code with license under src/asciiplot folder.
+* [lua-compat-5.3](https://github.com/keplerproject/lua-compat-5.3) which provides an API compatibility from 5.1 to 5.3
+* [fpng](https://github.com/richgel999/fpng) - a great C++ PNG reader/writer.``
