@@ -15,7 +15,9 @@ It is available in several frontends : C++, Lua, and Csound.
 3.2 [Hypercurve invert curve base](#hypercurve-invert-curve-base)
 
 3.3 [Normalize hypercurve](#normalize-hypercurve)
+
 4. [Hypercurve Segment](#segment)
+
 5. [Curve types](#curve-base)
 
 5.1. [Diocles cissoid curve](#diocles-cissoid-curve)
