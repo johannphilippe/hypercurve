@@ -352,7 +352,7 @@ In Hypercurve, a Curve base represents the algorithm of a specific curve. Some o
 
   
 
-### Diocles cissoid curve
+#### Diocles cissoid curve
 
   
 
@@ -394,7 +394,7 @@ hc_cissoid(float iarg_a)
 
   
 
-### Cubic curve
+#### Cubic curve
 
   
 
@@ -424,7 +424,7 @@ hc_cubic_curve()
 
   
 
-### Power curve
+#### Power curve
 
   
 
@@ -452,7 +452,7 @@ hc_power_curve(float ipower)
 
 ```
 
-### Hamming / Hanning / Blackman curves
+#### Hamming / Hanning / Blackman curves
 
   
 
@@ -492,7 +492,7 @@ hc_blackman_curve()
 
 ```
 
-### Gaussian curve (bell)
+#### Gaussian curve (bell)
 
   
 
@@ -536,7 +536,7 @@ hc_gauss_curve(float iA, float ic)
 
   
 
-### Toxoid curve (duplicatrix cubic curve)
+#### Toxoid curve (duplicatrix cubic curve)
 
   
 
@@ -578,7 +578,7 @@ hc_duplicatrix_cubic_curve(float ia)
 
   
 
-### Catenary curve (funicular)
+#### Catenary curve (funicular)
 
   
 
@@ -622,7 +622,7 @@ hc_funicular_curve(float ia)
   
   
 
-### Tightrope Walker curve
+#### Tightrope Walker curve
 
   
 
@@ -653,7 +653,7 @@ hc_tightrope_walker_curve(float ia, float ib)
   
   
 
-### Quadratic Bezier curve
+#### Quadratic Bezier curve
 
 C++ :
 
@@ -682,7 +682,7 @@ hc_quadratic_bezier_curve( hc_control_point cp )
   
   
 
-### Cubic Bezier curve
+#### Cubic Bezier curve
 
   
 
@@ -713,7 +713,7 @@ hc_cubic_bezier_curve(hc_control_point cp1, hc_control_point cp2)
   
   
 
-### Cubic spline curve
+#### Cubic spline curve
 
   
 
@@ -744,7 +744,7 @@ Csound :
   
   
 
-### Catmull Rom pline curve
+#### Catmull Rom pline curve
 
   
 
