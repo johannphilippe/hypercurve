@@ -7,7 +7,11 @@ extern "C" {
 #include"lauxlib.h"
 #include"lua.h"
 }
+
+#ifndef WIN32
 #include<unistd.h>
+#endif
+
 #include<memory.h>
 #include<functional>
 

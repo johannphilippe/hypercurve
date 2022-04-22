@@ -1,4 +1,9 @@
+#ifdef WIN32
+#include<csound.hpp>
+#else
 #include<csound/csound.hpp>
+#endif
+
 #include<iostream>
 #include<string>
 #include<filesystem>
