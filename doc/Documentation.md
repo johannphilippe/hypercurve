@@ -9,14 +9,15 @@ It is available in several frontends : C++, Lua, and Csound.
 1. [Hypercurve basic syntax](#hypercurve-basic-syntax)
 2. [Import Hypercurve](#import-hypercurve)
 3. [Hypercurve class](#hypercurve-class)
+
 3.1 [Hypercurve operators](#hypercurve-operators)
 
 3.2 [Hypercurve invert curve base](#hypercurve-invert-curve-base)
 
 3.3 [Normalize hypercurve](#normalize-hypercurve)
-
 4. [Hypercurve Segment](#segment)
 5. [Curve types](#curve-base)
+
 5.1. [Diocles cissoid curve](#diocles-cissoid-curve)
 
 5.2. [Cubic curve](#cubic-curve)
