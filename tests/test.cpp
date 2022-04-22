@@ -254,7 +254,7 @@ int main()
                  segment(1, 1, share(catenary_curve(0.1)))
               });
 
-    write_as_png(cat, false, "catenary_a1");
+    write_as_png(cat, false, "catenary_a1.png");
     curve cat2(def, 0,
     {
                  segment(1, 1, share(catenary_curve(100000)))
@@ -267,7 +267,31 @@ int main()
                  segment(frac(1, 2), 1, share(toxoid_curve(10))),
                  segment(frac(1, 2), 0, share(toxoid_curve(0)))
               });
-    write_as_png(tox, false, "toxoid");
+    write_as_png(tox, false, "toxoid.png");
+
+    curve ctst(def, 0, {
+                       segment(frac(1,10), 1, share(power_curve(50))),
+                       segment(frac(9, 10), 0, share(power_curve(9)))
+                    });
+    ctst.ascii_display("ctst", "power curve", '*');
+    write_as_png(ctst, false, "power.png");
+
+    curve tightrope(def, 0, {
+                       segment(frac(2,10), 1, share(tightrope_walker_curve(1.1,0.1))),
+                       segment(frac(8, 10), 0, share(tightrope_walker_curve(1.1, 1.0)))
+                    });
+    tightrope.ascii_display("tightrope walker", "trw", '*');
+    write_as_png(tightrope, false, "tightrope.png");
+
+    curve tightrope2(def, 0, {
+                       segment(frac(1,2), 1, invert( share(tightrope_walker_curve(1.01,1)))),
+                       segment(frac(1,2), 0, invert( share(tightrope_walker_curve(1.01,1)))),
+                    });
+
+    tightrope2.normalize_y(-1, 1);
+    tightrope2.ascii_display("tightrope walker2q", "trw", '*');
+    write_as_png(tightrope2, true, "tightrope2.png");
+    check_equality(tightrope, tightrope2);
 
     sf.writef(c13.get_samples(), def);
     sf2.writef(c10.get_samples(), def);

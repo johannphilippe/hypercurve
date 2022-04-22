@@ -22,14 +22,15 @@ C++ :
 ```c++
 
 auto crv = hypercurve::hypercurve( 2048, 0, {
+    // In C++, segment is expecting a curve_base of type shared_ptr
 
-hypercurve::segment(0.5, 1, cubic_curve()),
+hypercurve::segment(0.5, 1, hypercurve::share(hypercurve::cubic_curve())),
 
-hypercurve::segment(0.5, 0, diocles_curve(1))
+hypercurve::segment(0.5, 0, hypercurve::share(hypercurve::diocles_curve(1)))
 
 });
 
-  
+  // Get samples values like below
 
 double sample = crv.get_sample_at(1024);
 
@@ -43,7 +44,9 @@ bool fill = true;
 
 bool waveform = false;
 
-png.draw_curve(samples, crv.get_definition(), fill, waveform)
+png.draw_curve(samples, crv.get_definition(), fill, waveform);
+
+png.write_png("my/path/to.png");
 
 ```
 
@@ -67,12 +70,11 @@ crv:ascii_display("MyHybridCurve", "half cubic, half cissoid", "*")
 
 local  fill = true
 
-local  is_waveform = false
+local  is_waveform = false -- waveform will scale the png from -1 to 1
 
 crv:write_as_png("path_to/curve.png", fill, is_waveform)
 
 crv:write_as_wav( "path/curve.wav" )
-
   
 
 -- rescale the curve
@@ -148,13 +150,12 @@ In csound you can manually import the library like below, or simply put the libr
 
 ## Hypercurve
 
-  
-
+ 
 C++ :
 
 ```c++
 
-auto crv = hypercurve::hypercurve(size_t size_in_samples, double y_start, std::vector<hypercurve::segment> segment_list);
+auto crv = hypercurve::curve(size_t size_in_samples, double y_start, std::vector<hypercurve::segment> segment_list);
 
 // With possible alias
 
@@ -178,7 +179,109 @@ icrv = hc_hypercurve(int isize_in_samples, float iy_start, isegment1 , [isegment
 
 ```
 
-  
+
+### Methods
+
+#### Operators : +, -, *, /
+
+
+Hypercurves can be combined through operators. 
+
+
+C++ :
+
+```c++
+
+  hypercurve::curve c1(2048, 0, {hypercurve::segment(1, 1, hypercurve::share(hypercurve::cubic_curve()))});
+  hypercurve::curve c2(2048, 0, {hypercurve::segment(1, 1, hypercurve::share(hypercurve::diocles_curve(1)))});
+  hypercurve::curve sum = c1 + c2; 
+  // Or 
+  c1 += c2;
+
+  // It works for all mathematic operators +, -, /, *
+```
+
+Lua :
+
+```Lua
+
+  local c1 = hc.hypercurve(2048, 0, {hc.segment(1, 1, hc.cubic())})
+  local c2 = hc.hypercurve(2048, 0, {hc.segment(1, 1, hc.diocles(1))})
+  local sub = c1 - c2
+  local prod = c1 * c2
+```
+
+Csound :
+
+```Csound
+  icrv1 = hc_hypercurve(2048, 0, hc_segment(1, 1, hc_cubic_curve()))
+  icrv2 = hc_hypercurve(2048, 0, hc_segment(1, 1, hc_diocles_curve(1)))
+  icrv_sum = hc_add(icrv1, icrv2)
+  icrv_sub = hc_sub(icrv1, icrv2)
+  icrv_prod = hc_mult(icrv1, icrv2)
+  icrv_div = hc_div(icrv1, icrv2)
+```
+
+#### Invert curve base 
+
+This function will make a symetry of the curve on a x_start/y_start - x_destination/y_destination axis
+
+
+
+C++ :
+
+```c++
+
+hypercurve::invert(hypercurve::share( hypercurve::cubic_curve() ));
+
+```
+
+Lua :
+
+```Lua
+
+hc.invert(hc.cubic())
+
+```
+
+Csound :
+
+```Csound
+
+hc_invert(hc_cubic_curve())
+
+```
+
+
+#### Normalize hypercurve
+
+This function will allow you to normalize an hypercurve between min and max y values
+
+
+C++ :
+
+```c++
+  hypercurve::curve c(4096, 0, {hypercurve::segment(1, 1, hypercurve::cubic_curve())});
+  c.normalize_y(-1, 1);
+  // Now "c" curve y start is -1 and its destination is 1
+
+```
+
+Lua :
+
+```Lua
+  local crv = hc.hypercurve(4096, 0, {hc.segment(1, 1, hc.cubic())})
+  crv:normalize_y(-1, 1)
+```
+
+Csound :
+
+```Csound
+
+  icrv = hc_hypercurve(4096, 0, hc_segment(1, 1, hc_cubic_curve()))
+  // This function won't make a copy, it will only scale the corresponding curve
+  hc_normalize_y(icrv, -1, 1)
+``` 
 
 ## Segment
 
@@ -315,7 +418,7 @@ Csound :
 
 ```Csound
 
-hc_cubic()
+hc_cubic_curve()
 
 ```
 
@@ -357,11 +460,11 @@ C++ :
 
 ```c++
 
-hypercurve::share( hypercurve::hamming_curve() )
+hypercurve::share( hypercurve::hamming_curve() );
 
-hypercurve::share( hypercurve::hanning_curve() )
+hypercurve::share( hypercurve::hanning_curve() );
 
-hypercurve::share( hypercurve::blackman_curve() )
+hypercurve::share( hypercurve::blackman_curve() );
 
 ```
 
@@ -469,7 +572,7 @@ hc_toxoid_curve(float ia)
 
 // Alias
 
-hc_toxoid_curve(float ia)
+hc_duplicatrix_cubic_curve(float ia)
 
 ```
 

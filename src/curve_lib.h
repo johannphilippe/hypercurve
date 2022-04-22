@@ -16,7 +16,7 @@
 namespace  hypercurve {
 
 //////////////////////////////////////////////////
-// Simple Curves
+// Base Curve
 //////////////////////////////////////////////////
 class curve_base
 {
@@ -31,12 +31,13 @@ public:
     inline virtual double process(size_t i, size_t size) {return process(frac(i, size));}
     inline virtual double process_all(size_t size, memory_vector<double>::iterator &it)
     {
-        definition = size;
         double max = 0.0;
         for(size_t i = 0; i < size; ++i)
         {
-            double res = scale(process(frac(i, size)));
+            const double x = frac(i, size);
+            double res = scale(process(x));
             if( std::abs(res) > max) max = std::abs(res);
+            if(inverted) res = process_invert(x, res);
             *it = res;
             ++it;
         }
@@ -44,9 +45,10 @@ public:
     }
 
     // Do not override this (or make sure to implement y_start and y_destination affectation)
-    inline virtual void init(double y_start_, double y_dest_) {
+    inline virtual void init(double y_start_, double y_dest_, size_t definition_) {
         y_start = y_start_;
         y_destination = y_dest_;
+        definition = definition_;
         abs_diff = std::abs(y_start - y_destination);
         offset = std::min(y_start, y_destination);
         on_init();
@@ -56,6 +58,8 @@ public:
     // affectation repetition
     inline virtual void on_init() {}
 
+    // Allows inversion of curve (y symetry on a linear x_start/x_end axis).
+    bool inverted = false;
 protected:
 
     inline virtual double scale(double y)
@@ -64,11 +68,28 @@ protected:
         return (y * abs_diff) + offset;
     }
 
+    inline double process_invert(double x, double y)
+    {
+        const double lin = linear_interpolation(y_start, y_destination, x);
+        return lin + (lin - y);
+    }
+
     size_t definition;
     double y_start, y_destination, abs_diff, offset;
 };
 
 using linear_curve = curve_base;
+
+// Allows you to make an y symetry on a x_start/y_start x_end/y_end linear axis
+inline std::shared_ptr<curve_base> invert(std::shared_ptr<curve_base> cb)
+{
+    cb->inverted = true;
+    return cb;
+}
+
+//////////////////////////////////////////////////
+// Curve Library
+//////////////////////////////////////////////////
 
 class diocles_curve : public curve_base
 {
@@ -233,9 +254,11 @@ using funicular_curve = catenary_curve;
 //////////////////////////////////////////////////
 // Conchal curve
 // https://mathcurve.com/courbes2d.gb/conchale/conchale.shtml
+// TODO invert x y axis
 // x must be scaled from -a to max_x
 // Must be scaled and axis inverted
 // Still to do
+// Angle b = -4.713
 //////////////////////////////////////////////////
 class conchal_curve : public curve_base
 {
@@ -243,21 +266,38 @@ public:
     conchal_curve(double a_, double c_)
         : a(a_)
         , c(c_)
+        , w(std::sqrt((a*a) + (c*c)))
+        , height(a + w)
     {
-        if( (a > c) || (a <= 0) || (c <= 0) )
-            throw(std::runtime_error("Conchal curve : a must be < c, a and c must be > 0"));
+        if( (a > c) || (a <= 0) || (c <= 0) || (c <  (a * 1.2)))
+            throw(std::runtime_error("Conchal curve : a must be < c, c must be >= a * 1.2, a and c must be > 0"));
         max_x = a + (std::sqrt((a*a) + (c*c)));
     }
 
     double process(double x) override
     {
+        const double step = height / double(this->definition);
+        const double mx = x * height - a + step;
+        const double my = conchal_process(mx) / conchal_process(-a);
+        std::cout << "mx : " << mx << " my : " << my << std::endl;
+        const double res = (rotate(mx, my, pi_angle(-90), [&](double x_) {
+           return this->conchal_process(x_);
+        }) + a ) / (height);
 
+        //std::cout << "res = " << res << std::endl;
+        if(std::isnan(res))
+            std::cout <<"NAN ALERT at " << x  << "  mx : " << mx << std::endl;
+        return res;
     }
 
 protected:
     inline double conchal_process(double x)
     {
-        return sqrt(((c*c)+ (a*a) -(x*x	)) * (c*c) - (a*a) + (x*x)) / (x+a);
+        std::cout <<"conchal : " << ((c*c) + (a*a) - (x*x) ) * ((c*c) - (a*a) + (x*x)) << "   " << (x+a) << std::endl;
+        return std::sqrt(
+                    ((c*c) + (a*a) - (x*x))
+                    * ((c*c) - (a*a) + (x*x))
+                    ) / (x+a);
     }
 
     inline double scaled_conchal(double x)
@@ -267,10 +307,48 @@ protected:
         return x + (_conchal_res + a);
     }
 
-    double a, c, max_x;
-
+    double a, c, max_x, w, height;
 };
 
+//////////////////////////////////////////////////
+// Tightrope walker cure
+// https://mathcurve.com/courbes2d.gb/danseur/danseur.shtml
+// The more a is sperior to b, the more is is "straight"
+// abs(b) is the curve x max point
+// Also a must not be too close to b (undefined behavior) : a = 1.01 b = 1 is ok. a = 1.0001 is not.
+//////////////////////////////////////////////////
+
+class tightrope_walker_curve : public curve_base
+{
+public:
+    tightrope_walker_curve(double a_, double b_)
+        : a(a_)
+        , b( std::abs(b_) )
+    {
+        if( (a < 0) || (a <= b) )
+            throw(std::runtime_error("a must be > abs(b), a must be > 0"));
+    }
+
+    void on_init() override
+    {
+        max_x = b - b / double(definition);
+        max_y = abs(process_tightrope_walker(max_x));
+    }
+
+    double process(double x) override
+    {
+        if( ( x * b) >= max_x) return process_tightrope_walker(max_x) / max_y;
+        return process_tightrope_walker(x * b) / max_y;
+    }
+
+protected:
+    inline double process_tightrope_walker(double x)
+    {
+        return (x * (a-x)) / std::sqrt((b*b)-(x*x));
+    }
+
+    double a,b, max_x, max_y;
+};
 
 //////////////////////////////////////////////////
 // Toxoid curve
@@ -302,11 +380,6 @@ protected:
     double a, height;
 };
 using duplicatrix_cubic = toxoid_curve;
-
-//////////////////////////////////////////////////
-// Cardioid
-// Idea : user could just give a segment in degrees with a rotation offset, and give y_start and y_dest.
-//////////////////////////////////////////////////
 
 //////////////////////////////////////////////////
 // user defined curves
@@ -387,6 +460,7 @@ public:
             double relative_x = relative_position(r1.first, r2.first, x);
             double linear_interp = linear_interpolation(r1.second, r2.second, relative_x);
             if(std::abs(linear_interp) > max) max = std::abs(linear_interp);
+            if(inverted) linear_interp = process_invert(x, linear_interp);
             *it = linear_interp;
             ++it;
         }
@@ -464,10 +538,8 @@ public:
         , _control_point2(_cp2)
     {}
 
-    void init(double y_start_, double y_dest_) override
+    void on_init() override
     {
-        y_start = y_start_;
-        y_destination = y_dest_;
         c_x = ((-1) * 0 + 3 * _control_point1.x - 3 * _control_point2.x + 1);
         b_x = (3 * 0 - 6 * _control_point1.x + 3 * _control_point2.x);
         a_x = ((-3) * 0 + 3 * _control_point1.x);
@@ -613,6 +685,7 @@ public:
         for(size_t i = 0; i < size; i++)
         {
             if( std::abs(res[i]) > max ) max = std::abs(res[i]);
+            if(inverted) res[i] = process_invert(frac(i, size), res[i]);
             *it = res[i];
             ++it;
         }
@@ -667,6 +740,7 @@ public:
             double relative_x = relative_position(r1.first, r2.first, x);
             double linear_interp = linear_interpolation(r1.second, r2.second, relative_x);
             if(std::abs(linear_interp) > max) max = std::abs(linear_interp);
+            if(inverted) linear_interp = process_invert(x, linear_interp);
             *it = linear_interp;
             ++it;
         }

@@ -418,6 +418,23 @@ struct cs_catmull_rom : csnd::Plugin<1, 2>
 };
 
 //////////////////////////////////////////////////
+// Invert curve
+//////////////////////////////////////////////////
+
+struct cs_invert_curve : public csnd::Plugin<1,1>
+{
+  int init()
+  {
+      if(curve_base_map.find(int(inargs[0])) == curve_base_map.end())
+          return NOTOK;
+      std::shared_ptr<curve_base> c = curve_base_map[int(inargs[0])];
+      c->inverted = true;
+      outargs[0] = int(inargs[0]);
+      return OK;
+  }  
+};
+
+//////////////////////////////////////////////////
 // Curve lib
 //////////////////////////////////////////////////
 
@@ -702,6 +719,7 @@ void csnd::on_load(Csound *csound) {
     csnd::plugin<cs_control_point>(csound, "hc_control_point", "i", "ii", csnd::thread::i);
     csnd::plugin<cs_control_point>(csound, "hc_point", "i", "ii", csnd::thread::i);
     csnd::plugin<cs_normalize_curve>(csound, "hc_normalize", "", "iii", csnd::thread::i);
+    csnd::plugin<cs_invert_curve>(csound, "hc_invert", "i", "i", csnd::thread::i);
     csnd::plugin<cs_add_curve>(csound, "hc_add", "i", "ii" , csnd::thread::i);
     csnd::plugin<cs_sub_curve>(csound, "hc_sub", "i", "ii" , csnd::thread::i);
     csnd::plugin<cs_mult_curve>(csound, "hc_mult", "i", "ii" , csnd::thread::i);

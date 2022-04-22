@@ -35,11 +35,11 @@
 
 # What is it ? 
 
-
-A set of classes to create hybrid curves and use them for audio and music (or whatever). 
+Hypercurve is a library allowing you to use several curve algorithms into a single 2D envelope. It is designed to be used in audio applications, for people who know how to enjoy a finely shaped curve. 
+As shown above, you can perfectly combine gaussian curve with bezier curve, and plenty of other curve algorithms. 
 It can be used in C++, Lua or Csound.
 
-On a mathematical point of view, it has to be noticed that since curves needs to be scaled in and mapped together, there must be a few approximations inherent to the application.
+Every curve algorithm is different. In an audio application, you can assign an envelope to any kind of parameter. For some parameters (like frequency), the way a value goes up and down in time changes everything to the perception of sound. Thus, the possibility of having a finely shaped envelope is truly essential. This, is the purpose of Hypercurve. 
 
 ## Implemented curves 
 
@@ -95,10 +95,10 @@ c.get_samples();
 
 ```csound
 instr 1
-	icrv = hypercurve(2048, 0, 
-				segment(1/2, 1, diocles_curve(1)),
-				segment(1/2, 0, hanning_curve()))
-	kenv = run_hypercurve(icrv, linseg(0, p3, 1))
+	icrv = hc_hypercurve(2048, 0, 
+				hc_segment(1/2, 1, hc_diocles_curve(1)),
+				hc_segment(1/2, 0, hc_hanning_curve()))
+	kenv = hc_run(icrv, linseg(0, p3, 1))
 	ao = vco2(0.3, 300) * kenv
 	outs(ao, ao)
 endin
@@ -165,15 +165,15 @@ The PNG writer [fpng](https://github.com/richgel999/fpng) used for hypercurve ha
 
 # TODO
 
+* Lua semantics : append "curve"  to curve_base methods
+
+* Test new functionnalities : Csound and Lua normalize (x, y) and operators
+
 * REAPER/Reascript -> see https://forum.cockos.com/showthread.php?p=2543755#post2543755
 
 * Implement a polynomial with varargs (like a, b, c  : ax^3 + bx^2 + c)
 
 * A real good picture in README to show what it actually looks like
-
-* Operator for curves in Lua and Csound. In Csound it should be functions (sum_hypercurve, substract, multiply, div) that create a new one. In Lua just a layer on top of C++ operators with metatables.
-* Csound RT opcode : cubic spline (mem alloc). Also missing X rescale, y_rescale, and user_defined curve
-* Implement rescale (Lua, Csound) a
 
 * Lagrange interpolation for curve extraction.
 
@@ -189,6 +189,10 @@ The PNG writer [fpng](https://github.com/richgel999/fpng) used for hypercurve ha
 * Elastic curve : https://mathcurve.com/courbes2d.gb/linteaire/linteaire.shtml
 * Simple log/exp ?
 * Kulp quartic
+* Puntiforme https://mathcurve.com/courbes2d/puntiforme/puntiforme.shtml
+* Mouse https://mathcurve.com/courbes2d/bouche/bouche.shtml
+* Bicorn AKA cocked hat  https://mathcurve.com/courbes2d/bicorne/bicorne.shtml
+* Legendre polynome
 
 * Ideas here https://mathcurve.com/courbes2d/courbes2d.shtml
 

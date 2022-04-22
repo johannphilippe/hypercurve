@@ -24,21 +24,21 @@ instr 1
 	outs ao, ao
 endin
 
-gicrv = hypercurve(16384, 0, 
-		segment(1/8, 1, cissoid_curve(2)), 
-		segment(1/8, 0.5, power_curve(5)),
-		segment(4/8, 0.2, cubic_bezier_curve( control_point(0.3, 0.8), control_point(0.9, 0.1))),
-		segment(2/8, 0, hanning_curve()))
+gicrv = hc_hypercurve(16384, 0, 
+		hc_segment(1/8, 1, hc_cissoid_curve(2)), 
+		hc_segment(1/8, 0.5, hc_power_curve(5)),
+		hc_segment(4/8, 0.2, hc_cubic_bezier_curve( hc_control_point(0.3, 0.8), hc_control_point(0.9, 0.1))),
+		hc_segment(2/8, 0, hc_hanning_curve()))
 
-giwav = hypercurve(16384, 0, 
-		segment(1/3, 1, cissoid_curve(1)), 
-		segment(1/3, -1, hamming_curve()), 
-		segment(1/3, 0, quadratic_bezier_curve(control_point(0.3, 0.8))))
+giwav = hc_hypercurve(16384, 0, 
+		hc_segment(1/3, 1, hc_cissoid_curve(1)), 
+		hc_segment(1/3, -1, hc_hamming_curve()), 
+		hc_segment(1/3, 0, hc_quadratic_bezier_curve(hc_control_point(0.3, 0.8))))
 
 instr 2
 	icrv = gicrv
 	iwav = giwav
-	kenv = run_hypercurve(icrv, linseg:k(0, p3, 1))
+	kenv = hc_run(icrv, linseg:k(0, p3, 1))
 	//	ares = run_hypercurve(iwav, phasor:a(p4))
 	ares = vco2(1, p4, 0) 
 	ares *= kenv * 0.3

@@ -9,7 +9,7 @@
 #include"core.h"
 #include"cubic_spline.h"
 #include"curve_lib.h"
-#include"utilities.h"
 #include"modulator_lib.h"
+#include"utilities.h"
 
 #endif // HYPERCURVE_H

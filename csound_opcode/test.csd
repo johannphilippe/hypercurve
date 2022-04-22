@@ -9,29 +9,29 @@ ksmps =  32
 nchnls = 2
 0dbfs  = 1
 
-gicp = control_point(0.2, 0.6)
-gicpp = control_point(0.4, 0.6)
+gicp = hc_control_point(0.2, 0.6)
+gicpp = hc_control_point(0.4, 0.6)
 
-gidiocles = hypercurve(2048, 0, 
-		segment(1/2, 1, diocles_curve(1)), 
-		segment(1/2, 0, diocles_curve(1)))
-gicub = hypercurve(2048, 0, 
-		segment(1/2, 1, cubic_curve()), 
-		segment(1/2, 0, cubic_curve()))
-giquad_bez = hypercurve(2048, 0, 
-		segment(1/2, 1, quadratic_bezier_curve( control_point(0.2, 0.6) ) ), 
-		segment(1/2, 0, quadratic_bezier_curve( control_point(0.5, 0.2) ) ) )
+gidiocles = hc_hypercurve(2048, 0, 
+		hc_segment(1/2, 1, hc_diocles_curve(1)), 
+		hc_segment(1/2, 0, hc_diocles_curve(1)))
+gicub = hc_hypercurve(2048, 0, 
+		hc_segment(1/2, 1, hc_cubic_curve()), 
+		hc_segment(1/2, 0, hc_cubic_curve()))
+giquad_bez = hc_hypercurve(2048, 0, 
+		hc_segment(1/2, 1, hc_quadratic_bezier_curve( hc_control_point(0.2, 0.6) ) ), 
+		hc_segment(1/2, 0, hc_quadratic_bezier_curve( hc_control_point(0.5, 0.2) ) ) )
 
-gicub_bez = hypercurve(2048, 0, 
-		segment(1/2, 1, cubic_bezier_curve(control_point(0.2, 0.8), control_point(0.5, 0.3))), 
-		segment(1/2, 0, cubic_bezier_curve(control_point(0.8, 0.1), control_point(0.9, 0.7))))
+gicub_bez = hc_hypercurve(2048, 0, 
+		hc_segment(1/2, 1, hc_cubic_bezier_curve(hc_control_point(0.2, 0.8), hc_control_point(0.5, 0.3))), 
+		hc_segment(1/2, 0, hc_cubic_bezier_curve(hc_control_point(0.8, 0.1), hc_control_point(0.9, 0.7))))
 
-gicm = hypercurve(2048, 0, 
-		segment(1/2, 1, catmull_rom_curve(control_point(-1, -5), control_point(2,  4))), 
-		segment(1/2, 0, catmull_rom_curve(control_point(-1, -8), control_point(4, 2))))
+gicm = hc_hypercurve(2048, 0, 
+		hc_segment(1/2, 1, hc_catmull_rom_curve(hc_control_point(-1, -5), hc_control_point(2,  4))), 
+		hc_segment(1/2, 0, hc_catmull_rom_curve(hc_control_point(-1, -8), hc_control_point(4, 2))))
 instr 1
 	icurve = p4
-	kenv = run_hypercurve(icurve, linseg(0, p3, 1))
+	kenv = hc_run_hypercurve(icurve, linseg(0, p3, 1))
 
 	ao = vco2(0.3,  200 + (kenv * 200) ) * kenv
 	outs ao,ao

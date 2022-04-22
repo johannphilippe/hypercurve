@@ -55,9 +55,9 @@ struct luahc_user_defined_curve_t : public hypercurve::user_defined_curve
 };
 
 //extern "C" {
-///////////////////////////////////////////:
+///////////////////////////////////////////
 // Control point
-///////////////////////////////////////////:
+///////////////////////////////////////////
 int luahc_control_point(lua_State *lua)
 {
     double x = lua_tonumber(lua, 1);
@@ -113,10 +113,11 @@ int luahc_control_point_xy(lua_State *lua)
     return 2;
 }
 
-///////////////////////////////////////////:
+///////////////////////////////////////////
 // Create curve element
 // Syntax : hypercurve.curve_base()
-///////////////////////////////////////////:
+///////////////////////////////////////////
+
 int luahc_curve_base(lua_State *lua)
 {
     lua_curve_helper(lua, new hypercurve::curve_base);
@@ -276,10 +277,27 @@ int luahc_user_defined_curve(lua_State *lua)
     return 0;
 }
 
-///////////////////////////////////////////:
+
+///////////////////////////////////////////
+// Invert curve
+///////////////////////////////////////////
+
+int luahc_invert_curve(lua_State *lua)
+{
+    luahc_curve_base_t *curve = *(luahc_curve_base_t **)luaL_checkudata(lua, 1, "hypercurve.curve_base");
+    curve->crv->inverted = true;
+    luahc_curve_base_t **crv = (luahc_curve_base_t **) lua_newuserdata(lua, sizeof(luahc_curve_base_t*));
+    *crv = curve;
+    luaL_getmetatable(lua, "hypercurve.curve_base");
+    lua_setmetatable(lua, -2);
+    return 1;
+}
+
+///////////////////////////////////////////
 // Create curve segment
 // Syntax : hypercurve.segment(double frac, double y_dest, curve crv)
-///////////////////////////////////////////:
+///////////////////////////////////////////
+
 int luahc_segment(lua_State *lua)
 {
     double frac = lua_tonumber(lua, 1);
@@ -546,6 +564,10 @@ static const luaL_Reg luahc_static_meth[] =
     {"gaussian", luahc_gauss_curve},
     {"duplicatrix_cubic", luahc_toxoid_curve},
     {"funicular", luahc_catenary_curve},
+    
+    // Helpers 
+    {"invert", luahc_invert_curve},
+    
     { NULL      ,NULL      }
 };
 

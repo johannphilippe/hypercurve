@@ -11,17 +11,22 @@
 #include<vector>
 #include<memory>
 #include<cstring>
-
+#include<functional>
 #include"fpng/src/fpng.h"
 
 namespace hypercurve {
 
-double pos(double x)
+inline int round(double x)
+{
+    return (x - std::floor(x)) ? 1 : 0;
+}
+
+inline double pos(double x)
 {
     return (x > 0) ? x : 0;
 }
 
-double frac(double x1, double x2)
+inline double frac(double x1, double x2)
 {
     return double(x1) / double(x2);
 }
@@ -126,6 +131,18 @@ std::vector<double> linspace(size_t size)
     return v;
 }
 
+inline double pi_angle(double angle)
+{
+    return angle * M_PI / 180.0;
+}
+
+// Pi relative angle
+//https://www.desmos.com/calculator/aqmmojldge?lang=fr
+inline double rotate(double x, double y, double angle, std::function<double(double)> f)
+{
+    return (f(x * std::cos(angle) - y * std::sin(angle) ) - x * std::sin(angle) ) / std::cos(angle);
+}
+
 // Windows
 inline double hanning(int index, int length) {
     return  0.5 * (1 - cos(2 * M_PI * index / (length - 1 )));
@@ -188,8 +205,16 @@ struct memory_vector
    {
       _size = v.size();
       _data = new T[_size];
-      for(size_t i = 0; i < v.size(); ++i)
-          _data[i] = v[i];
+      std::copy(v.begin(), v.end(), _data);
+   }
+
+   // Move std::vector - allow allocation with :
+   // memory_vector<type>({arg1, arg2, arg3...});
+   memory_vector(std::vector<T> &&v)
+   {
+      _size = v.size();
+      _data = new T[_size];
+      std::move(v.begin(), v.end(), _data);
    }
 
    // operators

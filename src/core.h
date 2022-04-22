@@ -25,7 +25,6 @@ public:
         , y_destination(y_dest)
         , _curve( std::move(c) )
     {
-        std::cout << "create segment" << std::endl;
     }
 
     segment() {}
@@ -35,12 +34,11 @@ public:
         return _curve->process_all(size, it);
     }
 
-    virtual void set_y_start(double y)
+    virtual void init(double y_start_, size_t definition)
     {
-        y_start = y;
-        _curve->init(y_start, y_destination);
+        y_start = y_start_;
+        _curve->init(y_start, y_destination, definition);
     }
-
     void rescale_x(double factor)
     {
         fractional_size *= factor;
@@ -66,8 +64,8 @@ public:
         , segs(segs_)
         , samples(definition)
     {
-        init();
         check_total_size();
+        init();
         process();
     }
 
@@ -76,10 +74,10 @@ public:
 
     virtual void init()
     {
-        segs[0].set_y_start(y_start);
+        segs[0].init(y_start, std::round(segs[0].fractional_size * definition) );
         for(size_t i = 1; i < segs.size(); i++)
         {
-            segs[i].set_y_start(segs[i - 1].y_destination);
+            segs[i].init(segs[i - 1].y_destination, std::round(segs[i].fractional_size * definition) );
         }
     }
 
@@ -89,10 +87,11 @@ public:
         for(size_t i = 0; i < segs.size(); i++)
         {
             // For each segment, we must give it a real size (size_t), and an iterator position
-            size_t seg_size = std::floor(segs[i].fractional_size * definition);
+            size_t seg_size = std::round(segs[i].fractional_size * definition);
             double seg_max = segs[i].process(it, seg_size);
             if(std::abs(seg_max)  > max) max = std::abs(seg_max);
         }
+        find_extremeness();
     }
 
     void normalize_y(double target_min, double target_max)
@@ -101,7 +100,7 @@ public:
 
         for(size_t i = 0; i < samples.size(); i++)
         {
-            samples[i] = ((samples[i] + std::abs(min) ) / ambitus )  * std::abs(target_max - target_min) + target_min;
+            samples[i] = ((samples[i] - min ) / ambitus )  * std::abs(target_max - target_min) + target_min;
         }
     }
 
