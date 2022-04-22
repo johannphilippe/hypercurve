@@ -9,23 +9,38 @@ It is available in several frontends : C++, Lua, and Csound.
 1. [Hypercurve basic syntax](#hypercurve-basic-syntax)
 2. [Import Hypercurve](#import-hypercurve)
 3. [Hypercurve class](#hypercurve-class)
-3.1.1 [Hypercurve operators](#hypercurve-operators)
-3.1.2 [Hypercurve invert curve base](#hypercurve-invert-curve-base)
-3.1.3 [Normalize hypercurve](#normalize-hypercurve)
+3.1 [Hypercurve operators](#hypercurve-operators)
+
+3.2 [Hypercurve invert curve base](#hypercurve-invert-curve-base)
+
+3.3 [Normalize hypercurve](#normalize-hypercurve)
+
 4. [Hypercurve Segment](#segment)
 5. [Curve types](#curve-base)
 5.1. [Diocles cissoid curve](#diocles-cissoid-curve)
+
 5.2. [Cubic curve](#cubic-curve)
+
 5.3. [Power curve](#power-curve)
+
 5.4 [FFT Window curves](#hamming-hanning-blackman-curves)
+
 5.5 [Gaussian curve](#gaussian-curve)
+
 5.6 [Toxoid curve](#toxoid-curve)
+
 5.7 [Catenary curve](#catenary-curve)
+
 5.8 [Tightrope Walker curve](#tightrope-walker-curve)
+
 5.9 [Quadratic bezier curve](#quadratic-bezier-curve)
+
 5.10 [Cubic bezier curve](#cubic-bezier-curve)
+
 5.11 [Cubic spline curve](#cubic-spline-curve)
+
 5.12 [Catmull Rom Spline curve](#catmull-rom-spline-curve)
+
 
 
 ## Hypercurve basic syntax
