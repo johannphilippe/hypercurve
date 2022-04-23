@@ -29,6 +29,23 @@ gicub_bez = hc_hypercurve(2048, 0,
 gicm = hc_hypercurve(2048, 0, 
 		hc_segment(1/2, 1, hc_catmull_rom_curve(hc_control_point(-1, -5), hc_control_point(2,  4))), 
 		hc_segment(1/2, 0, hc_catmull_rom_curve(hc_control_point(-1, -8), hc_control_point(4, 2))))
+
+gipolynomial = hc_hypercurve(2048, 0,
+		hc_segment(1, 1, hc_polynomial_curve(5, 3, -1.5, 9)))
+
+hc_normalize_y(gipolynomial, 0, 3)
+
+giadd = hc_add(gicub, gidiocles)
+gisub = hc_sub(gicub_bez, gipolynomial)
+gimult = hc_mult(gicub, gidiocles)
+gidiv = hc_div(gicm, gipolynomial)
+
+hc_normalize_y(giadd, 0, 1)
+hc_normalize_y(gisub, 0, 1)
+hc_normalize_y(gimult, 0, 1)
+hc_normalize_y(gidiv, 0, 1)
+
+
 instr 1
 	icurve = p4
 	kenv = hc_run_hypercurve(icurve, linseg(0, p3, 1))

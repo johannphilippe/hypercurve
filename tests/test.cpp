@@ -76,6 +76,15 @@ void check_equality(curve &c1, curve &c2)
 
 void generate_curve_pictures()
 {
+    const int segs = 4;
+    curve hybrid(2048, 0, {
+                    segment(frac(1, segs), 1, share(diocles_curve(0.5))),
+                    segment(frac(1, segs), 0.55, share(toxoid_curve(0.5))),
+                    segment(frac(1, segs), 0.8, share(mouse_curve())),
+                    segment(frac(1, segs), 0, share(gauss_curve(1, 2)))
+                 });
+    write_as_png(hybrid, false, "hybrid.png");
+
     curve dioc(2048, 0, {segment(1, 1, share(diocles_curve(1)))});
     write_doc_png(dioc, "diocles.png");
     curve cubic(2048, 0, {segment(1, 1, share(cubic_curve()))});
@@ -104,6 +113,15 @@ void generate_curve_pictures()
     write_doc_png(spl, "cubic_spline.png");
     curve catmul(2048, 0, {segment(1, 1, share(catmull_rom_spline_curve(point(-1,-0.5), point(2, 3.5))))});
     write_doc_png(catmul, "catmul_rom.png");
+    curve polynomial(2048, 0, { segment(1, 1, share(polynomial_curve( {1.34, -1, -0.5, 0.1}) ))});
+    polynomial.normalize_y(0, 1);
+    write_doc_png(polynomial, "polynomial.png");
+    curve typed(2048, 0, {segment(1, 1, share(typed_curve(-5)))});
+    write_doc_png(typed, "typed.png");
+    curve mouse(2048, 0, {segment(1, 1, share(mouse_curve()))});
+    write_doc_png(mouse, "mouse.png");
+    curve bicorn(2048, 0, {segment(1, 1, share(bicorn_curve(true)))});
+    write_doc_png(bicorn, "bicorn.png");
 }
 
 int main()
@@ -145,11 +163,12 @@ int main()
     curve c3(def, 0, {
                  segment(frac(1,div), 1.0, share(quadratic_bezier_curve({0.1, 0.9}))),
                  segment(frac(1,div), 0.5, share(quadratic_bezier_curve({0.66, 0.1}))),
-                 segment(frac(1,div), 0.8, share(quadratic_bezier_curve({0.9, 0.9}))),
+                 segment(frac(1,div), 0.8, share(quadratic_bezier_curve({0.5, 0.9}))),
                  segment(frac(1, div), 0.1, share(quadratic_bezier_curve({0.5, 0})))
              });
 
     t.time_since_last("Bezier quadratic 4 segments");
+    write_as_png(c3, false, "bezier_quadratic.png");
 
     c3.ascii_display("Bezier quadratic", "y = quadratic_bezier(x)", '*');
 
@@ -250,9 +269,11 @@ int main()
              });
     c9.ascii_display("gauss", "A = 10, c = 0.5", '*');
     curve c10(def, 0.0, {
-                segment(1, 1, share(gauss_curve(1, 0.5)))
+                segment(frac(1,2), 1, share(gauss_curve(1, 0.5))),
+                segment(frac(1,2), 0, share(gauss_curve(1, 0.5)))
              });
     c10.ascii_display("gauss", "A = 1, c = 0.5", '*');
+    write_as_png(c10, false, "gauss.png");
 
     check_equality(c9, c10);
 
@@ -261,11 +282,13 @@ int main()
                  segment(frac(1,2), 0, share(typed_curve(10)))
               });
     c11.ascii_display("typed curve" , "type = 10", '*');
+    write_as_png(c11, false, "typedpos.png");
     curve c12(def, 0, {
                  segment(frac(1,2), 1, share(typed_curve(-10))),
                  segment(frac(1,2), 0, share(typed_curve(-10)))
               });
     c12.ascii_display("typed curve" , "type = -10", '*');
+    write_as_png(c12, false, "typedneg.png");
 
     double hdiv = 9;
     curve c13(def, 0, {
@@ -308,8 +331,9 @@ int main()
 
     curve tox(def, 0, {
                  segment(frac(1, 2), 1, share(toxoid_curve(10))),
-                 segment(frac(1, 2), 0, share(toxoid_curve(0)))
+                 segment(frac(1, 2), 0, share(toxoid_curve(0.5)))
               });
+    tox.ascii_display("toxoid", "tox", '*');
     write_as_png(tox, false, "toxoid.png");
 
     curve ctst(def, 0, {
@@ -339,6 +363,31 @@ int main()
     sf.writef(c13.get_samples(), def);
     sf2.writef(c10.get_samples(), def);
 
+
+    curve polynomial(def, 0, {
+                         segment(1, 1, share(polynomial_curve( {1.34, -1, -0.5, 0.1}) ))
+                     });
+
+    polynomial.ascii_display("polynomial", "poly", '*');
+    polynomial.normalize_y(0, 1);
+    write_as_png(polynomial, false, "poly.png");
+
+    curve mouse(def, 0, {
+                    segment(frac(1,2), 1, share(mouse_curve())),
+                    segment(frac(1,2), 0, share(mouse_curve()))
+                });
+    mouse.ascii_display("mouse", "kiss", '*');
+    write_as_png(mouse, false, "mouse.png");
+
+    curve bicorn(def, 0, {
+                     segment(frac(1,2), 1, share(bicorn_curve(false))),
+                     segment(frac(1,2), 0, share(bicorn_curve(false))),
+                 });
+    bicorn.ascii_display("bicorn", "cocked hat", '*');
+    bicorn.normalize_y(0, 1);
+    write_as_png(bicorn, false, "bicorn.png");
+
+    // Curves pictures for Doc
     generate_curve_pictures();
 
     return 0;

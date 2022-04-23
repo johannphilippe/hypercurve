@@ -39,12 +39,14 @@ public:
 
     void normalize_y(double target_min, double target_max)
     {
+        std::cout << "normalize " << target_min << " " << target_max << std::endl;
         find_extremeness();
 
         for(size_t i = 0; i < samples.size(); i++)
         {
             samples[i] = ((samples[i] - min ) / ambitus )  * std::abs(target_max - target_min) + target_min;
         }
+        std::cout << "eo normalize" << std::endl;
     }
 
     void find_extremeness()
@@ -98,6 +100,7 @@ static increment_map< std::shared_ptr<control_point> > control_point_map;
 static increment_map< std::shared_ptr<segment> > segment_map;
 static increment_map< cs_rt_hypercurve * > curve_map;
 
+
 //////////////////////////////////////////////////
 // Helpers
 //////////////////////////////////////////////////
@@ -130,7 +133,6 @@ struct cs_diocles_curve : public csnd::Plugin<1, 1>
   {
       _curve = std::make_shared<diocles_curve>(inargs[0]);
       index = curve_base_map.map(_curve);
-      std::cout << "curve index : " << index << std::endl;
       outargs[0] = index;
       return OK;
   }
@@ -308,6 +310,47 @@ struct cs_toxoid : csnd::Plugin<1, 1>
     std::shared_ptr<toxoid_curve> _curve;
 };
 
+
+struct cs_mouse : csnd::Plugin<1, 0>
+{
+    int init()
+    {
+        _curve = std::make_shared<mouse_curve>();
+        index = curve_base_map.map(_curve);
+        outargs[0] = index;
+        return OK;
+    }
+
+    int deinit()
+    {
+        curve_base_map.unmap(index);
+        return OK;
+    }
+
+    int index;
+    std::shared_ptr<mouse_curve> _curve;
+};
+
+struct cs_bicorn : csnd::Plugin<1, 1>
+{
+    int init()
+    {
+        _curve = std::make_shared<bicorn_curve>(inargs[0] == 1);
+        index = curve_base_map.map(_curve);
+        outargs[0] = index;
+        return OK;
+    }
+
+    int deinit()
+    {
+        curve_base_map.unmap(index);
+        return OK;
+    }
+
+    int index;
+    std::shared_ptr<bicorn_curve> _curve;
+};
+
 struct cs_catenary : csnd::Plugin<1, 1>
 {
     int init()
@@ -417,6 +460,31 @@ struct cs_catmull_rom : csnd::Plugin<1, 2>
     std::shared_ptr<catmull_rom_spline_curve> _curve;
 };
 
+struct cs_polynomial_curve : csnd::Plugin<1, 64>
+{
+    int init()
+    {
+        args.allocate(csound, in_count());
+        std::cout << "in count polynomial : " << in_count() << std::endl;
+        for(size_t i = 0; i < args.len(); ++i)
+            args[i] = inargs[i];
+        _curve = std::make_shared<polynomial_curve>(args.data(), args.len());
+        index = curve_base_map.map(_curve);
+        outargs[0] = index;
+        return OK;
+    }
+
+    int deinit()
+    {
+        curve_base_map.unmap(index);
+        return OK;
+    }
+
+    int index;
+    csnd::AuxMem<double> args;
+    std::shared_ptr<polynomial_curve> _curve;
+};
+
 //////////////////////////////////////////////////
 // Invert curve
 //////////////////////////////////////////////////
@@ -435,6 +503,25 @@ struct cs_invert_curve : public csnd::Plugin<1,1>
 };
 
 //////////////////////////////////////////////////
+// Normalize curve
+//////////////////////////////////////////////////
+
+struct cs_normalize_curve : public csnd::InPlug< 3>
+{
+  int init()
+  {
+      if(curve_map.find(int(args[0])) == curve_map.end())
+      {
+          return NOTOK;
+      }
+      curve_map[int(args[0])]->normalize_y(args[1], args[2]);
+      return OK;
+  }
+};
+
+
+
+//////////////////////////////////////////////////
 // Curve lib
 //////////////////////////////////////////////////
 
@@ -445,7 +532,6 @@ struct cs_segment : public csnd::Plugin<1, 3>
       seg = std::make_shared<segment>(inargs[0], inargs[1], curve_base_map[inargs[2]]);
       index = segment_map.map(seg);
       outargs[0] = index;
-      std::cout << "segment index : " << index << std::endl;
       return OK;
   }
 
@@ -469,6 +555,7 @@ struct cs_curve : public csnd::Plugin<1,64>, public cs_rt_hypercurve
       check_total_size();
       process_init();
 
+
       // missing x and y rescale
       for(size_t i = 2; i < in_count(); ++i)
       {
@@ -483,7 +570,7 @@ struct cs_curve : public csnd::Plugin<1,64>, public cs_rt_hypercurve
       index = curve_map.map(this);
 
       // Weirdly, it works below
-      AsciiPlotter p("helloplot" , 80, 15);
+      AsciiPlotter p("hc_hypercurve : "  + std::to_string(index)  , 80, 15);
       p.addPlot(std::vector<double>(linspace(inargs[0])), std::vector<double>(this->samples.begin(), this->samples.end()), "helloplot", '*');
       p.show();
 
@@ -561,18 +648,6 @@ private:
   int index;
 };
 
-struct cs_normalize_curve : public csnd::Plugin<0, 3>
-{
-  int init()
-  {
-      if(curve_map.find(int(inargs[0])) == curve_map.end())
-          return NOTOK;
-      curve_map[int(inargs[0])]->normalize_y(inargs[1], inargs[2]);
-      return OK;
-  }
-};
-
-
 ////////////////////////////////////////////////////////////////////////
 // Operators for curves
 ////////////////////////////////////////////////////////////////////////
@@ -582,6 +657,7 @@ struct cs_operator : public cs_rt_hypercurve
     void _allocate( csnd::Csound *cs)
     {
         mem.allocate(cs, _definition);
+        samples.init(mem.data(), _definition);
     }
 
     csnd::AuxMem<double> mem;
@@ -606,7 +682,7 @@ struct cs_add_curve : public csnd::Plugin<1, 2>, cs_operator
       }
       index = curve_map.map(this);
 
-      AsciiPlotter p("helloplot" , 80, 15);
+      AsciiPlotter p("hc_hypercurve : "  + std::to_string(index)  , 80, 15);
       p.addPlot(std::vector<double>(linspace(inargs[0])), std::vector<double>(this->samples.begin(), this->samples.end()), "helloplot", '*');
       p.show();
 
@@ -615,7 +691,6 @@ struct cs_add_curve : public csnd::Plugin<1, 2>, cs_operator
     }
 
     int index;
-    csnd::AuxMem<double> mem;
 };
 
 struct cs_sub_curve : public csnd::Plugin<1, 2>, cs_operator
@@ -637,7 +712,7 @@ struct cs_sub_curve : public csnd::Plugin<1, 2>, cs_operator
       }
       index = curve_map.map(this);
 
-      AsciiPlotter p("helloplot" , 80, 15);
+      AsciiPlotter p("hc_hypercurve : "  + std::to_string(index)  , 80, 15);
       p.addPlot(std::vector<double>(linspace(inargs[0])), std::vector<double>(this->samples.begin(), this->samples.end()), "helloplot", '*');
       p.show();
 
@@ -668,7 +743,7 @@ struct cs_mult_curve : public csnd::Plugin<1, 2>, cs_operator
       }
       index = curve_map.map(this);
 
-      AsciiPlotter p("helloplot" , 80, 15);
+      AsciiPlotter p("hc_hypercurve : "  + std::to_string(index)  , 80, 15);
       p.addPlot(std::vector<double>(linspace(inargs[0])), std::vector<double>(this->samples.begin(), this->samples.end()), "helloplot", '*');
       p.show();
 
@@ -699,7 +774,7 @@ struct cs_div_curve : public csnd::Plugin<1, 2>, cs_operator
       }
       index = curve_map.map(this);
 
-      AsciiPlotter p("helloplot" , 80, 15);
+      AsciiPlotter p("hc_hypercurve : "  + std::to_string(index)  , 80, 15);
       p.addPlot(std::vector<double>(linspace(inargs[0])), std::vector<double>(this->samples.begin(), this->samples.end()), "helloplot", '*');
       p.show();
 
@@ -716,9 +791,9 @@ struct cs_div_curve : public csnd::Plugin<1, 2>, cs_operator
 void csnd::on_load(Csound *csound) {
     std::cout << "loading csound hypercurve" << std::endl;
     // Helpers
+    csnd::plugin<cs_normalize_curve>(csound, "hc_normalize_y", "", "iii", csnd::thread::i);
     csnd::plugin<cs_control_point>(csound, "hc_control_point", "i", "ii", csnd::thread::i);
     csnd::plugin<cs_control_point>(csound, "hc_point", "i", "ii", csnd::thread::i);
-    csnd::plugin<cs_normalize_curve>(csound, "hc_normalize_y", "", "iii", csnd::thread::i);
     csnd::plugin<cs_invert_curve>(csound, "hc_invert", "i", "i", csnd::thread::i);
     csnd::plugin<cs_add_curve>(csound, "hc_add", "i", "ii" , csnd::thread::i);
     csnd::plugin<cs_sub_curve>(csound, "hc_sub", "i", "ii" , csnd::thread::i);
@@ -735,7 +810,10 @@ void csnd::on_load(Csound *csound) {
     csnd::plugin<cs_gaussian>(csound, "hc_gauss_curve", "i", "ii", csnd::thread::i);
     csnd::plugin<cs_catenary>(csound, "hc_catenary_curve", "i", "i", csnd::thread::i);
     csnd::plugin<cs_toxoid>(csound, "hc_toxoid_curve", "i", "i", csnd::thread::i);
+    csnd::plugin<cs_mouse>(csound, "hc_mouse_curve", "i", "", csnd::thread::i);
+    csnd::plugin<cs_bicorn>(csound, "hc_bicorn_curve", "i", "i", csnd::thread::i);
     csnd::plugin<cs_tightrope_walker>(csound, "hc_tightrope_walker_curve", "i", "ii", csnd::thread::i);
+    csnd::plugin<cs_polynomial_curve>(csound, "hc_polynomial_curve", "i", "m", csnd::thread::i);
 
     csnd::plugin<cs_typed>(csound, "hc_typed_curve", "i", "i", csnd::thread::i);
     csnd::plugin<cs_quad_bezier>(csound, "hc_quadratic_bezier_curve", "i", "i", csnd::thread::i);
@@ -748,6 +826,8 @@ void csnd::on_load(Csound *csound) {
     csnd::plugin<cs_diocles_curve>(csound, "hc_cissoid_curve", "i", "i", csnd::thread::i); // alias for diocles
     csnd::plugin<cs_gaussian>(csound, "hc_gaussian_curve", "i", "ii", csnd::thread::i);
     csnd::plugin<cs_typed>(csound, "hc_transeg_curve", "i", "i", csnd::thread::i);
+    csnd::plugin<cs_mouse>(csound, "hc_kiss_curve", "i", "", csnd::thread::i);
+    csnd::plugin<cs_bicorn>(csound, "hc_cocked_hat_curve", "i", "i", csnd::thread::i);
 
     // Core
     csnd::plugin<cs_segment>(csound, "hc_segment", "i", "iii", csnd::thread::i);

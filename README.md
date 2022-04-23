@@ -146,15 +146,14 @@ cmake .. -DBUILD_LUA_MODULE=TRUE -DLUA_INCLUDE_DIR=/you/dir/include -DLUA_LIBRAR
 ```
 The PNG writer [fpng](https://github.com/richgel999/fpng) used for hypercurve has SSE support. This can be enabled with `-DSSE=1`.
 # TODO
+* Fix toxoid curve (hybrid example)
+* Fix bezier and spline control points (is it relative or absolute to the segment ? think about catmull rom)
 * Lua semantics : append "curve"  to curve_base methods
-* Test new functionnalities : Csound and Lua normalize (x, y) and operators
 * REAPER/Reascript -> see https://forum.cockos.com/showthread.php?p=2543755#post2543755
-* Implement a polynomial with varargs (like a, b, c  : ax^3 + bx^2 + c)
 * A real good picture in README to show what it actually looks like
 * Lagrange interpolation for curve extraction.
 * Documentation : add pictures of each curve.
 * Hard one -> all curves allowing one sample processing (including cubic spline) to allow no-table processing.
-* Semantic : keep curve in "diocles_curve" or remove it ? (choose btw lua or csound style)
 ## Curves to implement
 * Cardioid / hypercardioid
 * Elastic curve : https://mathcurve.com/courbes2d.gb/linteaire/linteaire.shtml

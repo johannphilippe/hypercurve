@@ -35,7 +35,7 @@ public:
         for(size_t i = 0; i < size; ++i)
         {
             const double x = frac(i, size);
-            double res = scale(process(x));
+            double res = scale(x);
             if( std::abs(res) > max) max = std::abs(res);
             if(inverted) res = process_invert(x, res);
             *it = res;
@@ -44,7 +44,7 @@ public:
         return max;
     }
 
-    // Do not override this (or make sure to implement y_start and y_destination affectation)
+    // Do not override this (or make sure to implement members definition)
     inline virtual void init(double y_start_, double y_dest_, size_t definition_) {
         y_start = y_start_;
         y_destination = y_dest_;
@@ -62,10 +62,11 @@ public:
     bool inverted = false;
 protected:
 
-    inline virtual double scale(double y)
+    inline virtual double scale(double x)
     {
-        if(y_start > y_destination) y = 1.0 - y;
-        return (y * abs_diff) + offset;
+        if(y_start > y_destination)
+            return  process(1.0 - x) * abs_diff + offset;
+        return process(x) * abs_diff + offset;
     }
 
     inline double process_invert(double x, double y)
@@ -162,6 +163,47 @@ public:
     }
 };
 
+// See https://mathcurve.com/courbes2d/bouche/bouche.shtml
+class mouse_curve : public curve_base
+{
+public:
+    inline double process(double x) override
+    {
+        const double _x = x -1;
+        return std::sqrt( std::pow( (a*a) - (_x*_x), 3 ) / std::pow(a, 4) );
+    }
+
+    constexpr static const double a = 1.0;
+};
+using kiss_curve = mouse_curve;
+
+// See https://mathcurve.com/courbes2d/bicorne/bicorne.shtml
+class bicorn_curve : public curve_base
+{
+public:
+    // Sign true = positive, false = negative
+    bicorn_curve(bool sign_)
+        : sign(sign_ == true ? 1 : -1)
+    {}
+
+    inline double process(double x) override
+    {
+        const double _x = x-1;
+        if(sign == 1)
+            return process_bicorn(_x) / process_bicorn(0);
+        return process_bicorn(_x);
+    }
+
+    constexpr static const double a = 1.0;
+    int sign;
+
+protected:
+    inline double process_bicorn(double x)
+    {
+        return  ((a*a) - (x*x)) / (2*a + (std::sqrt(a*a - x*x) * sign));
+    }
+};
+using cocked_hat_curve = bicorn_curve;
 
 //////////////////////////////////////////////////
 // Typed curve - inspired by Csound GEN 16
@@ -170,7 +212,7 @@ class typed_curve : public curve_base
 {
 public:
     typed_curve(double type_)
-        : type(type_)
+        : type(-type_)
     {}
 
     inline double process(double x) override
@@ -356,6 +398,8 @@ protected:
 // https://mathcurve.com/courbes2d/cubicduplicatrice/cubicduplicatrice.shtml
 // a needs to be <= 0 (see constructor)
 //////////////////////////////////////////////////
+
+
 class toxoid_curve : public curve_base
 {
 
@@ -379,6 +423,35 @@ protected:
 
     double a, height;
 };
+/*
+class toxoid_curve : public curve_base
+{
+
+public:
+    toxoid_curve(double a_)
+        : a(a_)
+        , height(toxoid_process(a + 1))
+    {
+        if(a <= 0.0)
+           throw(std::runtime_error("a must be > 0"));
+    }
+
+    double process(double x) override
+    {
+        return toxoid_process(x + (a / 2)) / height;
+    }
+
+protected:
+
+    inline double toxoid_process(double x)
+    {
+        //return std::sqrt(x * std::pow(x - a/2, 2));
+        return std::sqrt( ( (x*x) * (x - a/2) ) / a  );
+    }
+
+    double a, height;
+};
+*/
 using duplicatrix_cubic = toxoid_curve;
 
 //////////////////////////////////////////////////
@@ -410,11 +483,19 @@ protected:
 // If you give three parameters a, b, c
 // it will return ax^3 + bx^2 + cx
 //////////////////////////////////////////////////
-class vararg_polynomial : public curve_base
+class polynomial_curve : public curve_base
 {
 public:
-    vararg_polynomial(memory_vector<double> args)
+    polynomial_curve(memory_vector<double> args)
         : constants(args)
+    {}
+
+    polynomial_curve(std::vector<double> args)
+        : constants(args)
+    {}
+
+    polynomial_curve(double *args, size_t size)
+        : constants(args, size)
     {}
 
     double process(double x) override
@@ -425,6 +506,7 @@ public:
             res += std::pow(x, constants.size() - i) * constants[i];
         }
         // then scale.
+        return res;
     }
 
     memory_vector<double> constants;

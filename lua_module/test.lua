@@ -72,7 +72,7 @@ bez:ascii_display("bezier", "y=bezier", "-")
 function cube(x)
 	return x*x*x
 end
-local crv = hc.user_defined(cube)
+local crv = hc.user_defined(function(x) return x * x * x end)
 print("ud ccc ok")
 local seg = hc.segment(1, 1, crv)
 print("ud seg ok ")
@@ -95,3 +95,14 @@ local cm_crv = hc.curve( 16384, 0,
 
 cm_crv:ascii_display("catmullrom", "cm(x)", "*")
 
+-- Operators 
+local sum = cm_crv + hybrid
+local sub = cm_crv - hybrid
+local prod = cm_crv * hybrid
+local div = cm_crv / hybrid
+
+
+sum:ascii_display("sum", "sum", "*")
+sub:ascii_display("sub", "sub", "*")
+prod:ascii_display("prod", "prod", "*")
+div:ascii_display("div", "div", "*")

@@ -7,12 +7,14 @@ Hypercurve is a library of 2D curves designed to process audio envelopes, applie
 It is available in several frontends : C++, Lua, and Csound.
 
 1. [Hypercurve basic syntax](#hypercurve-basic-syntax)
+
 2. [Import Hypercurve](#import-hypercurve)
+
 3. [Hypercurve class](#hypercurve-class)
 
 3.1 [Hypercurve operators](#hypercurve-operators)
 
-3.2 [Hypercurve invert curve base](#hypercurve-invert-curve-base)
+3.2 [Invert curve base](#hypercurve-invert-curve-base)
 
 3.3 [Normalize hypercurve](#normalize-hypercurve)
 
@@ -44,11 +46,20 @@ It is available in several frontends : C++, Lua, and Csound.
 
 5.12 [Catmull Rom Spline curve](#catmull-rom-spline-curve)
 
+5.13 [Polynomial Curve](#polynomial-curve)
+
+5.14 [User defined Curve](#user-defined-curve)
+
+5.15 [Typed Curve](#typed-curve)
+
+5.16 [Mouse Curve](#mouse-curve)
+
+5.16 [Bicorn Curve](#bicorn-curve)
+
 
 
 ## Hypercurve basic syntax
 
-  
 
 Here is a simple example of syntax with possible use cases :
 
@@ -74,6 +85,7 @@ double sample = crv.get_sample_at(1024);
 double *samples = crv.get_samples();
 
   
+// Write the curve as PNG file
 
 hypercurve::png png;
 
@@ -84,6 +96,12 @@ bool waveform = false;
 png.draw_curve(samples, crv.get_definition(), fill, waveform);
 
 png.write_png("my/path/to.png");
+
+// Write the curve as WAV file (Sndfile is linked to hypercurve)
+
+SndfileHandle sf(path , SFM_WRITE, SF_FORMAT_WAV | SF_FORMAT_PCM_24, 1, 48000);
+
+sf.writef(crv.get_samples(), crv.get_definition());
 
 ```
 
@@ -231,8 +249,14 @@ C++ :
   hypercurve::curve c1(2048, 0, {hypercurve::segment(1, 1, hypercurve::share(hypercurve::cubic_curve()))});
   hypercurve::curve c2(2048, 0, {hypercurve::segment(1, 1, hypercurve::share(hypercurve::diocles_curve(1)))});
   hypercurve::curve sum = c1 + c2; 
+  hypercurve::curve sub = c1 - c2; 
+  hypercurve::curve prod = c1 * c2; 
+  hypercurve::curve div = c1 / c2; 
   // Or 
   c1 += c2;
+  c1 -= c2;
+  c1 *= c2;
+  c1 /= c2;
 
   // It works for all mathematic operators +, -, /, *
 ```
@@ -243,8 +267,10 @@ Lua :
 
   local c1 = hc.hypercurve(2048, 0, {hc.segment(1, 1, hc.cubic())})
   local c2 = hc.hypercurve(2048, 0, {hc.segment(1, 1, hc.diocles(1))})
+  local add = c1 + c2
   local sub = c1 - c2
   local prod = c1 * c2
+  local div = c1 / c2
 ```
 
 Csound :
@@ -818,5 +844,174 @@ Csound :
 ```Csound
 
 hc_catmull_rom_spline_curve(hc_control_point cp1, hc_control_point cp2)
+
+```
+
+
+
+#### Polynomial curve
+
+The polynomial curve accepts an infinite number of arguments (up to 64 for Csound) and will evaluate curve with a polynomial expression  : 
+`(arg1*x)^3 + (arg2*x)^2 + (arg1*x)^1`
+In audio context, it is safer to scale the hypercurve in which you use a polynomial, as its y scale may be uncertain. Use the `normalize_y` method on your hypercurve to do so.
+
+![Polynomial curve](png/polynomial.png)
+  
+
+C++ :
+
+```c++
+
+hypercurve::share( hypercurve::polynomial_curve( {1.34, -1, -0.5, 0.1} ) );
+
+```
+
+Lua :
+
+```Lua
+hc.polynomial(1.34, -1, -0.5, 0.1)
+```
+
+Csound :
+
+```Csound
+hc_polynomial_curve(1.34, -1, -0.5, 0.1)
+
+```
+
+#### User defined curve
+
+
+User defined curve allows you to pass your own function that will return `y` for each `x` between 0 and 1. 
+
+![User defined curve](png/cubic.png)
+  
+
+C++ :
+
+```c++
+
+hypercurve::share( hypercurve::user_defined_curve(
+      [](double x){
+        return x * x * x;
+      }
+      ));
+
+```
+
+Lua :
+
+```Lua
+hc.user_defined(function(x) return x * x * x end )
+-- Alternatively, you can pass it a named function
+function my_own_cubic(x)
+  return x*x*x
+end
+hc.user_defined(my_own_cubic)
+```
+
+Csound :
+
+```Csound
+;Not implemented
+
+```
+
+
+#### Typed Curve
+
+
+Typed curve allows you to define a curve factor between -10 and 10 (concave or convex). It is based on Csound [GEN16 formula](http://www.csounds.com/manual/html/GEN16.html). Because of Hypercurve architecture, a increasing segment of typed curve will be inverted (concave instead of convex and convex instead of concave) in comparison to csound GEN16. So type > 0 means convex, type < 0 means concave
+
+![Typed curve](png/typed.png)
+  
+
+C++ :
+
+```c++
+
+hypercurve::share( hypercurve::typed_curve(-5));
+
+```
+
+Lua :
+
+```Lua
+hc.typed(-5)
+```
+
+Csound :
+
+```Csound
+hc_typed(-5)
+
+```
+
+
+  
+#### Mouse Curve
+
+
+![Mouse curve](png/mouse.png)
+  
+
+C++ :
+
+```c++
+
+hypercurve::share( hypercurve::mouse_curve());
+// Alias
+hypercurve::share( hypercurve::kiss_curve());
+
+```
+
+Lua :
+
+```Lua
+hc.mouse()
+-- Alias
+hc.kiss()
+```
+
+Csound :
+
+```Csound
+hc_mouse_curve()
+// Alias
+hc_kiss_curve()
+
+```
+
+
+#### Bicorn Curve
+
+
+![Bicorn curve](png/bicorn.png)
+  
+
+C++ :
+
+```c++
+
+hypercurve::share( hypercurve::bicorn_curve());
+// Alias
+hypercurve::share( hypercurve::cocked_hat_curve());
+
+```
+
+Lua :
+
+```Lua
+hc.bicorn()
+-- Alias
+hc.cocked_hat()
+```
+
+Csound :
+
+```Csound
+hc_bicorn_curve()
+// Alias
+hc_cocked_hat_curve()
 
 ```

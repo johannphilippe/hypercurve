@@ -203,6 +203,22 @@ int luahc_toxoid_curve(lua_State *lua)
     return 1;
 }
 
+int luahc_mouse_curve(lua_State *lua)
+{
+    lua_curve_helper(lua, new hypercurve::mouse_curve());
+    luaL_getmetatable(lua, "hypercurve.curve_base");
+    lua_setmetatable(lua, -2);
+    return 1;
+}
+
+int luahc_bicorn_curve(lua_State *lua)
+{
+    lua_curve_helper(lua, new hypercurve::bicorn_curve(lua_toboolean(lua, 1)));
+    luaL_getmetatable(lua, "hypercurve.curve_base");
+    lua_setmetatable(lua, -2);
+    return 1;
+}
+
 int luahc_typed_curve(lua_State *lua)
 {
     lua_curve_helper(lua, new hypercurve::typed_curve(
@@ -281,6 +297,16 @@ int luahc_user_defined_curve(lua_State *lua)
     return 0;
 }
 
+int luahc_polynomial_curve(lua_State *lua)
+{
+    hypercurve::memory_vector<double> vec(lua_gettop(lua));
+    for(size_t i = 1; i <= vec.size(); ++i)
+        vec[i-1] = lua_tonumber(lua, i);
+    lua_curve_helper(lua, new hypercurve::polynomial_curve(vec));
+    luaL_getmetatable(lua, "hypercurve.curve_base");
+    lua_setmetatable(lua, -2);
+    return 1;
+}
 
 ///////////////////////////////////////////
 // Invert curve
@@ -552,12 +578,15 @@ static const luaL_Reg luahc_static_meth[] =
     {"blackman", luahc_blackman_curve},
     {"gauss", luahc_gauss_curve},
     {"toxoid", luahc_toxoid_curve},
+    {"mouse", luahc_mouse_curve},
+    {"bicorn", luahc_bicorn_curve},
     {"catenary", luahc_catenary_curve},
     {"tightrope_walker", luahc_tightrope_walker_curve},
     {"quadratic_bezier", luahc_quadratic_bezier_curve},
     {"cubic_bezier", luahc_cubic_bezier_curve},
     {"cubic_spline", luahc_cubic_spline_curve},
     {"catmull_rom", luahc_catmull_rom_spline_curve},
+    {"polynomial", luahc_polynomial_curve},
 
     {"typed", luahc_typed_curve},
     {"user_defined", luahc_user_defined_curve},
@@ -568,6 +597,8 @@ static const luaL_Reg luahc_static_meth[] =
     {"gaussian", luahc_gauss_curve},
     {"duplicatrix_cubic", luahc_toxoid_curve},
     {"funicular", luahc_catenary_curve},
+    {"kiss", luahc_mouse_curve},
+    {"cocked_hat", luahc_bicorn_curve},
 
     // Helpers
     {"invert", luahc_invert_curve},
