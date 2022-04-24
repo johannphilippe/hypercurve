@@ -1,44 +1,19 @@
 
-# hypercurve
+# Hypercurve
 
-
-```
-                                       awesome hybrid curve
-	1 +--------------------------------------------------------------------------------+
-          |        ********                                                                |
-          |       *        **                                                              |
-          |                                                                                |
-          |      *           *******                                                       |
-          |                         *                                                      |
-          |     *                                     ******************                   |
-          |                                      *****                  *****              |
-          |                                    **                            ***           |
-          |    *                     *      ***                                 ***        |
-          |                               **                                       **      |
-          |   *                          *                                           **    |
-          |                             *                                              *   |
-          |  *                         *                                                *  |
-          | *                         *                                                  * |
-          |*                                                                              *|
-        0 +--------------------------------------------------------------------------------+
-          0                                                                                 1
-          +--------------------------------------------------------------------------------+
-          |   * A combination of gaussian, cissoid, power of 9, and cubic bezier curve     |
-          +--------------------------------------------------------------------------------+
-```
-
-
+![Hybrid hypercurve](doc/png/hybrid.png)
+This hypercurve is a combination of 1/8 diocles curve, 1/8 toxoid curve, 2/8 mouse curve, and 4/8 gauss curve.
 
 
 # What is it ? 
 
-Hypercurve is a library allowing you to use several curve algorithms into a single 2D envelope. It is designed to be used in audio applications, for people who know how to enjoy a finely shaped curve. 
-As shown above, you can perfectly combine gaussian curve with bezier curve, and plenty of other curve algorithms. 
-It can be used in C++, Lua or Csound.
+Hypercurve is a library allowing you to combine several curve algorithms into a single 2D envelope. It is designed to be used in audio applications, for people who know how to enjoy a finely shaped curve. 
+As shown above, you can perfectly combine gaussian curve with diocles cissoid curve, and plenty of other curve algorithms. 
+The library can be used in C++, Lua and Csound.
 
-Every curve algorithm is different. In an audio application, you can assign an envelope to any kind of parameter. For some parameters (like frequency), the way a value goes up and down in time changes everything to the perception of sound. Thus, the possibility of having a finely shaped envelope is truly essential. This, is the purpose of Hypercurve. 
+Every curve algorithm is different. In audio applications, we use to assign envelopes to any kind of parameter. In computer music, the way a value goes up and down in time has a big influence on how we hear a sound. Thus, the possibility to create finely shaped envelopes is truly essential. This is the purpose of Hypercurve. 
 
-## Implemented curves 
+## Implemented curve algorithms
 
 
 - Cissoid (Diocles curve) 
@@ -52,6 +27,8 @@ Every curve algorithm is different. In an audio application, you can assign an e
 - Toxoid (aka duplicatrix_cubic)
 - Catenary (aka funicular)
 - Tightrope Walker curve  
+- Mouse curve
+- Bicorn curve
 
 - Typed curves : inspired from Csounds [GEN16](http://www.csounds.com/manual/html/GEN16.html)
 - User defined curves - pass it a function (or a lambda in C++), that returns y for any x between 0 and 1. Not implemented in Csound.
@@ -66,7 +43,7 @@ The basic syntax stands as follow :
 * `hypercurve(integer size, double y_start, {segment_list});`
 Where `size` is the size in samples, `y_start` is the starting point of the curve, and segment list is a list of segments. 
 *  `segment(double frac, double y_destination, curve_type crv);`
-Where `frac` is the fractional size of the segment (fraction between 0 and 1), `y_destination` is the target point, and `crv`  a curve picked from hypercurve.
+Where `frac` is the fractional size of the segment (fraction between 0 and 1), `y_destination` is the target point, and `crv`  a curve algorithm picked from hypercurve.
 
 
 ## A simple C++ example 
@@ -146,13 +123,9 @@ cmake .. -DBUILD_LUA_MODULE=TRUE -DLUA_INCLUDE_DIR=/you/dir/include -DLUA_LIBRAR
 ```
 The PNG writer [fpng](https://github.com/richgel999/fpng) used for hypercurve has SSE support. This can be enabled with `-DSSE=1`.
 # TODO
-* Fix toxoid curve (hybrid example)
-* Fix bezier and spline control points (is it relative or absolute to the segment ? think about catmull rom)
-* Lua semantics : append "curve"  to curve_base methods
+* Lua semantics : append "curve"  to curve_base methods and reflect this to Documentation
 * REAPER/Reascript -> see https://forum.cockos.com/showthread.php?p=2543755#post2543755
-* A real good picture in README to show what it actually looks like
 * Lagrange interpolation for curve extraction.
-* Documentation : add pictures of each curve.
 * Hard one -> all curves allowing one sample processing (including cubic spline) to allow no-table processing.
 ## Curves to implement
 * Cardioid / hypercardioid
@@ -160,8 +133,6 @@ The PNG writer [fpng](https://github.com/richgel999/fpng) used for hypercurve ha
 * Simple log/exp ?
 * Kulp quartic
 * Puntiforme https://mathcurve.com/courbes2d/puntiforme/puntiforme.shtml
-* Mouse https://mathcurve.com/courbes2d/bouche/bouche.shtml
-* Bicorn AKA cocked hat  https://mathcurve.com/courbes2d/bicorne/bicorne.shtml
 * Legendre polynome
 * Ideas here https://mathcurve.com/courbes2d/courbes2d.shtml
 # External libraries

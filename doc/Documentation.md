@@ -20,41 +20,43 @@ It is available in several frontends : C++, Lua, and Csound.
 
 4. [Hypercurve Segment](#segment)
 
-5. [Curve types](#curve-base)
+5. [Control point](#control-point)
 
-5.1. [Diocles cissoid curve](#diocles-cissoid-curve)
+6. [Curve types](#curve-base)
 
-5.2. [Cubic curve](#cubic-curve)
+6.1. [Diocles cissoid curve](#diocles-cissoid-curve)
 
-5.3. [Power curve](#power-curve)
+6.2. [Cubic curve](#cubic-curve)
 
-5.4 [FFT Window curves](#hamming-hanning-blackman-curves)
+6.3. [Power curve](#power-curve)
 
-5.5 [Gaussian curve](#gaussian-curve)
+6.4 [FFT Window curves](#hamming-hanning-blackman-curves)
 
-5.6 [Toxoid curve](#toxoid-curve)
+6.5 [Gaussian curve](#gaussian-curve)
 
-5.7 [Catenary curve](#catenary-curve)
+6.6 [Toxoid curve](#toxoid-curve)
 
-5.8 [Tightrope Walker curve](#tightrope-walker-curve)
+6.7 [Catenary curve](#catenary-curve)
 
-5.9 [Quadratic bezier curve](#quadratic-bezier-curve)
+6.8 [Tightrope Walker curve](#tightrope-walker-curve)
 
-5.10 [Cubic bezier curve](#cubic-bezier-curve)
+6.9 [Quadratic bezier curve](#quadratic-bezier-curve)
 
-5.11 [Cubic spline curve](#cubic-spline-curve)
+6.10 [Cubic bezier curve](#cubic-bezier-curve)
 
-5.12 [Catmull Rom Spline curve](#catmull-rom-spline-curve)
+6.11 [Cubic spline curve](#cubic-spline-curve)
 
-5.13 [Polynomial Curve](#polynomial-curve)
+6.12 [Catmull Rom Spline curve](#catmull-rom-spline-curve)
 
-5.14 [User defined Curve](#user-defined-curve)
+6.13 [Polynomial Curve](#polynomial-curve)
 
-5.15 [Typed Curve](#typed-curve)
+6.14 [User defined Curve](#user-defined-curve)
 
-5.16 [Mouse Curve](#mouse-curve)
+6.15 [Typed Curve](#typed-curve)
 
-5.16 [Bicorn Curve](#bicorn-curve)
+6.16 [Mouse Curve](#mouse-curve)
+
+6.16 [Bicorn Curve](#bicorn-curve)
 
 
 
@@ -347,7 +349,7 @@ Csound :
 
 ## Segment
 
-  
+An hypercurve is composed with a list of one or more segments. Each segment have a fractional size (0-1 range), a destination in y axis, and a curve_base wich represents the algorithm. 
 
 C++ :
 
@@ -373,6 +375,43 @@ iseg = hc_segment(float fractional_size, float y_destination, curve_base icrv_ba
 
 ```
 
+
+## Control point
+
+Some curve_base algorithms need control points to process their interpolation : splines and bezier curves. 
+A control point is a simple point in 2D space with x and y position. Be careful that control points x position is an absolute position in the segment. If you specify a control point with x = 0.5, then the control point will stand in the middle of the segment. 
+
+C++ :
+
+```c++
+
+hypercurve::control_point(0.5, 0.8);
+// Alias
+hypercurve::point(0.5, 0.8);
+// Can also be passed with {}
+hypercurve::quadratic_bezier_curve({0.5, 0.8});
+
+```
+
+Lua :
+
+```Lua
+
+hc.control_point(0.5, 0.8)
+-- Alias
+hc.point(0.5, 0.8)
+
+```
+
+Csound :
+
+```Csound
+
+hc_control_point(0.5, 0.8)
+// Alias
+hc_point(0.5, 0.8)
+
+```
   
 
 <!---

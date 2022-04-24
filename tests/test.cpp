@@ -49,9 +49,9 @@ void write_as_png(curve &c, bool waveform = true, std::string name = "h.png")
     p.write_as_png(concat);
 }
 
-void write_doc_png(curve &c, std::string name)
+void write_doc_png(curve &c, std::string name, int width = 1024, int height = 256)
 {
-    png p(1024, 256);
+    png p(width, height);
     p.draw_curve(c.get_samples(), c.get_definition(), true, false);
     p.draw_grid(10, 10, color{{255, 255, 255, 100}});
     std::string concat("/home/johann/Documents/GitHub/hypercurve/doc/png/" + name);
@@ -76,14 +76,15 @@ void check_equality(curve &c1, curve &c2)
 
 void generate_curve_pictures()
 {
-    const int segs = 4;
+    const int segs = 8;
     curve hybrid(2048, 0, {
-                    segment(frac(1, segs), 1, share(diocles_curve(0.5))),
-                    segment(frac(1, segs), 0.55, share(toxoid_curve(0.5))),
-                    segment(frac(1, segs), 0.8, share(mouse_curve())),
-                    segment(frac(1, segs), 0, share(gauss_curve(1, 2)))
+                    segment(frac(1, segs), 1, share(diocles_curve(1))),
+                    segment(frac(1, segs), 0.2, share(toxoid_curve(0.01))),
+                    segment(frac(2, segs), 0.8, share(mouse_curve())),
+                    segment(frac(4, segs), 0, share(gauss_curve(10, 0.5)))
                  });
-    write_as_png(hybrid, false, "hybrid.png");
+    hybrid.ascii_display("hybrid_curve", "hybrid", '*');
+    write_doc_png(hybrid,  "hybrid.png", 2048, 512);
 
     curve dioc(2048, 0, {segment(1, 1, share(diocles_curve(1)))});
     write_doc_png(dioc, "diocles.png");

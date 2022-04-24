@@ -399,19 +399,19 @@ protected:
 // a needs to be <= 0 (see constructor)
 //////////////////////////////////////////////////
 
-
 class toxoid_curve : public curve_base
 {
 
 public:
     toxoid_curve(double a_)
         : a(-std::abs(a_))
-        , height(toxoid_process(1))
-    {}
+        , height(toxoid_process( 1))
+    {
+    }
 
     double process(double x) override
     {
-       return toxoid_process(x) / height;
+        return toxoid_process(x) / height;
     }
 
 protected:
@@ -419,39 +419,11 @@ protected:
     inline double toxoid_process(double x)
     {
         return std::sqrt(x * std::pow(x - a/2, 2));
+        //return std::sqrt( ( (x*x) * (x - a/2) ) / a  );
     }
 
     double a, height;
 };
-/*
-class toxoid_curve : public curve_base
-{
-
-public:
-    toxoid_curve(double a_)
-        : a(a_)
-        , height(toxoid_process(a + 1))
-    {
-        if(a <= 0.0)
-           throw(std::runtime_error("a must be > 0"));
-    }
-
-    double process(double x) override
-    {
-        return toxoid_process(x + (a / 2)) / height;
-    }
-
-protected:
-
-    inline double toxoid_process(double x)
-    {
-        //return std::sqrt(x * std::pow(x - a/2, 2));
-        return std::sqrt( ( (x*x) * (x - a/2) ) / a  );
-    }
-
-    double a, height;
-};
-*/
 using duplicatrix_cubic = toxoid_curve;
 
 //////////////////////////////////////////////////
