@@ -44,7 +44,7 @@ void write_as_png(curve &c, bool waveform = true, std::string name = "h.png")
 {
     png p(2048, 1024);
     p.draw_curve(c.get_samples(), c.get_definition(), true, waveform);
-    p.draw_grid(10, 10, color{{255, 255, 255, 100}});
+    p.draw_grid(10, 10, color{255, 255, 255, 100});
     std::string concat("/home/johann/Documents/" + name);
     p.write_as_png(concat);
 }
@@ -53,7 +53,7 @@ void write_doc_png(curve &c, std::string name, int width = 1024, int height = 25
 {
     png p(width, height);
     p.draw_curve(c.get_samples(), c.get_definition(), true, false);
-    p.draw_grid(10, 10, color{{255, 255, 255, 100}});
+    p.draw_grid(10, 10, color{255, 255, 255, 100});
     std::string concat("/home/johann/Documents/GitHub/hypercurve/doc/png/" + name);
     std::cout << concat << std::endl;
     p.write_as_png(concat);

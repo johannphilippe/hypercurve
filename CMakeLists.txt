@@ -98,7 +98,7 @@ target_link_libraries(hypercurve_test
 ##### 	Build Lua Module
 #############################################
 
-if(${BUILD_LUA_MODULE})
+if(BUILD_LUA_MODULE)
    message(STATUS "Building Lua module")
    add_subdirectory(lua_module)
    target_link_libraries(lua_hypercurve PUBLIC hypercurve_static sndfile ${LUA_LIBRARIES})
@@ -108,7 +108,7 @@ endif()
 ##### 	Build Csound Opcode
 #############################################
 
-if(${BUILD_CSOUND_OPCODE})
+if(BUILD_CSOUND_OPCODE)
    message(STATUS "Building Csound opcode")
    add_subdirectory(csound_opcode)
    target_link_libraries(csound_hypercurve PUBLIC hypercurve_static)

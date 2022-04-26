@@ -1,17 +1,10 @@
-#ifdef WIN32
 #include<csound.hpp>
-#else
-#include<csound/csound.hpp>
-#endif
 
 #include<iostream>
 #include<string>
-#include<filesystem>
 
 int main()
 {
-    std::cout << std::filesystem::current_path() << std::endl;
-
     Csound cs;
     //cs.SetOption("--verbose");
     cs.SetOption("--opcode-lib=./libcsound_hypercurve.so");

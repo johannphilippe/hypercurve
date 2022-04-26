@@ -567,6 +567,7 @@ static const luaL_Reg luahc_static_meth[] =
     {"segment", luahc_segment},
 
     {"control_point", luahc_control_point},
+    {"point", luahc_control_point},
 
     {"curve_base", luahc_curve_base},
     {"linear", luahc_curve_base},

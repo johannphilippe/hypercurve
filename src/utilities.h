@@ -266,14 +266,15 @@ struct memory_vector
 // PNG utils
 
 //using color = std::array<uint8_t, 4>;
-struct color : public std::array<uint8_t, 4>
+struct color //: public std::array<uint8_t, 4>
 {
+    uint8_t r,g,b,a;
 };
 
-constexpr const color white{{255, 255, 255, 255}};
-constexpr const color black{{0, 0, 0, 255}};
-constexpr const color red{{192, 9,9, 255}};
-constexpr const color purple{{106, 9, 192, 255}};
+constexpr const color white{255, 255, 255, 255};
+constexpr const color black{0, 0, 0, 255};
+constexpr const color red{192, 9,9, 255};
+constexpr const color purple{106, 9, 192, 255};
 
 
 struct png

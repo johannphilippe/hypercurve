@@ -123,6 +123,7 @@ The PNG writer [fpng](https://github.com/richgel999/fpng) used for hypercurve ha
 * REAPER/Reascript -> see https://forum.cockos.com/showthread.php?p=2543755#post2543755
 * Lagrange interpolation for curve extraction.
 * Hard one -> all curves allowing one sample processing (including cubic spline) to allow no-table processing.
+* Faust ?
 ## Curves to implement
 * Cardioid / hypercardioid
 * Elastic curve : https://mathcurve.com/courbes2d.gb/linteaire/linteaire.shtml
