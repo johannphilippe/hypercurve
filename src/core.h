@@ -121,7 +121,7 @@ public:
     void ascii_display(std::string name, std::string label, char marker)
     {
         AsciiPlotter plot(name, 80, 15);
-        plot.addPlot(linspace(definition), std::vector<double>(samples.data(), samples.data() + definition), label, marker);
+        plot.addPlot(std::vector<double>(samples.data(), samples.data() + definition), label, marker);
         plot.legend();
         plot.show();
     }
@@ -256,7 +256,8 @@ protected:
 
     void rescale(double x)
     {
-        double factor = (1 + (1 - x));
+        double factor = (1. / x);
+        std::cout << "factor " << std::endl;
         for(auto & it : segs) {
             it.rescale_x(factor);
         }

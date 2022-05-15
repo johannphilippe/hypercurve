@@ -39,14 +39,12 @@ public:
 
     void normalize_y(double target_min, double target_max)
     {
-        std::cout << "normalize " << target_min << " " << target_max << std::endl;
         find_extremeness();
 
         for(size_t i = 0; i < samples.size(); i++)
         {
             samples[i] = ((samples[i] - min ) / ambitus )  * std::abs(target_max - target_min) + target_min;
         }
-        std::cout << "eo normalize" << std::endl;
     }
 
     void find_extremeness()
@@ -556,7 +554,6 @@ struct cs_curve : public csnd::Plugin<1,64>, public cs_rt_hypercurve
       process_init();
 
 
-      // missing x and y rescale
       for(size_t i = 2; i < in_count(); ++i)
       {
           if(segment_map.find(int(inargs[i])) == segment_map.end())
@@ -566,12 +563,11 @@ struct cs_curve : public csnd::Plugin<1,64>, public cs_rt_hypercurve
           segment_map[inargs[i]]->init(y_start, segment_map[inargs[i]]->fractional_size * _definition);
           process_one(segment_map[inargs[i]]);
       }
-
       index = curve_map.map(this);
 
       // Weirdly, it works below
       AsciiPlotter p("hc_hypercurve : "  + std::to_string(index)  , 80, 15);
-      p.addPlot(std::vector<double>(linspace(inargs[0])), std::vector<double>(this->samples.begin(), this->samples.end()), "helloplot", '*');
+      p.addPlot( std::vector<double>(this->samples.begin(), this->samples.end()), "helloplot", '*');
       p.show();
 
       outargs[0] = index;
@@ -603,7 +599,7 @@ protected:
 
     void rescale(double x)
     {
-        double factor = (1 + (1 - x));
+        double factor = 1. / x;
         for(size_t i = 2; i < in_count(); ++i) {
             segment_map[inargs[i]]->rescale_x(factor);
         }
@@ -624,7 +620,7 @@ struct cs_run_curve : public csnd::Plugin<1, 2>
   int kperf()
   {
       phasor = inargs[1];
-      i_phasor = floor(phasor * curve_map[index]->get_definition());
+      i_phasor = std::round(phasor * curve_map[index]->get_definition());
       outargs[0] = limit(-1, 1, curve_map[index]->get_sample_at(i_phasor));
       return OK;
   }
@@ -634,7 +630,7 @@ struct cs_run_curve : public csnd::Plugin<1, 2>
       for(size_t i = 0; i < nsmps; ++i)
       {
           phasor = inargs(1)[i];
-          i_phasor = floor(phasor * curve_map[index]->get_definition());
+          i_phasor = std::round(phasor * curve_map[index]->get_definition());
           outargs(0)[i] = limit(-1, 1, curve_map[index]->get_sample_at(i_phasor));
 
       }
@@ -645,6 +641,56 @@ struct cs_run_curve : public csnd::Plugin<1, 2>
 private:
   double phasor;
   size_t i_phasor;
+  int index;
+};
+
+
+struct cs_run_curve_interpolate : public csnd::Plugin<1, 2>
+{
+  int init()
+  {
+      index = inargs[0];
+      if(curve_map.find(index) == curve_map.end())
+          return NOTOK;
+      return OK;
+  }
+
+  int kperf()
+  {
+      phasor = inargs[1];
+      outargs[0] = interpolate();
+      return OK;
+  }
+
+  int aperf()
+  {
+      for(size_t i = 0; i < nsmps; ++i)
+      {
+          phasor = inargs(1)[i];
+          outargs(0)[i] = interpolate();
+      }
+
+      return OK;
+  }
+
+  double interpolate()
+  {
+      i_phasor = floor(phasor * curve_map[index]->get_definition());
+      if( (phasor == 0) || (i_phasor >= (curve_map[index]->get_definition() - 1) ))
+          return limit(-1, 1, curve_map[index]->get_sample_at(i_phasor));
+      n_phasor = ceil(phasor * curve_map[index]->get_definition());
+      return limit(-1, 1, linear_interpolation(
+                       curve_map[index]->get_sample_at(i_phasor),
+                       curve_map[index]->get_sample_at(n_phasor),
+                       relative_position(
+                           fraction(i_phasor, curve_map[index]->get_definition()),
+                           fraction(n_phasor, curve_map[index]->get_definition()),
+                           phasor)));
+  }
+
+private:
+  double phasor;
+  size_t i_phasor, n_phasor;
   int index;
 };
 
@@ -683,7 +729,7 @@ struct cs_add_curve : public csnd::Plugin<1, 2>, cs_operator
       index = curve_map.map(this);
 
       AsciiPlotter p("hc_hypercurve : "  + std::to_string(index)  , 80, 15);
-      p.addPlot(std::vector<double>(linspace(inargs[0])), std::vector<double>(this->samples.begin(), this->samples.end()), "helloplot", '*');
+      p.addPlot( std::vector<double>(this->samples.begin(), this->samples.end()), "helloplot", '*');
       p.show();
 
       outargs[0] = index;
@@ -713,7 +759,7 @@ struct cs_sub_curve : public csnd::Plugin<1, 2>, cs_operator
       index = curve_map.map(this);
 
       AsciiPlotter p("hc_hypercurve : "  + std::to_string(index)  , 80, 15);
-      p.addPlot(std::vector<double>(linspace(inargs[0])), std::vector<double>(this->samples.begin(), this->samples.end()), "helloplot", '*');
+      p.addPlot(std::vector<double>(this->samples.begin(), this->samples.end()), "helloplot", '*');
       p.show();
 
       outargs[0] = index;
@@ -744,7 +790,7 @@ struct cs_mult_curve : public csnd::Plugin<1, 2>, cs_operator
       index = curve_map.map(this);
 
       AsciiPlotter p("hc_hypercurve : "  + std::to_string(index)  , 80, 15);
-      p.addPlot(std::vector<double>(linspace(inargs[0])), std::vector<double>(this->samples.begin(), this->samples.end()), "helloplot", '*');
+      p.addPlot(std::vector<double>(this->samples.begin(), this->samples.end()), "helloplot", '*');
       p.show();
 
       outargs[0] = index;
@@ -775,7 +821,7 @@ struct cs_div_curve : public csnd::Plugin<1, 2>, cs_operator
       index = curve_map.map(this);
 
       AsciiPlotter p("hc_hypercurve : "  + std::to_string(index)  , 80, 15);
-      p.addPlot(std::vector<double>(linspace(inargs[0])), std::vector<double>(this->samples.begin(), this->samples.end()), "helloplot", '*');
+      p.addPlot(std::vector<double>(this->samples.begin(), this->samples.end()), "helloplot", '*');
       p.show();
 
       outargs[0] = index;
@@ -838,5 +884,7 @@ void csnd::on_load(Csound *csound) {
     csnd::plugin<cs_run_curve>(csound, "hc_run", "k", "ik", csnd::thread::ik);
     csnd::plugin<cs_run_curve>(csound, "hc_run_hypercurve", "a", "ia", csnd::thread::ia);
     csnd::plugin<cs_run_curve>(csound, "hc_run", "a", "ia", csnd::thread::ia);
-
+    // With interpolation
+    csnd::plugin<cs_run_curve_interpolate>(csound, "hc_runi", "k", "ik", csnd::thread::ik);
+    csnd::plugin<cs_run_curve_interpolate>(csound, "hc_runi", "a", "ia", csnd::thread::ia);
 }

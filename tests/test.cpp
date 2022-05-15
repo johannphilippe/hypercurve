@@ -78,10 +78,10 @@ void generate_curve_pictures()
 {
     const int segs = 8;
     curve hybrid(2048, 0, {
-                    segment(frac(1, segs), 1, share(diocles_curve(1))),
-                    segment(frac(1, segs), 0.2, share(toxoid_curve(0.01))),
-                    segment(frac(2, segs), 0.8, share(mouse_curve())),
-                    segment(frac(4, segs), 0, share(gauss_curve(10, 0.5)))
+                    segment(fraction(1, segs), 1, share(diocles_curve(1))),
+                    segment(fraction(1, segs), 0.2, share(toxoid_curve(0.01))),
+                    segment(fraction(2, segs), 0.8, share(mouse_curve())),
+                    segment(fraction(4, segs), 0, share(gauss_curve(10, 0.5)))
                  });
     hybrid.ascii_display("hybrid_curve", "hybrid", '*');
     write_doc_png(hybrid,  "hybrid.png", 2048, 512);
@@ -138,10 +138,10 @@ int main()
     // Simple composite curve
     curve c(def, 0
             , 	{
-                segment(frac(1,4), 1.0, share(diocles_curve(1))),
-                segment(frac(1,4), 0.5, share(cubic_curve())),
-                segment(frac(1,4), 1, share(diocles_curve(1))),
-                segment(frac(1,4), 0, share(diocles_curve(1)))
+                segment(fraction(1,4), 1.0, share(diocles_curve(1))),
+                segment(fraction(1,4), 0.5, share(cubic_curve())),
+                segment(fraction(1,4), 1, share(diocles_curve(1))),
+                segment(fraction(1,4), 0, share(diocles_curve(1)))
                 }
             );
 
@@ -152,20 +152,20 @@ int main()
     t.reset();
 
     // One segment curve
-    curve c2(def, 0, {segment(frac(1,1), 1.0, share(diocles_curve(1)))});
+    curve c2(def, 0, {segment(fraction(1,1), 1.0, share(diocles_curve(1)))});
 
     t.time_since_last("one segment curve");
 
     c2.ascii_display("One segment diocles curve", "y = oneseg(x)", '*');
-    double div = 4;
 
+    const double div = 4;
     t.reset();
     // Bezier quadratic (one control point)
     curve c3(def, 0, {
-                 segment(frac(1,div), 1.0, share(quadratic_bezier_curve({0.1, 0.9}))),
-                 segment(frac(1,div), 0.5, share(quadratic_bezier_curve({0.66, 0.1}))),
-                 segment(frac(1,div), 0.8, share(quadratic_bezier_curve({0.5, 0.9}))),
-                 segment(frac(1, div), 0.1, share(quadratic_bezier_curve({0.5, 0})))
+                 segment(fraction(1,div), 1.0, share(quadratic_bezier_curve({0.1, 0.9}))),
+                 segment(fraction(1,div), 0.5, share(quadratic_bezier_curve({0.66, 0.1}))),
+                 segment(fraction(1,div), 0.8, share(quadratic_bezier_curve({0.5, 0.9}))),
+                 segment(fraction(1, div), 0.1, share(quadratic_bezier_curve({0.5, 0})))
              });
 
     t.time_since_last("Bezier quadratic 4 segments");
@@ -176,7 +176,7 @@ int main()
     t.reset();
     // Bezier cubic (taking two control points)
     curve c4(def, 0, {
-                 segment(frac(1,1), 1	, share(cubic_bezier_curve({0.2, 0.8}, {0.8, 0.2})))
+                 segment(fraction(1,1), 1	, share(cubic_bezier_curve({0.2, 0.8}, {0.8, 0.2})))
              });
 
     t.time_since_last("Bezier cubic");
@@ -210,12 +210,12 @@ int main()
     // CatmullRom
     t.reset();
     curve c7(def, 0, {
-                 segment(frac(1,2), 1, {
+                 segment(fraction(1,2), 1, {
                      share(catmull_rom_spline_curve(
                         point(-2, -0.5),
                         point(2, 0.2)))
                  }),
-                 segment(frac(1,2), 0, {
+                 segment(fraction(1,2), 0, {
                      share(catmull_rom_spline_curve(
                      point(-1, 3),
                      point(3, -5)
@@ -228,9 +228,9 @@ int main()
 
     t.reset();
     curve	 w(def, 0, {
-                  segment(frac(1,3), 1, share(cubic_curve())),
-                  segment(frac(1,3), -1, share(cubic_curve())),
-                  segment(frac(1,3), 0, share(cubic_curve())),
+                  segment(fraction(1,3), 1, share(cubic_curve())),
+                  segment(fraction(1,3), -1, share(cubic_curve())),
+                  segment(fraction(1,3), 0, share(cubic_curve())),
 
                });
     t.time_since_last("Waveform");
@@ -239,8 +239,8 @@ int main()
 
 
     curve to_modulate(16384, 0, {
-                         segment(frac(1,2), 1, share(diocles_curve(1))),
-                         segment(frac(1,2), 0, share(diocles_curve(1))),
+                         segment(fraction(1,2), 1, share(diocles_curve(1))),
+                         segment(fraction(1,2), 0, share(diocles_curve(1))),
 
                       });
 
@@ -259,8 +259,8 @@ int main()
 
 
     curve c8(def, 0.0, {
-                 segment(frac(1,2), 1, share(hanning_curve())),
-                 segment(frac(1,2), 0, share(hanning_curve()))
+                 segment(fraction(1,2), 1, share(hanning_curve())),
+                 segment(fraction(1,2), 0, share(hanning_curve()))
              });
     c8.ascii_display("Hanning", "hanning(x)", '.');
 
@@ -270,8 +270,8 @@ int main()
              });
     c9.ascii_display("gauss", "A = 10, c = 0.5", '*');
     curve c10(def, 0.0, {
-                segment(frac(1,2), 1, share(gauss_curve(1, 0.5))),
-                segment(frac(1,2), 0, share(gauss_curve(1, 0.5)))
+                segment(fraction(1,2), 1, share(gauss_curve(1, 0.5))),
+                segment(fraction(1,2), 0, share(gauss_curve(1, 0.5)))
              });
     c10.ascii_display("gauss", "A = 1, c = 0.5", '*');
     write_as_png(c10, false, "gauss.png");
@@ -279,25 +279,25 @@ int main()
     check_equality(c9, c10);
 
     curve c11(def, 0, {
-                 segment(frac(1,2), 1, share(typed_curve(10))),
-                 segment(frac(1,2), 0, share(typed_curve(10)))
+                 segment(fraction(1,2), 1, share(typed_curve(10))),
+                 segment(fraction(1,2), 0, share(typed_curve(10)))
               });
     c11.ascii_display("typed curve" , "type = 10", '*');
     write_as_png(c11, false, "typedpos.png");
     curve c12(def, 0, {
-                 segment(frac(1,2), 1, share(typed_curve(-10))),
-                 segment(frac(1,2), 0, share(typed_curve(-10)))
+                 segment(fraction(1,2), 1, share(typed_curve(-10))),
+                 segment(fraction(1,2), 0, share(typed_curve(-10)))
               });
     c12.ascii_display("typed curve" , "type = -10", '*');
     write_as_png(c12, false, "typedneg.png");
 
     double hdiv = 9;
     curve c13(def, 0, {
-                 segment(frac(1, hdiv), 1, share(gauss_curve(5, 1))),
-                 segment(frac(1, hdiv), 0.8, share(cissoid_curve(2))),
-                 segment(frac(1, hdiv), 0.1, share(power_curve(9))),
-                 segment(frac(6, hdiv), 0, share(cubic_bezier_curve(point(0.2, 0.9), point(0.8, 0.8))))
-                 //segment(frac(6, hdiv), 0, share(cissoid_curve(1)))
+                 segment(fraction(1, hdiv), 1, share(gauss_curve(5, 1))),
+                 segment(fraction(1, hdiv), 0.8, share(cissoid_curve(2))),
+                 segment(fraction(1, hdiv), 0.1, share(power_curve(9))),
+                 segment(fraction(6, hdiv), 0, share(cubic_bezier_curve(point(0.2, 0.9), point(0.8, 0.8))))
+                 //segment(fraction(6, hdiv), 0, share(cissoid_curve(1)))
               });
 
     c13.ascii_display("awesome hybrid curve", "A combination of gaussian, cissoid, power of 9, and cubic bezier curve", '*');
@@ -305,8 +305,8 @@ int main()
 
     curve c14(def, 0,
     {
-                segment(frac(1,2), 1, share(diocles_curve(1))),
-                segment(frac(1,2), 0, share(diocles_curve(1)))
+                segment(fraction(1,2), 1, share(diocles_curve(1))),
+                segment(fraction(1,2), 0, share(diocles_curve(1)))
               });
 
     curve cheb(def, 0,
@@ -331,29 +331,29 @@ int main()
 
 
     curve tox(def, 0, {
-                 segment(frac(1, 2), 1, share(toxoid_curve(10))),
-                 segment(frac(1, 2), 0, share(toxoid_curve(0.5)))
+                 segment(fraction(1, 2), 1, share(toxoid_curve(10))),
+                 segment(fraction(1, 2), 0, share(toxoid_curve(0.5)))
               });
     tox.ascii_display("toxoid", "tox", '*');
     write_as_png(tox, false, "toxoid.png");
 
     curve ctst(def, 0, {
-                       segment(frac(1,10), 1, share(power_curve(50))),
-                       segment(frac(9, 10), 0, share(power_curve(9)))
+                       segment(fraction(1,10), 1, share(power_curve(50))),
+                       segment(fraction(9, 10), 0, share(power_curve(9)))
                     });
     ctst.ascii_display("ctst", "power curve", '*');
     write_as_png(ctst, false, "power.png");
 
     curve tightrope(def, 0, {
-                       segment(frac(2,10), 1, share(tightrope_walker_curve(1.1,0.1))),
-                       segment(frac(8, 10), 0, share(tightrope_walker_curve(1.1, 1.0)))
+                       segment(fraction(2,10), 1, share(tightrope_walker_curve(1.1,0.1))),
+                       segment(fraction(8, 10), 0, share(tightrope_walker_curve(1.1, 1.0)))
                     });
     tightrope.ascii_display("tightrope walker", "trw", '*');
     write_as_png(tightrope, false, "tightrope.png");
 
     curve tightrope2(def, 0, {
-                       segment(frac(1,2), 1, invert( share(tightrope_walker_curve(1.01,1)))),
-                       segment(frac(1,2), 0, invert( share(tightrope_walker_curve(1.01,1)))),
+                       segment(fraction(1,2), 1, invert( share(tightrope_walker_curve(1.01,1)))),
+                       segment(fraction(1,2), 0, invert( share(tightrope_walker_curve(1.01,1)))),
                     });
 
     tightrope2.normalize_y(-1, 1);
@@ -374,21 +374,40 @@ int main()
     write_as_png(polynomial, false, "poly.png");
 
     curve mouse(def, 0, {
-                    segment(frac(1,2), 1, share(mouse_curve())),
-                    segment(frac(1,2), 0, share(mouse_curve()))
+                    segment(fraction(1,2), 1, share(mouse_curve())),
+                    segment(fraction(1,2), 0, share(mouse_curve()))
                 });
     mouse.ascii_display("mouse", "kiss", '*');
     write_as_png(mouse, false, "mouse.png");
 
     curve bicorn(def, 0, {
-                     segment(frac(1,2), 1, share(bicorn_curve(false))),
-                     segment(frac(1,2), 0, share(bicorn_curve(false))),
+                     segment(fraction(1,2), 1, share(bicorn_curve(false))),
+                     segment(fraction(1,2), 0, share(bicorn_curve(false))),
                  });
     bicorn.ascii_display("bicorn", "cocked hat", '*');
     bicorn.normalize_y(0, 1);
     write_as_png(bicorn, false, "bicorn.png");
 
     // Curves pictures for Doc
+    curve rescale_test(def, 0, {
+                           segment(fraction(1, 3), 1, share(bicorn_curve(false))),
+                           segment(fraction(1, 3), 0, share(mouse_curve()))
+                       });
+    rescale_test.ascii_display("Rescaled", "rescaled 2/3", '*');
+
+
+    // Random curves
+
+
+    for(size_t i = 0; i < 100; ++i){
+        curve rand1 = random_curve_composer(4, 0, 1, def);
+        rand1.ascii_display("random1", "oooh", '*');
+        std::string rname = "rand_" + std::to_string(i) + ".png";
+        write_as_png(rand1, false, rname);
+    }
+
+
+
     generate_curve_pictures();
 
     return 0;

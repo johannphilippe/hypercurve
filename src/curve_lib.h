@@ -28,13 +28,13 @@ public:
     inline virtual double process(double x) {return x;};
     // When you want to retrieve a single sample from a curve, it is recommanded to use this one. It is not necessary to override it for simple curves,
     // but may be necessary for complex (bezier, spline, catmullrom ...)
-    inline virtual double process(size_t i, size_t size) {return process(frac(i, size));}
+    inline virtual double process(size_t i, size_t size) {return process(fraction(i, size));}
     inline virtual double process_all(size_t size, memory_vector<double>::iterator &it)
     {
         double max = 0.0;
         for(size_t i = 0; i < size; ++i)
         {
-            const double x = frac(i, size);
+            const double x = fraction(i, size);
             double res = scale(x);
             if( std::abs(res) > max) max = std::abs(res);
             if(inverted) res = process_invert(x, res);
@@ -81,7 +81,7 @@ protected:
 
 using linear_curve = curve_base;
 
-// Allows you to make an y symetry on a x_start/y_start x_end/y_end linear axis
+// Allows you to make a symetry on a x_start/y_start x_end/y_end linear axis
 inline std::shared_ptr<curve_base> invert(std::shared_ptr<curve_base> cb)
 {
     cb->inverted = true;
@@ -97,14 +97,21 @@ class diocles_curve : public curve_base
 public:
     diocles_curve(double a_)
         : a(a_)
+        , compensation(1. / process_diocles(1.0) )
     {}
     inline double process(double x) override
     {
-        return std::sqrt( std::pow(x, 3) / (2 * a - x) );
+        return process_diocles(x) * (compensation);
     }
 
 private:
-    double a;
+
+    inline double process_diocles(double x)
+    {
+         return std::sqrt( std::pow(x, 3) / (2 * a - x) );
+    }
+
+    double a, compensation;
 };
 
 using cissoid_curve = diocles_curve;
@@ -335,7 +342,8 @@ public:
 protected:
     inline double conchal_process(double x)
     {
-        std::cout <<"conchal : " << ((c*c) + (a*a) - (x*x) ) * ((c*c) - (a*a) + (x*x)) << "   " << (x+a) << std::endl;
+        std::cout <<"conchal : " << ((c*c) + (a*a) - (x*x) )
+                    * ((c*c) - (a*a) + (x*x)) << "   " << (x+a) << std::endl;
         return std::sqrt(
                     ((c*c) + (a*a) - (x*x))
                     * ((c*c) - (a*a) + (x*x))
@@ -530,7 +538,7 @@ public:
     // This one should be implemented instead of the above one (if wanted to process single bezier point)
     inline virtual double process(size_t i, size_t size) override
     {
-        return process(frac(i, size));
+        return process(fraction(i, size));
     }
 protected:
     inline virtual std::pair<double, double> process_bezier(double x) {return {x,0};}
@@ -739,7 +747,7 @@ public:
         for(size_t i = 0; i < size; i++)
         {
             if( std::abs(res[i]) > max ) max = std::abs(res[i]);
-            if(inverted) res[i] = process_invert(frac(i, size), res[i]);
+            if(inverted) res[i] = process_invert(fraction(i, size), res[i]);
             *it = res[i];
             ++it;
         }

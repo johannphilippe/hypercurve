@@ -195,9 +195,8 @@ AsciiPlotter::AsciiPlotter(string title, int width, int height)
 	_curves = 0;
 }
 
-void AsciiPlotter::addPlot(vector<double> xdata, vector<double> ydata, string label = "", char marker = ' ')
+void AsciiPlotter::addPlot( vector<double> ydata, string label = "", char marker = ' ')
 {
-	_xdata = xdata;
 	_markers[_curves] = marker;
 	_labels[_curves] = label;
 	_ydata[_curves++] = ydata;
@@ -205,10 +204,8 @@ void AsciiPlotter::addPlot(vector<double> xdata, vector<double> ydata, string la
 
 void AsciiPlotter::show()
 {
-	int n = _xdata.size();
-
-	double xmin = _xdata[0];
-	double xmax = _xdata[n - 1];
+    double xmin = 0.0;
+    double xmax = 1.0;
 
 	double ymax = 1.0e-15;
 	double ymin = 1.0e15;
@@ -388,93 +385,6 @@ void AsciiPlotter::legend()
 	_legend = true;
 }
 
-void AsciiPlotter::example()
-{
-	_width = 120;
-	_height = 20;
-
-	vector<double> t(101);
-	vector<double> a(101);
-	vector<double> b(101);
-	vector<double> c(101);
-	double A = 10.0;
-
-	double dt = 0.0002;
-
-	for (int i = 0; i < 101; i++)
-	{
-		if (i != 0)
-		{
-			t[i] = t[i - 1] + dt;
-		}
-		a[i] = A * sin(6.28 * 60.0 * t[i]);
-		b[i] = A * sin(6.28 * 60.0 * t[i] + 2.09);
-		c[i] = A * sin(6.28 * 60.0 * t[i] + 4.19);
-	}
-
-	_title = "Three Phase Currents";
-	_height = 20;
-	
-	AsciiPlotter::addPlot(t, a, "Ia", '.');
-	AsciiPlotter::addPlot(t, b, "Ib", 'x');
-	AsciiPlotter::addPlot(t, c, "Ic", '*');
-	AsciiPlotter::legend();
-	AsciiPlotter::xlabel("t (s)");
-	AsciiPlotter::ylabel("I (A)");
-	AsciiPlotter::show();
-
-	vector<double> x(101);
-	vector<double> f(101);
-
-	dt = 0.05;
-
-	for (int i = 0; i < 101; i++)
-	{
-		if (i != 0)
-		{
-			t[i] = t[i - 1] + dt;
-		}
-
-		x[i] = sin(6.28 * t[i] - 2.0 * sin(6.28 * 0.2 * t[i]));
-	}
-
-	_curves = 0;
-	_title = "FM Signal";
-	
-	AsciiPlotter::addPlot(t, x, "Signal", 'x');
-
-	AsciiPlotter::legend();
-	AsciiPlotter::xlabel("t (s)");
-	AsciiPlotter::ylabel("");
-	AsciiPlotter::show();
-
-	vector<double> x1(101);
-	vector<double> x2(101);
-
-	dt = 0.2;
-
-	for (int i = 0; i < 101; i++)
-	{
-		if (i != 0)
-		{
-			t[i] = t[i - 1] + dt;
-		}
-		x1[i] = sin(t[i]) * exp(-t[i]/10);
-		x2[i] = cos(t[i]) * exp(-t[i]/10);
-	}
-
-	_curves = 0;
-	_title = "Dampened Sine Waves with Envelope";
-	
-	AsciiPlotter::addPlot(t, x1, "sin(t) * exp(-t/10)", '*');
-	AsciiPlotter::addPlot(t, x2, "cos(t) * exp(-t/10)", 'x');
-
-
-	AsciiPlotter::legend();
-	AsciiPlotter::xlabel("t (s)");
-	AsciiPlotter::ylabel("");
-	AsciiPlotter::show();
-}
 
 AsciiPlotter::~AsciiPlotter()
 {

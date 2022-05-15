@@ -13,12 +13,29 @@
 #include<cstring>
 #include<functional>
 #include"fpng/src/fpng.h"
-
+#include <random>
 #ifndef M_PI
  #define M_PI 3.14159265358979323846
 #endif
 
 namespace hypercurve {
+
+template<typename Numeric, typename Generator = std::mt19937>
+Numeric random(Numeric from, Numeric to)
+{
+    thread_local static Generator gen(std::random_device{}());
+
+    using dist_type = typename std::conditional
+    <
+        std::is_integral<Numeric>::value
+        , std::uniform_int_distribution<Numeric>
+        , std::uniform_real_distribution<Numeric>
+    >::type;
+
+    thread_local static dist_type dist;
+
+    return dist(gen, typename dist_type::param_type{from, to});
+}
 
 inline int round(double x)
 {
@@ -30,7 +47,8 @@ inline double pos(double x)
     return (x > 0) ? x : 0;
 }
 
-inline double frac(double x1, double x2)
+template<typename T, typename TT>
+inline double fraction(T x1, TT x2)
 {
     return double(x1) / double(x2);
 }
@@ -122,7 +140,7 @@ inline T log_exp_point(T beg, T ending, int dur, int idx, double typ)
 inline double relative_position(double x1, double x2, double x)
 {
     if(!(x >= x1 && x <= x2) || !(x1 < x2))
-        throw(std::runtime_error("Make sure x1 <= x <= x2 and x1 < x2"));
+        throw(std::runtime_error( std::string("Make sure x1 <= x <= x2 and x1 < x2 \nx1 = ")  + std::to_string(x1) + " & x = " + std::to_string(x) + " & x2 = " + std::to_string(x2)));
     const double factor = 1.0 / (x2 - x1);
     return (x * factor) - (x1 * factor);
 }
@@ -252,6 +270,18 @@ struct memory_vector
       return _data[index];
    }
 
+   T max() {
+       T mx = 0;
+       for(size_t i = 0; i < size(); ++i)
+           if(_data[i] > mx) mx = _data[i];
+       return mx;
+   }
+   T min() {
+       T mx = 0;
+       for(size_t i = 0; i < size(); ++i)
+           if(_data[i] < mx) mx = _data[i];
+       return mx;
+   }
    size_t size() {return _size;}
 
    iterator begin() {return iterator(_data);}
@@ -279,7 +309,8 @@ constexpr const color purple{106, 9, 192, 255};
 
 struct png
 {
-    png(size_t width_ = 2048, size_t height_ = 1024, color background_ = black, color foreground_ = purple)
+    png(size_t width_ = 2048, size_t height_ = 1024,
+        color background_ = black, color foreground_ = purple)
         : width(width_)
         , height(height_)
         , background(background_)
@@ -326,7 +357,7 @@ struct png
         {
             size_t yb = 0;
             size_t ye = height;
-            size_t x = i * frac(width, xdiv);
+            size_t x = i * fraction(width, xdiv);
             for(size_t y = yb; y < ye; ++y)
             {
                 set(x, y, c);
@@ -336,7 +367,7 @@ struct png
         {
             size_t xb = 0;
             size_t xe = width;
-            size_t y = i * frac(height, ydiv);
+            size_t y = i * fraction(height, ydiv);
             for(size_t x = xb; x < xe; ++x)
             {
                 set(x, y, c);
@@ -345,11 +376,12 @@ struct png
 
     }
 
-    void draw_curve(double *samples, size_t size, bool fill = true, bool waveform = false )
+    void draw_curve(double *samples, size_t size,
+                    bool fill = true, bool waveform = false )
     {
         for(size_t i = 0; i < size; ++i)
         {
-            double x = frac(i,size);
+            double x = fraction(i,size);
             double y = (waveform) ? (samples[i] + 1.0) / 2.0 : samples[i];
             if(fill)
                 fill_curve_point(x, y, waveform);
@@ -361,7 +393,8 @@ struct png
 
     void write_as_png(std::string path)
     {
-        fpng::fpng_encode_image_to_file(path.c_str(), (void *) data.data(), width, height, 4);
+        fpng::fpng_encode_image_to_file(path.c_str(),
+                                        (void *) data.data(), width, height, 4);
     }
 
 protected:

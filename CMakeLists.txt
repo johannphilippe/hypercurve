@@ -6,6 +6,13 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake/Modules/)
 
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Release)
+endif()
+
+set(CMAKE_CXX_FLAGS_DEBUG "-g")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+
 #############################################
 ##### 	Build libsndfile
 #############################################
@@ -28,6 +35,7 @@ set(HYPERCURVE_SOURCES
    src/utilities.h
    src/cubic_spline.h
    src/modulator_lib.h
+   src/extra.h
    src/hypercurve.h
 
    # fpng library

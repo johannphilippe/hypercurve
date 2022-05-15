@@ -1,6 +1,8 @@
 # Hypercurve documentation
 
   
+![Hybrid Hypercurve](png/hybrid.png)
+
 
 Hypercurve is a library of 2D curves designed to process audio envelopes, applied to any audio parameter.
 
@@ -14,7 +16,7 @@ It is available in several frontends : C++, Lua, and Csound.
 
 3.1 [Hypercurve operators](#hypercurve-operators)
 
-3.2 [Invert curve base](#hypercurve-invert-curve-base)
+3.2 [Invert curve base](#invert-curve-base)
 
 3.3 [Normalize hypercurve](#normalize-hypercurve)
 
@@ -457,6 +459,7 @@ In Hypercurve, a Curve base represents the algorithm of a specific curve. Some o
 
 ![Diocles cissoid](png/diocles.png)
   
+Diocles curve takes 1 argument `a` which must be in range `0.5 < a < inf`. The more a increases, the more linear the curve becomes. Otherwise, diocles curve is a concave curve.
 
 C++ :
 
@@ -532,6 +535,9 @@ hc_cubic_curve()
   
 ![Power curve](png/power9.png)
 
+The power curve takes one argument, which is the exponent of power operation. The more `power` is important, the more concave the curve is.
+A power of 1 will create a linear curve.
+
 C++ :
 
 ```c++
@@ -606,6 +612,8 @@ hc_blackman_curve()
   
 ![Gaussian curve](png/gaussian.png)
 
+The gaussian curve takes two parameterrs `A` and `c`. The most important parameter is `c`. A lower value will result in a more carved curve. Higher values will look more like a roundish curve. The `A` parameter does not seem really significant in this implementation. Though, changing it does not return strictly the same results. `c` argument is usually in range `0 < c < inf`
+
 C++ :
 
 ```c++
@@ -650,6 +658,8 @@ hc_gauss_curve(float iA, float ic)
 
 ![Toxoid curve](png/toxoid.png)
 
+The parameter `a` is usually in range `0 < a < inf`. Low values for `a` will return more concave results, while higher values will return more convex curves. 
+
 C++ :
 
 ```c++
@@ -691,6 +701,8 @@ hc_duplicatrix_cubic_curve(float ia)
 #### Catenary curve
 
 ![Catenary curve](png/catenary.png)
+
+Relevant values for `a` argument are in range `0 < a < 2`. The more `a` tends to 0, the more it is concave. 
 
 C++ :
 
@@ -737,6 +749,10 @@ hc_funicular_curve(float ia)
   
 ![Tightrope Walker curve](png/tightrope.png)
 
+In this particular case, `a` must be superior to `abs(b)` and `a` must be superior to `0` (quite logical here). 
+Here, it is the distance between `a` and `abs(b)` that will is interesting. A big distance (e.g. a = 1.0, b = 0.1) will create a hardcore concave curve (useful for quick attack envelopes). But a smaller distance (a = 1.01, b = 1) will create a big bump before the attack segment. 
+
+
 C++ :
 
 ```c++
@@ -767,6 +783,8 @@ hc_tightrope_walker_curve(float ia, float ib)
 #### Quadratic Bezier curve
 
 ![Quadratic Bezier curve](png/quadratic_bezier.png)
+
+Quadratic bezier curve must be passed a control point. This point will shape the curve. Notice that the x position of the point must be defined in absolute coordinates of the segment. So for example the point :  `point{0.5, 0.2}` will be located in the middle of the segment. 
 
 C++ :
 
@@ -799,6 +817,8 @@ hc_quadratic_bezier_curve( hc_control_point cp )
 
 ![Cubic bezier curve](png/cubic_bezier.png)
 
+Same as for quadratic bezier curve, except that you need to specify two control points here. Make sure that the second point is located after the first one, else your curve might be coming back in the x axis, wich as an audio envelope might mean return back in the past (not so good). 
+
 C++ :
 
 ```c++
@@ -829,6 +849,8 @@ hc_cubic_bezier_curve(hc_control_point cp1, hc_control_point cp2)
 #### Cubic spline curve
 
 ![Cubic Spline curve](png/cubic_spline.png)
+
+Cubic spline curve is similar to Csound's [GEN08](http://www.csounds.com/manual/html/GEN08.html). You pass it a list of any number of control points. The difference with Bezier curves is that your segment will actually pass through all of these control points. This curve may sometime need to be rescaled, since the deviation of the curve can go across the limits of your y origin and destination. X coordinates of control points must be absolute coordinates (inside the segment, so between 0 and 1).
 
 C++ :
 
@@ -861,6 +883,7 @@ Csound :
 
 ![Catmull Rom Spline curve](png/catmul_rom.png)
   
+Another spline curve. Like cubic bezier it receives 2 control points. BUT the catmull rom control points X coordinates must be outside the segment. So cp1.x must be < 0 and cp2.x must be > 1. 
 
 C++ :
 

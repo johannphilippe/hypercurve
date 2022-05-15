@@ -121,7 +121,7 @@ public:
         double max = 0.0;
         for(size_t i = 0; i < size; ++i)
         {
-            const double x = frac(i, size);
+            const double x = fraction(i, size);
             double res = Amp::get_amplitude(x) * process(x);
             if( std::abs(res) > max) max = std::abs(res);
             *it = res;

@@ -11,5 +11,6 @@
 #include"curve_lib.h"
 #include"modulator_lib.h"
 #include"utilities.h"
+#include"extra.h"
 
 #endif // HYPERCURVE_H

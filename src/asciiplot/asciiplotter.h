@@ -42,7 +42,6 @@ private:
 	string _xlabel;
 	string _ylabel;
 	bool _legend;
-	vector<double> _xdata;
 	vector<double> _ydata[MAX_CURVES];
 	string _labels[MAX_CURVES];
 	char _markers[MAX_CURVES];
@@ -52,11 +51,10 @@ public:
 	AsciiPlotter(string title, int width, int height);
 	~AsciiPlotter();
 	void plot(const char *plotfile, const char *datafile);
-	void addPlot(vector<double> xdata, vector<double> ydata, string label, char marker);
+    void addPlot( vector<double> ydata, string label, char marker);
     void show();
 	void xlabel(string label);
 	void ylabel(string label);
 	void legend();
-	void example();
 };
 

@@ -56,7 +56,7 @@ double y_start = 0;
 curve c(definition, y_start, 
 	{
 		// segment(fractional_size, y_destination, curve
-		segment(frac(1,2), 1.0, share(cissoid_curve(1))),
+		segment(fraction(1,2), 1.0, share(cissoid_curve(1))),
 		segment(0.5, 0.0, share(blackman_curve()))
 	}); 
 // Then access samples with double *get_samples() 
@@ -118,6 +118,7 @@ cmake .. -DBUILD_LUA_MODULE=TRUE -DLUA_INCLUDE_DIR=/you/dir/include -DLUA_LIBRAR
 ```
 The PNG writer [fpng](https://github.com/richgel999/fpng) used for hypercurve has SSE support. This can be enabled with `-DSSE=1`.
 # TODO
+* Segfault when a large number of random curves generated (on curve init, where definition is incoherent number, and fractional size = 0)
 * Tests on invert function (Lua and Csound)
 * Lua semantics : append "curve"  to curve_base methods and reflect this to Documentation
 * REAPER/Reascript -> see https://forum.cockos.com/showthread.php?p=2543755#post2543755
@@ -134,7 +135,8 @@ The PNG writer [fpng](https://github.com/richgel999/fpng) used for hypercurve ha
 * Ideas here https://mathcurve.com/courbes2d/courbes2d.shtml
 # External libraries
 This library uses libsndfile as an external submodule.
-Currently, [libsndfile](https://github.com/libsndfile/libsndfile) is only used in Lua and in test.cpp. So hypercurve C++ library itself does not have any external dependency.
+Currently, [libsndfile](https://github.com/libsndfile/libsndfile) is the only dependency of this project. 
+
 It also includes source files from several open-source projects : 
 *  [AsciiPlot](https://github.com/joehood/asciiplotter) source code with license under src/asciiplot folder.
 * [lua-compat-5.3](https://github.com/keplerproject/lua-compat-5.3) which provides an API compatibility from 5.1 to 5.3
