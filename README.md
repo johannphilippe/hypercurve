@@ -9,7 +9,7 @@ This hypercurve is a combination of 1/8 diocles curve, 1/8 toxoid curve, 2/8 mou
 
 Hypercurve is a library allowing you to combine several curve algorithms into a single 2D envelope. It is designed to be used in audio applications, for people who know how to enjoy a finely shaped curve. 
 As shown above, you can perfectly combine gaussian curve with diocles cissoid curve, and plenty of other curve algorithms. 
-The library can be used in C++, Lua and Csound.
+The library can be used in C++, Lua, Csound and Faust.
 
 Every curve algorithm is different. In audio applications, we use to assign envelopes to any kind of parameter. In computer music, the way a value goes up and down in time has a big influence on how we hear a sound. Thus, the possibility to create finely shaped envelopes is truly essential. This is the purpose of Hypercurve. 
 
@@ -92,6 +92,18 @@ local crv = hc.hypercurve(definition, y_start,
 hc.write_as_wav("path/to/outfile.wav", crv)
 ```
 
+```Faust
+hc = library("hypercurve.lib");
+definition = 16384;
+y_start = 0;
+curve = hc.hypercurve(definition, y_start  (
+	hc.segment(1/2, 1.0, hc.cissoid_curve(1.0)),
+	hc.segment(1/2, 0.0, hc.cubic_curve)
+));
+
+// Run with interpolation
+env = hc.runi(curve, os.phasor(1, 1));
+```
 
 
 # Build
@@ -107,10 +119,11 @@ mkdir build && cd build
 cmake .. -DBUILD_ALL=TRUE
 make
 ```
-If you just want to build Lua module or Csound opcode, then just use 
+If you just want to build for Faust, Lua or Csound, then just use 
 ```
 cmake .. -DBUILD_CSOUND_OPCODE=TRUE
 cmake .. -DBUILD_LUA_MODULE=TRUE
+cmake .. -DBUILD_FAUST_LIB=TRUE
 ```
 On some platforms (e.g. Windows) you might need to set the Lua paths with the following options :
 ```
@@ -118,12 +131,13 @@ cmake .. -DBUILD_LUA_MODULE=TRUE -DLUA_INCLUDE_DIR=/you/dir/include -DLUA_LIBRAR
 ```
 The PNG writer [fpng](https://github.com/richgel999/fpng) used for hypercurve has SSE support. This can be enabled with `-DSSE=1`.
 # TODO
+* Expose random generators to frontends (Lua, Csound, Faust).
+* Faust tests
 * Tests on invert function (Lua and Csound)
 * Lua semantics : append "curve"  to curve_base methods and reflect this to Documentation
 * REAPER/Reascript -> see https://forum.cockos.com/showthread.php?p=2543755#post2543755
 * Lagrange interpolation for curve extraction.
 * Hard one -> all curves allowing one sample processing (including cubic spline) to allow no-table processing.
-* Faust ?
 ## Curves to implement
 * Cardioid / hypercardioid
 * Elastic curve : https://mathcurve.com/courbes2d.gb/linteaire/linteaire.shtml
