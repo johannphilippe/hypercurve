@@ -3,6 +3,7 @@
    Distributed under the MIT License (https://opensource.org/licenses/MIT)
 =============================================================================*/
 
+#pragma once
 #ifndef CURVE_LIB_H
 #define CURVE_LIB_H
 

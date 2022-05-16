@@ -1,3 +1,5 @@
+
+#pragma once
 #ifndef EXTRA_H
 #define EXTRA_H
 
@@ -35,7 +37,6 @@ enum curve_base_index {
     typed_i = 17,
     mouse_i = 18,
     bicorn_i = 19,
-
 
     // keep that last to get size
     size_i
@@ -133,23 +134,23 @@ std::pair<std::vector<double>, std::vector<control_point>> random_args_generator
     }
 }
 
-curve random_curve_composer( size_t max_segs = 16, int min = 0, int max = 1, size_t definition = 4096, bool envelop = false, bool force_curve_type = false, curve_base_index forced = linear_i)
+curve random_curve_composer( size_t max_segs = 16, int min = 0, int max = 1,
+                             size_t definition = 4096, bool envelop = false,
+                             bool force_curve_type = false, curve_base_index forced = linear_i)
 {
-
     auto gen_curve = [&](){
         return force_curve_type ? forced : static_cast<curve_base_index>(rand() % static_cast<int>(size_i));
     };
-    size_t nsegs = rand() % max_segs;
+    size_t nsegs = 1 + (rand() % max_segs);
 
     std::vector<segment> segs(nsegs);
     for(size_t i = 0; i < nsegs; ++i) {
-        double frac_size = random<double>(1, 100);
+        double frac_size = random<double>(0.1, 1);
         double dest = random<double>(0, 1);
         curve_base_index index =  gen_curve();
         while( index == user_defined_i)
             index = gen_curve();
 
-        std::cout << "index for curve " << static_cast<int>(index) << std::endl;
         std::pair<std::vector<double>, std::vector<control_point>> args = random_args_generator(index);
         if(i == (nsegs - 1) && envelop)
             dest = 0;

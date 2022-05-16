@@ -6,7 +6,6 @@
 #include"../src/hypercurve.h"
 #include<plugin.h>
 #include<OpcodeBase.hpp>
-#include<unordered_map>
 
 using namespace hypercurve;
 
@@ -69,35 +68,10 @@ protected:
     double min, max, ambitus;
 };
 
-// Make it derive from AuxMem
-template<typename T>
-struct increment_map  : public std::unordered_map<int, T>
-{
-    increment_map()
-    {
-    }
-
-    int map( T to_map)
-    {
-        this->insert({_index, to_map});
-        ++_index;
-        return _index - 1;
-    }
-    void unmap(size_t index)
-    {
-        if(this->find(index) != this->end())
-        {
-            this->erase(index);
-        }
-    }
-
-    size_t _index = 0;
-};
 static increment_map< std::shared_ptr<curve_base> > curve_base_map;
 static increment_map< std::shared_ptr<control_point> > control_point_map;
 static increment_map< std::shared_ptr<segment> > segment_map;
 static increment_map< cs_rt_hypercurve * > curve_map;
-
 
 //////////////////////////////////////////////////
 // Helpers

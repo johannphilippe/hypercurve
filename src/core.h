@@ -2,7 +2,7 @@
    Copyright (c) 2022 Johann Philippe
    Distributed under the MIT License (https://opensource.org/licenses/MIT)
 =============================================================================*/
-
+#pragma once
 #ifndef CORE_H
 #define CORE_H
 
@@ -12,6 +12,7 @@
 #include"curve_lib.h"
 #include"asciiplot/asciiplotter.h"
 #include<iostream>
+#include<utility>
 namespace hypercurve {
 ///////////////////////////////////////////////////
 // The segment class
@@ -24,8 +25,7 @@ public:
         : fractional_size(frac)
         , y_destination(y_dest)
         , _curve( std::move(c) )
-    {
-    }
+    {}
 
     segment() {}
 
@@ -47,8 +47,8 @@ public:
     double fractional_size;
     double y_destination;
     double y_start = 0;
-protected:
     std::shared_ptr<curve_base> _curve;
+protected:
 };
 
 /////////////////////////////////////////////////////
@@ -61,7 +61,7 @@ public:
     curve(size_t definition_, double y_start_, std::vector< segment > segs_)
         : definition(definition_)
         , y_start(y_start_)
-        , segs(segs_)
+        , segs( std::move(segs_) )
         , samples(definition)
     {
         check_total_size();
@@ -115,7 +115,7 @@ public:
                 max = it;
         }
         ambitus = std::abs(max - min);
-        return {min, max};
+        return std::make_pair(min, max);
     }
 
     void ascii_display(std::string name, std::string label, char marker)
@@ -257,7 +257,6 @@ protected:
     void rescale(double x)
     {
         double factor = (1. / x);
-        std::cout << "factor " << std::endl;
         for(auto & it : segs) {
             it.rescale_x(factor);
         }

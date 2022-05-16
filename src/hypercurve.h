@@ -3,6 +3,7 @@
    Distributed under the MIT License (https://opensource.org/licenses/MIT)
 =============================================================================*/
 
+#pragma once
 #ifndef HYPERCURVE_H
 #define HYPERCURVE_H
 

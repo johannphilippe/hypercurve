@@ -30,7 +30,10 @@ SOFTWARE.
 
 using namespace std;
 
-int max(vector<int> data)
+namespace  AsciiPlotterUtils {
+
+
+int max(vector<int> &data)
 {
 	int xmax = data[0];
     for (size_t i = 1; i < sizeof(data); i++)
@@ -43,7 +46,7 @@ int max(vector<int> data)
 	return xmax;
 }
 
-int min(vector<int> data)
+int min(vector<int> &data)
 {
 	int xmin = data[0];
     for (size_t i = 1; i < data.size(); i++)
@@ -56,7 +59,7 @@ int min(vector<int> data)
 	return xmin;
 }
 
-double max(vector<double> data)
+double max(vector<double> &data)
 {
 	double xmax = data[0];
     for (size_t i = 1; i < data.size(); i++)
@@ -69,7 +72,7 @@ double max(vector<double> data)
 	return xmax;
 }
 
-double min(vector<double> data)
+double min(vector<double> &data)
 {
 	double xmin = data[0];
     for (size_t i = 1; i < data.size(); i++)
@@ -171,6 +174,8 @@ vector<double> resample(vector<double> ydata, int newlength)
 	}
 }
 
+}
+
 AsciiPlotter::AsciiPlotter()
 {
 	_title = "";
@@ -228,8 +233,8 @@ void AsciiPlotter::show()
 
 	for (int curve = 0; curve < _curves; curve++)
 	{
-		double mx = max(_ydata[curve]);
-		double mn = min(_ydata[curve]);
+        double mx = AsciiPlotterUtils::max(_ydata[curve]);
+        double mn = AsciiPlotterUtils::min(_ydata[curve]);
 
 		if (mx > ymax)
 		{
@@ -245,11 +250,11 @@ void AsciiPlotter::show()
 	for (int curve = 0; curve < _curves; curve++)
 	{
 
-		resampled = resample(_ydata[curve], _width);
+        resampled = AsciiPlotterUtils::resample(_ydata[curve], _width);
 
 		for (int row = 0; row < _width; row++)
 		{
-			int colindex = (int)map(resampled[row], ymin, ymax, 0.0, (double)_height);
+            int colindex = (int)AsciiPlotterUtils::map(resampled[row], ymin, ymax, 0.0, (double)_height);
 			plane[row][min(max(0, colindex), _height - 1)] = _markers[curve];
 		}
 	}

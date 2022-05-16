@@ -160,11 +160,24 @@ hc_segment(0.5, 0, hc_cissoid_curve(1)))
 
 // Will run the curve in the time of the i event in an instrument
 
+// Run curve
 kenv = hc_run(icrv, linseg:k(0, p3, 1))
 
+// Or with linearinterpolation
+kenv = hc_runi(icrv, linseg:k(0, p3, 1))
 ```
 
   
+Faust : 
+```
+curve = hc.hypercurve(2048, 0, (
+  hc.segment(0.5, 1, hc.cubic_curve()), 
+  hc.segment(0.5, 0, hc.cissoid_curve(0.6)) 
+  ));
+
+env = hc.run(curve, os.phasor(1, 1));
+
+```
   
 
 ## Import hypercurve
@@ -205,6 +218,10 @@ In csound you can manually import the library like below, or simply put the libr
 
 ```
 
+Faust : 
+```
+hc = library("hypercurve.lib");
+```
   
 
 ## Hypercurve class
@@ -236,6 +253,11 @@ Csound :
 
 icrv = hc_hypercurve(int isize_in_samples, float iy_start, isegment1 , [isegment2, isegment3...])
 
+```
+
+Faust : 
+```
+curve = hc.hypercurve(int size_in_samples, float y_start, (list_of_segments) );
 ```
 
 
@@ -288,6 +310,20 @@ Csound :
   icrv_div = hc_div(icrv1, icrv2)
 ```
 
+
+Faust : 
+```
+crv1 = hc.hypercurve(2048, 0, (hc.segment(1, 1, hc.cubic_curve)));
+crv2 = hc.hypercurve(2048, 0, (hc.segment(1, 1, hc.diocles_curve(1))));
+
+crv_sum = hc.sum(crv1, crv2);
+crv_sub = hc.sub(crv1, crv2);
+crv_mult = hc.mult(crv1, crv2);
+crv_div = hc.div(crv1, crv2);
+
+```
+
+
 #### Invert curve base 
 
 This function will make a symetry of the curve on a x_start/y_start - x_destination/y_destination axis
@@ -318,6 +354,10 @@ hc_invert(hc_cubic_curve())
 
 ```
 
+Faust : 
+```
+hc.invert(hc.cubic_curve());
+```
 
 #### Normalize hypercurve
 
@@ -349,6 +389,14 @@ Csound :
   hc_normalize_y(icrv, -1, 1)
 ``` 
 
+
+Faust : 
+```
+crv = hc.hypercurve(2048, 0, (hc.segment(1, 1, hc.cubic_curve())))
+hc.normalize_y(crv, -1, 1);
+```
+
+
 ## Segment
 
 An hypercurve is composed with a list of one or more segments. Each segment have a fractional size (0-1 range), a destination in y axis, and a curve_base wich represents the algorithm. 
@@ -377,6 +425,10 @@ iseg = hc_segment(float fractional_size, float y_destination, curve_base icrv_ba
 
 ```
 
+Faust : 
+```
+seg = hc.segment(float fractional_size, float y_destination, curve_base crv_base);
+```
 
 ## Control point
 
@@ -414,6 +466,12 @@ hc_control_point(0.5, 0.8)
 hc_point(0.5, 0.8)
 
 ```
+
+Faust : 
+```
+hc.control_point(0.5, 0.7);
+hc.point(0.3, 0.8);
+```
   
 
 <!---
@@ -440,6 +498,11 @@ Csound :
 
 hc_
 
+```
+
+Faust : 
+```
+hc.
 ```
 
 -->
@@ -497,6 +560,15 @@ hc_cissoid(float iarg_a)
 
 ```
 
+Faust : 
+```
+hc.diocles_curve(float a);
+
+// Alias
+
+hc.cissoid(float a);
+
+```
   
 
 #### Cubic curve
@@ -529,6 +601,13 @@ hc_cubic_curve()
 ```
 
   
+Faust : 
+```
+hc.cubic_curve;
+
+```
+
+
 
 #### Power curve
 
@@ -561,6 +640,15 @@ Csound :
 hc_power_curve(float ipower)
 
 ```
+
+
+Faust : 
+```
+hc.power_curve(float exponent);
+
+```
+
+
 
 #### Hamming Hanning Blackman curves
 
@@ -608,6 +696,14 @@ hc_blackman_curve()
 
 ```
 
+
+Faust : 
+```
+hc.hamming;
+hc.hanning;
+hc.blackman;
+```
+
 #### Gaussian curve
   
 ![Gaussian curve](png/gaussian.png)
@@ -652,7 +748,15 @@ hc_gauss_curve(float iA, float ic)
 
 ```
 
-  
+Faust : 
+```
+hc.gaussian_curve(float A, float c);
+
+// Alias
+
+hc.gauss_curve(float A, float c);
+
+```
 
 #### Toxoid curve
 
@@ -696,6 +800,15 @@ hc_duplicatrix_cubic_curve(float ia)
 
 ```
 
+Faust : 
+```
+hc.toxoid_curve(float a);
+
+// Alias
+
+hc.duplicatrix_cubic_curve(float a);
+
+```
   
 
 #### Catenary curve
@@ -740,6 +853,11 @@ hc_funicular_curve(float ia)
 
 ```
 
+Faust : 
+```
+hc.catenary_curve(float a);
+hc.funicular_curve(float a);
+```
   
   
   
@@ -810,7 +928,11 @@ hc_quadratic_bezier_curve( hc_control_point cp )
 
 ```
 
-  
+Faust : 
+```
+hc.quadratic_bezier_curve(hc.control_point cp);
+
+```
   
 
 #### Cubic Bezier curve
@@ -844,6 +966,11 @@ hc_cubic_bezier_curve(hc_control_point cp1, hc_control_point cp2)
 ```
 
   
+Faust : 
+```
+hc.cubic_bezier_curve(hc.control_point cp1, hc.control_point cp2);
+
+```
   
 
 #### Cubic spline curve
@@ -877,6 +1004,11 @@ Csound :
 ```
 
   
+Faust : 
+```
+hc.cubic_spline_curve( (hc.control_point point_list) );
+
+```
   
 
 #### Catmull Rom spline curve
@@ -909,6 +1041,11 @@ hc_catmull_rom_spline_curve(hc_control_point cp1, hc_control_point cp2)
 
 ```
 
+Faust : 
+```
+hc.catmull_rom_spline_curve(hc.control_point cp1, hc.control_point cp2);
+
+```
 
 
 #### Polynomial curve
@@ -938,6 +1075,13 @@ Csound :
 
 ```Csound
 hc_polynomial_curve(1.34, -1, -0.5, 0.1)
+
+```
+
+
+Faust : 
+```
+hc.polynomial_curve( (float arguments_list) );
 
 ```
 
@@ -979,6 +1123,11 @@ Csound :
 
 ```
 
+Faust : 
+```
+// Not implemented
+
+```
 
 #### Typed Curve
 
@@ -1005,10 +1154,15 @@ hc.typed(-5)
 Csound :
 
 ```Csound
-hc_typed(-5)
+hc_typed_curve(-5)
 
 ```
 
+Faust : 
+```
+hc.typed_curve(9.5);
+
+```
 
   
 #### Mouse Curve
@@ -1044,6 +1198,13 @@ hc_kiss_curve()
 
 ```
 
+Faust : 
+```
+hc.mouse_curve();
+// Alias
+hc.kiss_curve();
+
+```
 
 #### Bicorn Curve
 
@@ -1055,25 +1216,33 @@ C++ :
 
 ```c++
 
-hypercurve::share( hypercurve::bicorn_curve());
+hypercurve::share( hypercurve::bicorn_curve(bool ));
 // Alias
-hypercurve::share( hypercurve::cocked_hat_curve());
+hypercurve::share( hypercurve::cocked_hat_curve(bool));
 
 ```
 
 Lua :
 
 ```Lua
-hc.bicorn()
+hc.bicorn(bool 0 or 1)
 -- Alias
-hc.cocked_hat()
+hc.cocked_hat(bool 0 or 1)
 ```
 
 Csound :
 
 ```Csound
-hc_bicorn_curve()
+hc_bicorn_curve(bool 0 or 1)
 // Alias
-hc_cocked_hat_curve()
+hc_cocked_hat_curve(bool 0 or 1)
+
+```
+
+Faust : 
+```
+hc.bicorn_curve(bool 0 or 1);
+// Alias
+hc.cocked_hat_curve(bool 0 or 1);
 
 ```

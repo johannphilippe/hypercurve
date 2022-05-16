@@ -24,6 +24,7 @@ target_compile_options(sndfile PRIVATE -fPIC)
 if(DEFINED BUILD_ALL)
    set(BUILD_CSOUND_OPCODE TRUE)
    set(BUILD_LUA_MODULE TRUE)
+   set(BUILD_FAUST_LIB TRUE)
 endif()
 
 #############################################
@@ -122,3 +123,12 @@ if(BUILD_CSOUND_OPCODE)
    target_link_libraries(csound_hypercurve PUBLIC hypercurve_static)
 endif()
 
+
+#############################################
+##### 	Build Faust lib
+#############################################
+
+if(BUILD_FAUST_LIB)
+   message(STATUS "Building Faust library")
+   add_subdirectory(faust_lib)
+endif()

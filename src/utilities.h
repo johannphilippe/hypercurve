@@ -3,12 +3,14 @@
    Distributed under the MIT License (https://opensource.org/licenses/MIT)
 =============================================================================*/
 
+#pragma once
 #ifndef UTILITIES_H
 #define UTILITIES_H
 
 #include<cmath>
 #include<iostream>
 #include<vector>
+#include<unordered_map>
 #include<memory>
 #include<cstring>
 #include<functional>
@@ -239,8 +241,12 @@ struct memory_vector
       std::move(v.begin(), v.end(), _data);
    }
 
-   // operators
+    ~memory_vector()
+   {
+       delete[] _data;
+   }
 
+   // operators
    memory_vector<T> operator=(const memory_vector<T> &other)
    {
        return memory_vector<T>(other);
@@ -250,11 +256,6 @@ struct memory_vector
    {
        _size = size_;
        _data = ptr;
-   }
-
-    ~memory_vector()
-   {
-       delete[] _data;
    }
 
    void resize(size_t size_)
@@ -403,6 +404,30 @@ protected:
     std::vector<color> data;
 };
 
+// Make it derive from AuxMem
+template<typename T>
+struct increment_map  : public std::unordered_map<int, T>
+{
+    increment_map()
+    {
+    }
+
+    int map( T to_map)
+    {
+        this->insert({_index, to_map});
+        ++_index;
+        return _index - 1;
+    }
+    void unmap(size_t index)
+    {
+        if(this->find(index) != this->end())
+        {
+            this->erase(index);
+        }
+    }
+
+    size_t _index = 1;
+};
 
 }
 
