@@ -129,6 +129,8 @@ On some platforms (e.g. Windows) you might need to set the Lua paths with the fo
 ```
 cmake .. -DBUILD_LUA_MODULE=TRUE -DLUA_INCLUDE_DIR=/you/dir/include -DLUA_LIBRARIES=/path/to/lua.lib
 ```
+In order to build the Faust library, you will need [Quom](https://pypi.org/project/quom/) to be installed in your system. See the Faust [README](faust_lib/README.md)
+
 The PNG writer [fpng](https://github.com/richgel999/fpng) used for hypercurve has SSE support. This can be enabled with `-DSSE=1`.
 # TODO
 * Expose random generators to frontends (Lua, Csound, Faust).
