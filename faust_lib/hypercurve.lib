@@ -1,4 +1,9 @@
-//################################ analyzers.lib ##########################################
+/*=============================================================================
+   Copyright (c) 2022 Johann Philippe
+   Distributed under the MIT License (https://opensource.org/licenses/MIT)
+=============================================================================*/
+
+//############################## hypercurve.lib ##########################################
 // Hypercurve library. Its official prefix is `hc`.
 //########################################################################################
 
@@ -7,9 +12,18 @@ declare version "0.1";
 
 ba = library("basics.lib");
 
-control_point = ffunction(int hc_control_point (float, float), "hypercurve_faust.h", "");
+/*=============================================================================
+Curve bases - implement different algorithms to be used as segments arguments
+=============================================================================*/
+/*
+      diocles_curve(a), alias cissoid_curve(a)
+      * a :  0.5 < a < inf
+      e.g. `diocles_curve(0.51)`
 
-// Arguments
+      Some of them use arguments while others don't (linear, cubic...)
+      Be careful that these arguments must be constant.
+*/
+
 diocles_curve = ffunction(int hc_diocles_curve (float), "hypercurve_faust.h", "");
 power_curve = ffunction(int hc_power_curve (float), "hypercurve_faust.h", "");
 gaussian_curve = ffunction(int hc_gaussian_curve (float, float), "hypercurve_faust.h", "");
@@ -19,25 +33,40 @@ tightrope_walker_curve = ffunction(int hc_tightrope_walker_curve(float, float), 
 typed_curve = ffunction(int hc_typed_curve (float), "hypercurve_faust.h", "");
 bicorn_curve = ffunction(int hc_bicorn_curve (float), "hypercurve_faust.h", "");
 
-// No arguments - require proxy
-linear_curve_proxy = ffunction(int hc_linear_curve (float), "hypercurve_faust.h", "");
-linear_curve = linear_curve_proxy(0);
-cubic_curve_proxy = ffunction(int hc_cubic_curve (int), "hypercurve_faust.h", "");
-cubic_curve  = cubic_curve_proxy(0);
-hanning_curve_proxy = ffunction(int hc_hanning_curve (int), "hypercurve_faust.h", "");
-hanning_curve  = hanning_curve_proxy(0);
-hamming_curve_proxy = ffunction(int hc_hamming_curve (int), "hypercurve_faust.h", "");
-hamming_curve  = hamming_curve_proxy(0);
-blackman_curve_proxy = ffunction(int hc_blackman_curve (int), "hypercurve_faust.h", "");
-blackman_curve  = blackman_curve_proxy(0);
-mouse_curve_proxy = ffunction(int hc_mouse_curve (int), "hypercurve_faust.h", "");
-mouse_curve = mouse_curve_proxy(0);
+// No arguments curve bases
+linear_curve = linear_curve_proxy(0) with
+{
+      linear_curve_proxy = ffunction(int hc_linear_curve (float), "hypercurve_faust.h", "");
+};
+cubic_curve  = cubic_curve_proxy(0)
+with {
+      cubic_curve_proxy = ffunction(int hc_cubic_curve (int), "hypercurve_faust.h", "");
+};
+hanning_curve  = hanning_curve_proxy(0)
+with {
+      hanning_curve_proxy = ffunction(int hc_hanning_curve (int), "hypercurve_faust.h", "");
+};
+hamming_curve  = hamming_curve_proxy(0)
+with {
+      hamming_curve_proxy = ffunction(int hc_hamming_curve (int), "hypercurve_faust.h", "");
+}
+blackman_curve  = blackman_curve_proxy(0)
+with {
+      blackman_curve_proxy = ffunction(int hc_blackman_curve (int), "hypercurve_faust.h", "");
+};
+mouse_curve = mouse_curve_proxy(0)
+with {
+      mouse_curve_proxy = ffunction(int hc_mouse_curve (int), "hypercurve_faust.h", "");
+};
 
 // Splines
 quadratic_bezier_curve = ffunction(int hc_quadratic_bezier_curve (int), "hypercurve_faust.h", "");
 cubic_bezier_curve = ffunction(int hc_cubic_bezier_curve (int, int), "hypercurve_faust.h", "");
 catmull_rom_spline_curve = ffunction(int hc_catmull_rom_spline_curve (int, int), "hypercurve_faust.h", "");
-cubic_spline_curve_proxy = ffunction(int hc_cubic_spline_curve(
+// Cubic spline curve takes a list of control points as argument. Max 32 control_points.
+cubic_spline_curve(control_point_list) = cubic_spline_curve_proxy(args)
+with {
+      cubic_spline_curve_proxy = ffunction(int hc_cubic_spline_curve(
                         int, int, int, int,
                         int, int, int, int,
                         int, int, int, int,
@@ -47,13 +76,13 @@ cubic_spline_curve_proxy = ffunction(int hc_cubic_spline_curve(
                         int, int, int, int,
                         int, int, int, int),
                         "hypercurve_faust.h", "");
-cubic_spline_curve(control_point_list) = cubic_spline_curve_proxy(args)
-with {
       args = control_point_list, par(n, 32 - ba.count(control_point_list), 0);
 };
 
-
-polynomial_curve_proxy = ffunction(int hc_cubic_spline_curve(
+// Polynomial curve defines a polynomial with user arguments. Max 32 arguments.
+polynomial_curve(argument_list) = cubic_spline_curve_proxy(args)
+with {
+      polynomial_curve_proxy = ffunction(int hc_cubic_spline_curve(
                         float, float, float, float,
                         float, float, float, float,
                         float, float, float, float,
@@ -63,11 +92,11 @@ polynomial_curve_proxy = ffunction(int hc_cubic_spline_curve(
                         float, float, float, float,
                         float, float, float, float),
                         "hypercurve_faust.h", "");
-polynomial_curve(argument_list) = cubic_spline_curve_proxy(args)
-with {
       args = argument_list, par(n, 32 - ba.count(argument_list), 0);
 };
 
+// Utility : control point (x, y) point
+control_point = ffunction(int hc_control_point (float, float), "hypercurve_faust.h", "");
 
 // Aliases
 point = control_point;
@@ -77,8 +106,36 @@ duplicatrix_cubic_curve = toxoid_curve;
 funicular_curve  = catenary_curve;
 kiss_curve = mouse_curve;
 
+/*=============================================================================
+Hypercurve segment : defines a segment inside an hypercurve
+=============================================================================*/
+/*
+      segment(fractional_size, y_destination, curve_base_index);
+      * fractional_size = fractional size in the hypercurve (between 0 and 1)
+      * y_destination = last y point in the segment
+      * curve_base_index = return value of a curve_base algorithm
+
+      e.g. : segment(1/2, 0.8, hc.catenary_curve(0.1));
+      Segment arguments must be constant.
+*/
 segment = ffunction(int hc_segment (float, float, int), "hypercurve_faust.h", "");
-hypercurve_proxy  = ffunction(int hc_hypercurve (int, float,
+
+/*=============================================================================
+Hypercurve composer
+=============================================================================*/
+/*
+      hypercurve(definition, y_start, (list_of_segments));
+      * definition : number of samples in the curve (usually a power of 2)
+      * y_start : start point of the curve in y axis
+      * list_of_segments : a parallel list of segments - max 64 segments
+
+      e.g. hypercurve(2048, 0, (hc.segment(1, 1, hc.cubic)));
+      Hypercuve arguments must be constants
+*/
+MAX_SEGMENTS = 64;
+hypercurve(definition, y_start, segs) =  hypercurve_proxy(definition, y_start, args)
+with {
+      hypercurve_proxy  = ffunction(int hc_hypercurve (int, float,
                         int, int, int, int,
                         int, int, int, int,
                         int, int, int, int,
@@ -96,23 +153,55 @@ hypercurve_proxy  = ffunction(int hc_hypercurve (int, float,
                         int, int, int, int,
                         int, int, int, int),
                         "hypercurve_faust.h", "");
-MAX_SEGMENTS = 64;
-hypercurve(definition, y_start, segs) =  hypercurve_proxy(definition, y_start, args)
-with {
         args = segs, par(n, MAX_SEGMENTS - ba.count(segs), 0);
 };
 
-// Pick values at relative positions in curve (between 0 and 1)
+/*=============================================================================
+Hypercurve runtime reader
+=============================================================================*/
+/*
+      run(hypercurve_index, read_index);
+      * hypercurve_index : return value of hypercurve composer
+      * read_index : value between 0 and 1 (e.g. phasor)
+*/
 run = ffunction(float hc_run (int, float), "hypercurve_faust.h", "");
 // Same with linear interpolation
 runi = ffunction(float hc_runi (int, float), "hypercurve_faust.h", "");
 
-// Operators
+/*=============================================================================
+Hypercurve operators
+=============================================================================*/
+/*
+      Allows to make some maths on hypercurves. Arguments must be constants.
+      add(hc1, hc2)
+      * hc1 : first hypercurve to be added to the other
+      * hc2 : second hypercurve
+
+      Returns a new hypercurve
+*/
 add = ffunction(int hc_add (int, int), "hypercurve_faust.h", "");
 sub = ffunction(int hc_sub (int, int), "hypercurve_faust.h", "");
 mult = ffunction(int hc_mult (int, int), "hypercurve_faust.h", "");
 div = ffunction(int hc_div (int, int), "hypercurve_faust.h", "");
 
-// Operations on curves
-normalize_y = ffunction(int hc_normalize_y (float, float), "hypercurve_faust.h", "");
+/*=============================================================================
+Hypercurve operations
+=============================================================================*/
+/*
+      Normalize, without copying the hypercurve, but returns the hypercurve index.
+      normalize_y(int hc, float min, float max);
+      * hc : hypercurve to be normalized
+      * min : minimum value in new scale
+      * max : maximum value in new scale
+
+*/
+normalize_y = ffunction(int hc_normalize_y (int, float, float), "hypercurve_faust.h", "");
+/*
+      Inverts a curve_base segment. It does not copy the curve_base, but still returns its index.
+      invert(int curve_base_index);
+      * curve_base_index : curve_base_index to be inverted
+
+
+      Does not copy the hypercurve, but  returns the hypercurve index.
+*/
 invert = ffunction(int hc_invert_curve_base (int), "hypercurve_faust.h", "");

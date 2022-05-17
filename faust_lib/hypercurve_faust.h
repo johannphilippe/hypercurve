@@ -1,3 +1,8 @@
+/*=============================================================================
+   Copyright (c) 2022 Johann Philippe
+   Distributed under the MIT License (https://opensource.org/licenses/MIT)
+=============================================================================*/
+
 #ifndef HYPERCURVE_FAUST_H
 #define HYPERCURVE_FAUST_H
 
@@ -6,7 +11,11 @@
 #include <stdarg.h>
 #include <stdio.h>
 
-// C only library to be used as a Faust module
+////////////////////////////////////////////////////////////////////////////////
+// Glue code for Faust hypercuve.
+////////////////////////////////////////////////////////////////////////////////
+
+
 using namespace hypercurve;
 extern "C"
 {
@@ -46,7 +55,6 @@ static int hc_div(int h1, int h2)
 {
     return faust_curve_map.map(share( *faust_curve_map[h1] / *faust_curve_map[h2]));
 }
-
 
 // Curve bases functions
 
@@ -174,7 +182,9 @@ int hc_curvemaker(int size, double y_start, int n_args, ...)
         segs.push_back(*faust_segment_map[arg]) ;
     }
     va_end(ap);
-    return faust_curve_map.map(share(curve(size, y_start, segs)));
+    int index = faust_curve_map.map(share(curve(size, y_start, segs)));
+    faust_curve_map[index]->ascii_display("faust curve", "curve display", '*');
+    return index;
 }
 
 static int hc_hypercurve(int size, double y_start,
@@ -235,12 +245,6 @@ static double hc_runi(int index, double phasor)
                  phasor)));
 
 }
-
-
-
 }
-
-
-
 
 #endif // HYPERCURVE_FAUST_H
