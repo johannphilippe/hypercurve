@@ -432,6 +432,30 @@ struct cs_catmull_rom : csnd::Plugin<1, 2>
     std::shared_ptr<catmull_rom_spline_curve> _curve;
 };
 
+struct cs_lagrange_curve : csnd::Plugin<1, 64>
+{
+    int init()
+    {
+        cp.allocate(csound, in_count() + 2);
+        for(size_t i = 0; i < in_count(); ++i)
+            cp[i+1] = *control_point_map[inargs[i]];
+        _curve = std::make_shared<lagrange_polynomial_curve>(cp.data(), cp.len());
+        index = curve_base_map.map(_curve);
+        outargs[0] = index;
+        return OK;
+    }
+
+    int deinit()
+    {
+        curve_base_map.unmap(index);
+        return OK;
+    }
+
+    int index;
+    csnd::AuxMem<control_point> cp;
+    std::shared_ptr<lagrange_polynomial_curve> _curve;
+};
+
 struct cs_polynomial_curve : csnd::Plugin<1, 64>
 {
     int init()
@@ -839,6 +863,7 @@ void csnd::on_load(Csound *csound) {
     csnd::plugin<cs_quad_bezier>(csound, "hc_quadratic_bezier_curve", "i", "i", csnd::thread::i);
     csnd::plugin<cs_cub_bezier>(csound, "hc_cubic_bezier_curve", "i", "ii", csnd::thread::i);
     csnd::plugin<cs_catmull_rom>(csound, "hc_catmull_rom_curve", "i" , "ii", csnd::thread::i);
+    csnd::plugin<cs_lagrange_curve>(csound, "hc_lagrange_curve", "i", "m", csnd::thread::i);
 
     // Aliases
     csnd::plugin<cs_toxoid>(csound, "hc_duplicatrix_cubic_curve", "i", "i", csnd::thread::i);

@@ -92,6 +92,9 @@ local crv = hc.hypercurve(definition, y_start,
 hc.write_as_wav("path/to/outfile.wav", crv)
 ```
 
+## A simple Faust example
+
+
 ```Faust
 hc = library("hypercurve.lib");
 definition = 16384;
@@ -133,11 +136,12 @@ In order to build the Faust library, you will need [Quom](https://pypi.org/proje
 
 The PNG writer [fpng](https://github.com/richgel999/fpng) used for hypercurve has SSE support. This can be enabled with `-DSSE=1`.
 # TODO
+* Waveform scaling : will only work if min_y = max_y : make a specific function
 * Expose random generators to frontends (Lua, Csound, Faust).
 * Tests on invert function (Lua and Csound)
 * Lua semantics : append "curve"  to curve_base methods and reflect this to Documentation
 * REAPER/Reascript -> see https://forum.cockos.com/showthread.php?p=2543755#post2543755
-* Lagrange interpolation for curve extraction.
+* Lagrange interpolation for curve extraction ?
 * Hard one -> all curves allowing one sample processing (including cubic spline) to allow no-table processing.
 ## Curves to implement
 * Cardioid / hypercardioid

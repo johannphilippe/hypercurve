@@ -60,7 +60,7 @@ It is available in several frontends : C++, Lua, and Csound.
 
 6.16 [Bicorn Curve](#bicorn-curve)
 
-
+6.17 [Lagrange Polynomial Curve](#lagrange-polynomial-curve)
 
 ## Hypercurve basic syntax
 
@@ -1245,4 +1245,39 @@ hc.bicorn_curve(bool 0 or 1);
 // Alias
 hc.cocked_hat_curve(bool 0 or 1);
 
+```
+
+
+
+#### Lagrange polynomial curve
+
+
+![Lagrange curve](png/lagrange.png)
+  
+Like cubic spline, lagrange interpolation takes a list of control points with 0 < x < 1. 
+
+C++ :
+
+```c++
+
+hypercurve::share( hypercurve::lagrange_polynomial_curve( {control_point(0.2, 0.8), control_point(0.4, 0.1)} ) );
+
+```
+
+Lua :
+
+```Lua
+hc.lagrange_polynomial( hc.control_point(0.2, 0.8), hc.control_point(0.4, 0.2) )
+```
+
+Csound :
+
+```Csound
+hc_lagrange_polynomial_curve( hc_control_point(0.2, 0.8), hc_control_point(0.4, 0.2))
+
+```
+
+Faust : 
+```
+hc.lagrange_polynomial_curve( (hc.control_point(0.2, 0.8), hc.control_point(0.4, 0.1)) );
 ```

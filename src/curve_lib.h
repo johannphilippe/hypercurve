@@ -135,8 +135,7 @@ public:
     {}
     inline double process(double x) override
     {
-        double res = std::pow(x, exponent) ;
-        return res;
+        return std::pow(x, exponent) ;
     }
 
 private:
@@ -157,7 +156,7 @@ class hamming_curve : public curve_base
 public:
     inline double process(double x) override
     {
-        return  hamming(x * definition, definition * 2);
+        return  (hamming(x * definition, definition * 2) - hamming_scaling_constant) * hamming_scaling_factor;
     }
 };
 
@@ -565,11 +564,6 @@ public:
     }
 
 private:
-    double get_t(double x)
-    {
-        return 0;
-    }
-
     inline std::pair<double, double> process_bezier(double x) override
     {
         return {
@@ -611,95 +605,7 @@ public:
         a_y = ((-3) * y_start + 3 * _control_point1.y);
     }
 
-    /*
-    double process(double x) override
-    {
-        return y_from_t(calculate_t(x));
-    }
-    */
 private:
-
-    double y_from_t(double t)
-    {
-        return cubed(1 - t) * y_start
-        + 3 * t * squared(1 - t) * _control_point1.y
-        + 3 * squared(t) * (1 - t) * _control_point2.y
-        + cubed(t) * y_destination;
-    }
-
-    double calculate_t(double x)
-    {
-        if(x == 0) return 0;
-        if(x == 1) return 1;
-        // Here 0 and 1 stand as P0.x and P3.x
-        const double a = -0.0 + 3.0 * _control_point1.x - 3 * _control_point2.x + 1.0;
-        const double b = 3.0 * 0.0 - 6 * _control_point1.x + 3.0 * _control_point2.x;
-        const double c = -3.0 * 0.0 + 3.0 * _control_point1.x;
-        const double d = 0.0 - x;
-        return solve_cubic(a, b, c, d);
-    }
-
-    double solve_cubic(double a, double b, double c, double d)
-    {
-        if (a == 0) return solve_quadratic(b, c, d);
-        if (d == 0) return 0;
-
-        b /= a;
-        c /= a;
-        d /= a;
-        double q = (3.0 * c - squared(b)) / 9.0;
-        double r = (-27.0 * d + b * (9.0 * c - 2.0 * squared(b))) / 54.0;
-        double disc = cubed(q) + squared(r);
-        double term1 = b / 3.0;
-
-        if (disc > 0) {
-            double s = r + std::sqrt(disc);
-            s = (s < 0) ? -cubic_root(-s) : cubic_root(s);
-            double t = r - std::sqrt(disc);
-            t = (t < 0) ? -cubic_root(-t) : cubic_root(t);
-
-            double result = -term1 + s + t;
-            if (result >= 0 && result <= 1) return result;
-        } else if (disc == 0) {
-            double r13 = (r < 0) ? -cubic_root(-r) : cubic_root(r);
-
-            double result = -term1 + 2.0 * r13;
-            if (result >= 0 && result <= 1) return result;
-
-            result = -(r13 + term1);
-            if (result >= 0 && result <= 1) return result;
-        } else {
-            q = -q;
-            double dum1 = q * q * q;
-            dum1 = std::acos(r / std::sqrt(dum1));
-            double r13 = 2.0 * std::sqrt(q);
-
-            double result = -term1 + r13 * std::cos(dum1 / 3.0);
-            if (result >= 0 && result <= 1) return result;
-
-            result = -term1 + r13 * std::cos((dum1 + 2.0 * M_PI) / 3.0);
-            if (result >= 0 && result <= 1) return result;
-
-            result = -term1 + r13 * std::cos((dum1 + 4.0 * M_PI) / 3.0);
-            if (result >= 0 && result <= 1) return result;
-        }
-
-        throw(std::runtime_error("no result for cubic solve"));
-        return 0;
-    }
-
-    double solve_quadratic(double a, double b, double c)
-    {
-        double result = (-b + std::sqrt(squared(b) - 4 * a * c)) / (2 * a);
-        if (result >= 0 && result <= 1) return result;
-
-        result = (-b - std::sqrt(squared(b) - 4 * a * c)) / (2 * a);
-        if (result >= 0 && result <= 1) return result;
-
-        throw(std::runtime_error("no result for quadratic solve"));
-        return 0;
-    }
-
     std::pair<double, double> process_bezier(double x) override
     {
         return {
@@ -733,7 +639,6 @@ public:
     void on_init() override
     {
        _control_points.insert(_control_points.begin(), curve_point(0, y_start));
-       //_control_points.push_back(curve_point(1, y_destination));
         // For each point, determine absolute position from relative position
         for(size_t i = 1; i < _control_points.size(); i++)
         {
@@ -825,6 +730,59 @@ private:
     }
 
     control_point _cp0, _cp3, _cp1, _cp2;
+};
+
+
+class lagrange_polynomial_curve : public curve_base
+{
+
+public:
+    lagrange_polynomial_curve(std::vector<control_point> pts)
+        : c_pts(pts.size() + 2)
+    {
+        std::copy(pts.begin(), pts.end(), c_pts.data() + 1);
+    }
+    lagrange_polynomial_curve(memory_vector<control_point> pts)
+        : c_pts(pts.size() + 2)
+    {
+        std::copy(pts.begin(), pts.end(), c_pts.data() + 1);
+    }
+
+    // Used for preallocated situations (e.g. Csound)
+    lagrange_polynomial_curve(control_point *pts, size_t size)
+        : c_pts(pts, size)
+    {}
+
+    void on_init() override
+    {
+        c_pts[0] = control_point(0, y_start);
+        c_pts[c_pts.size() - 1] = control_point(1, y_destination);
+    }
+
+    inline double process(double x) override
+    {
+        return process_lagrange(x);
+    }
+
+protected:
+    double process_lagrange(double x)
+    {
+        yp = 0;
+        for(size_t i = 0; i < c_pts.size(); ++i)
+        {
+            p = 1;
+            for(size_t j = 0; j < c_pts.size(); ++j)
+            {
+                if(j != i)
+                    p = p * (x - c_pts[j].x)/( c_pts[i].x  - c_pts[j].x);
+            }
+            yp = yp + p * c_pts[i].y;
+        }
+        return yp;
+    }
+
+    double p, yp;
+    memory_vector<control_point> c_pts;
 };
 
 

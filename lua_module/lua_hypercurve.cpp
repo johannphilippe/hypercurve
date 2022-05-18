@@ -297,6 +297,20 @@ int luahc_user_defined_curve(lua_State *lua)
     return 0;
 }
 
+int luahc_lagrange_interpolation_curve(lua_State *lua)
+{
+    hypercurve::memory_vector< hypercurve::control_point> vec(lua_gettop(lua));
+    for(size_t i = 1; i <= vec.size(); ++i)
+    {
+        hypercurve::control_point *cp = *(hypercurve::control_point**) luaL_checkudata(lua, i, "hypercurve.control_point");
+        vec[i - 1] = *cp;
+    }
+    lua_curve_helper(lua, new hypercurve::lagrange_polynomial_curve(vec));
+    luaL_getmetatable(lua, "hypercurve.curve_base");
+    lua_setmetatable(lua, -2);
+    return 1;
+}
+
 int luahc_polynomial_curve(lua_State *lua)
 {
     hypercurve::memory_vector<double> vec(lua_gettop(lua));
@@ -587,6 +601,7 @@ static const luaL_Reg luahc_static_meth[] =
     {"cubic_bezier", luahc_cubic_bezier_curve},
     {"cubic_spline", luahc_cubic_spline_curve},
     {"catmull_rom", luahc_catmull_rom_spline_curve},
+    {"lagrange_polynomial", luahc_lagrange_interpolation_curve},
     {"polynomial", luahc_polynomial_curve},
 
     {"typed", luahc_typed_curve},

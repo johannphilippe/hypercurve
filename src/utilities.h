@@ -63,7 +63,7 @@ inline double limit(double min, double max, double v)
 }
 
 template<typename T>
-std::shared_ptr<T> share(T t)
+inline std::shared_ptr<T> share(T t)
 {
     return std::make_shared<T>(t);
 }
@@ -172,8 +172,10 @@ inline double hanning(int index, int length) {
     return  0.5 * (1 - cos(2 * M_PI * index / (length - 1 )));
 }
 
+constexpr static const double hamming_scaling_constant = 0.08;
+constexpr static const double hamming_scaling_factor = 1.0 / (1.0 - hamming_scaling_constant);
 inline double hamming(int index, int length) {
-    return 0.54 - (0.46 * cos(2 * M_PI * index / (length - 1)));
+    return 0.54 - (0.46 * cos(2 * M_PI * double(index) / ( double(length) - 1.)));
 }
 
 inline double blackman(int index, int length) {

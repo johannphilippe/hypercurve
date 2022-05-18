@@ -31,7 +31,9 @@ hc = library("hypercurve.lib");
 // Sometimes, cubic spline needs to be rescaled
 // hc.normalize_y(crv, 0, 1)
 
-crv = hc.hypercurve(4096, 0, (hc.segment(1, 1, hc.linear_curve)));
+//crv = hc.hypercurve(4096, 0, (hc.segment(1, 1, hc.linear_curve)));
+
+crv = hc.hypercurve(4096, 0, ( hc.segment(1, 1, hc.lagrange_polynomial_curve( ( hc.control_point(0.2, 0.8), hc.control_point(0.4, 0.1))))));
 
 res = hc.run(crv, os.phasor(1, 1));
 process = os.sawtooth(440) * res;

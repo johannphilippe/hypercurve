@@ -41,13 +41,39 @@ enum curve_base_index {
     typed_i = 17,
     mouse_i = 18,
     bicorn_i = 19,
+    lagrange_polynomial_i = 20,
 
     // keep that last to get size
     size_i
 };
 
+std::unordered_map<curve_base_index, std::string> curve_base_index_map = {
+    {linear_i, "linear"},
+    {diocles_i, "diocles"},
+    {cubic_i, "cubic"},
+    {power_i, "power"},
+    {hanning_i, "hanning"},
+    {hamming_i, "hamming"},
+    {blackman_i, "blackman"},
+    {gaussian_i, "gaussian"},
+    {toxoid_i, "toxoid"},
+    {catenary_i, "catenary"},
+    {tightrope_walker_i, "tightrope_walker"},
+    {cubic_bezier_i, "cubic_bezier"},
+    {quadratic_bezier_i, "quad_bezier"},
+    {cubic_spline_i, "cubic_spline"},
+    {catmull_rom_spline_i, "catmull_rom"},
+    {polynomial_i, "polynomial"},
+    {user_defined_i, "user_defined_"},
+    {typed_i, "typed"},
+    {mouse_i, "mouse"},
+    {bicorn_i, "bicorn"},
+    {lagrange_polynomial_i, "lagrange"}
+};
 
-std::shared_ptr<curve_base> get_curve_from_index(curve_base_index n, std::vector<double> args, std::vector<control_point> cps)
+std::shared_ptr<curve_base> get_curve_from_index(curve_base_index n,
+                                                 std::vector<double> args,
+                                                 std::vector<control_point> cps)
 {
     switch (n) {
     case linear_i: return share(linear_curve());
@@ -69,6 +95,7 @@ std::shared_ptr<curve_base> get_curve_from_index(curve_base_index n, std::vector
     case typed_i: return share(typed_curve(args[0]));
     case mouse_i: return share(mouse_curve());
     case bicorn_i: return share(bicorn_curve(args[0] > 0 ));
+    case lagrange_polynomial_i: return share(lagrange_polynomial_curve(cps));
     default: return share(linear_curve());
     }
 }
@@ -106,7 +133,8 @@ std::pair<std::vector<double>, std::vector<control_point>> random_args_generator
 
         return {{}, cps};
     };
-    case quadratic_bezier_i: return {{}, {control_point(random<double>(0, 1), random<double>(0, 1))}};
+    case quadratic_bezier_i: return {{}, {control_point(random<double>(0, 1),
+                                                        random<double>(0, 1))}};
     case catmull_rom_spline_i: {
         std::vector<control_point> cps {
           control_point(random<double>(0.01, 3) * -1.0, random<double>(0.01, 34) * -1),
@@ -121,6 +149,7 @@ std::pair<std::vector<double>, std::vector<control_point>> random_args_generator
             args[i] = random<double>(0, 10);
         return {args, {}};
         };
+    case lagrange_polynomial_i:
     case cubic_spline_i: {
         size_t nargs = (rand() % 4) + 3;
         std::vector<control_point> cps(nargs);
@@ -134,37 +163,45 @@ std::pair<std::vector<double>, std::vector<control_point>> random_args_generator
     case typed_i: return {{random<double>(-10, 10)}, {}};
     case mouse_i: return {{},{}};
     case bicorn_i: return {{(double)random<int>(-1, 1)}, {}};
+
     default: return {{},{}};
     }
 }
 
-curve random_curve_composer( size_t max_segs = 16, int min = 0, int max = 1,
-                             size_t definition = 4096, bool envelop = false,
+std::pair<curve, std::string> random_curve_composer( size_t max_segs = 16, int min = 0, int max = 1,
+                             size_t definition = 4096, bool envelop = false, bool waveform = false,
                              bool force_curve_type = false, curve_base_index forced = linear_i)
 {
     auto gen_curve = [&](){
         return force_curve_type ? forced : static_cast<curve_base_index>(rand() % static_cast<int>(size_i));
     };
+
+    std::string cnames = "";
     size_t nsegs = 1 + (rand() % max_segs);
+    if(nsegs < 2) nsegs = 2;
+
 
     std::vector<segment> segs(nsegs);
     for(size_t i = 0; i < nsegs; ++i) {
         double frac_size = random<double>(0.1, 1);
-        double dest = random<double>(0, 1);
+
+        double dest = waveform ? random<double>(-1, 1) : random<double>(0, 1);
         curve_base_index index =  gen_curve();
-        while( index == user_defined_i)
+
+        while( index == user_defined_i || (envelop && ((index == polynomial_i) || (index == lagrange_polynomial_i) || (index == cubic_spline_i))))
             index = gen_curve();
 
+        cnames += curve_base_index_map[index] + "_";
         std::pair<std::vector<double>, std::vector<control_point>> args = random_args_generator(index);
-        if(i == (nsegs - 1) && envelop)
+        if(i == (nsegs - 1) && (envelop | waveform) )
             dest = 0;
         segs[i] = segment(frac_size, dest, get_curve_from_index(index, args.first, args.second) );
     }
 
-    double y_start = envelop ? 0 : random<double>(0, 1);
+    double y_start = (envelop | waveform) ? 0 : random<double>(0, 1);
     curve c(definition, y_start, segs);
-    c.normalize_y(min, max);
-    return c;
+    //c.normalize_y(min, max);
+    return {c, cnames};
 }
 
 }

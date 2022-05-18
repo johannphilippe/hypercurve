@@ -101,6 +101,24 @@ static int hc_cubic_spline_curve_varg(int n_args, ...)
     va_end(ap);
     return faust_curve_base_map.map(share(cubic_spline_curve(cps)));
 }
+
+static int hc_lagrange_curve_varg(int n_args, ...)
+{
+    int i, arg;
+    va_list ap;
+
+    std::vector< control_point > cps;
+    va_start(ap, n_args);
+    for(i = 0; i < n_args; i++) {
+        arg = va_arg(ap, int);
+        if(arg <= 0) continue;
+        cps.push_back(*faust_control_point_map[arg]) ;
+    }
+    va_end(ap);
+    return faust_curve_base_map.map(share(lagrange_polynomial_curve(cps)));
+}
+
+
 static int hc_polynomial_curve_varg(int n_args, ...)
 {
     int i, arg;
@@ -128,6 +146,26 @@ static int hc_cubic_spline_curve(
                     int s29 = -1, int s30 = -1, int s31 = -1, int s32 = -1
 ) {
     return hc_cubic_spline_curve_varg(32, s1, s2, s3, s4,
+                s5, s6, s7, s8,
+                s9, s10, s11, s12,
+                s13, s14, s15, s16,
+                s17, s18, s19, s20,
+                s21, s22, s23, s24,
+                s25, s26, s27, s28,
+                s29, s30, s31, s32 );
+}
+
+static int hc_lagrange_polynomial_curve(
+                    int s1 = -1, int s2 = -1, int s3 = -1, int s4 = -1,
+                    int s5 = -1, int s6 = -1, int s7 = -1, int s8 = -1,
+                    int s9 = -1, int s10 = -1, int s11 = -1, int s12 = -1,
+                    int s13 = -1, int s14 = -1, int s15 = -1, int s16 = -1,
+                    int s17 = -1, int s18 = -1, int s19 = -1, int s20 = -1,
+                    int s21 = -1, int s22 = -1, int s23 = -1, int s24 = -1,
+                    int s25 = -1, int s26 = -1, int s27 = -1, int s28 = -1,
+                    int s29 = -1, int s30 = -1, int s31 = -1, int s32 = -1
+) {
+    return hc_lagrange_curve_varg(32, s1, s2, s3, s4,
                 s5, s6, s7, s8,
                 s9, s10, s11, s12,
                 s13, s14, s15, s16,

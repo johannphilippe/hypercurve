@@ -123,9 +123,13 @@ void generate_curve_pictures()
     write_doc_png(mouse, "mouse.png");
     curve bicorn(2048, 0, {segment(1, 1, share(bicorn_curve(true)))});
     write_doc_png(bicorn, "bicorn.png");
+    curve lagrange(2048, 0, {segment(1, 1, share(lagrange_polynomial_curve({ control_point(0.2, 0.8),  control_point(0.4, 0.1) })))});
+    lagrange.normalize_y(0, 1);
+    write_doc_png(lagrange, "lagrange.png");
 }
 
-int main()
+
+void unit_tests()
 {
     int def = 16384;
 
@@ -396,19 +400,72 @@ int main()
     rescale_test.ascii_display("Rescaled", "rescaled 2/3", '*');
 
 
-    // Random curves
+}
 
+void random_generator_test()
+{
+    // Random curves
+    const int def = 16384;
 
     for(size_t i = 0; i < 100; ++i){
-        curve rand1 = random_curve_composer(4, 0, 1, def);
-        rand1.ascii_display("random1", "oooh", '*');
-        std::string rname = "rand_" + std::to_string(i) + ".png";
-        write_as_png(rand1, false, rname);
+        std::pair<curve, std::string> rand1 = random_curve_composer(4, -1, 1, def, true, true);
+        rand1.first.ascii_display("random_curve" + std::to_string(i), rand1.second, '*');
+
+        std::string rname = "rand_" + std::to_string(i) + "__" + rand1.second + ".png";
+        write_as_png(rand1.first, true, rname);
     }
 
+}
 
+void dummy_test()
+{
 
-    generate_curve_pictures();
+    curve crv(16384, 0, {segment(0.5, 1, share(hamming_curve())), segment(0.5, 0, share(hamming_curve()))});
+    write_as_png(crv, false, "hamming.png");
+    for(size_t i = 0; i < 1024; ++i)
+    {
+        std::cout << "hanning at "  << i << " is : " << hamming(i, 1024) << std::endl;
+    }
+    curve crvb(16384, 0, {segment(fraction(1,2), 1, share(blackman_curve())), segment(fraction(1,2), 0, share(blackman_curve()))});
+    write_as_png(crvb, false, "blackman.png");
+    for(size_t i = 0; i < 1024; ++i)
+    {
+
+        std::cout << "blackman at "  << i << " is : " << blackman(i, 1024) << std::endl;
+    }
+    /*
+    curve crv(16384, 0, {segment(1., 1., share(
+                       lagrange_polynomial_curve(
+                       { control_point(0.2, 0.9),
+                         control_point(0.4, 0.01),
+                         control_point(0.7, 0.9)
+                       }))
+                       )});
+    crv.ascii_display("lagrange curve", "interpolation", '*');
+    crv.normalize_y(0, 1);
+    write_as_png(crv, false, "lagrange.png");
+
+    curve crvspl(16384, 0, {segment(1., 1., share(
+                       cubic_spline_curve(
+                       { control_point(0.2, 0.9),
+                         control_point(0.4, 0.01),
+                         control_point(0.7, 0.9)
+                       }))
+                       )});
+    crvspl.ascii_display("spline curve", "interpolation", '*');
+    crvspl.normalize_y(0, 1);
+    write_as_png(crvspl, false, "spline.png");
+    */
+
+}
+
+int main()
+{
+
+    //dummy_test();
+    //unit_tests();
+    random_generator_test();
+    //generate_curve_pictures();
 
     return 0;
 }
