@@ -5,7 +5,7 @@
 
 
 Hypercurve is a library of 2D curves designed to process audio envelopes, applied to any audio parameter.
-
+ 
 It is available in several frontends : C++, Lua, and Csound.
 
 1. [Hypercurve basic syntax](#hypercurve-basic-syntax)
@@ -515,6 +515,9 @@ hc.
   
 
 In Hypercurve, a Curve base represents the algorithm of a specific curve. Some of them take one or several constant parameters.
+You should remember algorithms implementations are most of the time approximations of the curve equations. 
+Indeed, many curve equations are not easy to scale and normalize, since their behavior tends to infinity.
+So in many cases (e.g. hamming, gaussian...) I had to find a logical rule to force the curves to respect Hypercurve composition rules (normalizable, scalable). 
 
   
 
@@ -659,6 +662,8 @@ hc.power_curve(float exponent);
 ![Hamming curve](png/hamming.png)
 * Blackman
 ![Blackman curve](png/blackman.png)
+
+The Hamming implementation is an approximation, since the curve itself starts at y = 0.08 for x = 0. So it had to be stretched up a little bit to allow hypercurve to do its job.
 
 C++ :
 

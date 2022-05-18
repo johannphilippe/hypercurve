@@ -1,8 +1,8 @@
 
 # Hypercurve for Faust  
 
-You don't need to use cmake, since the whole library is contained as source only inside . The files `hypercurve.lib` and `hypercurve_faust.h` located 
-inside [hypercurve_faust_lib](./hypercurve_faust_lib) folder can be copied to your Faust library directoy.
+You don't need to use cmake, since the whole library is contained as source only inside [hypercurve_faust_lib](faust_hypercurve_lib). The files `hypercurve.lib` and `hypercurve_faust.h` located 
+inside [hypercurve_faust_lib](./faust_hypercurve_lib) folder can be copied to your Faust library directoy.
 
 # Build 
 
