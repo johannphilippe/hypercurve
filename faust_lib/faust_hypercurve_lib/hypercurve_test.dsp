@@ -45,15 +45,9 @@ phas_mult = hslider("speed", 0.1, 0.01, 1, 0.01);
 
 snt(freq, ph_freq, PHASE, amp_mult, index , sigL, sigR) = os.sawtooth(freq) : ve.korg35LPF(fq_amp * env + 0.2, 2) : *(amp) : *(env) : *(amp_mult) : sp.panner(pan) : +(sigL), +(sigR)
 with {
-      env = hc.run(crv, os.hsp_phasor(1,ph_freq * phas_mult, 0, PHASE));
+      env = hc.runi(crv, os.hsp_phasor(1,ph_freq * phas_mult, 0, PHASE));
       pan = 1-env, 0+env : select2(index % 2 == 0);
 };
-
-main_crv = hc.hypercurve(4096, 0, (
-            hc.segment(1/2, 1, hc.diocles_curve(0.6)),
-            hc.segment(1/2, 0, hc.power_curve(4))
-      ));
-
 
 N_OSC = 16;
 

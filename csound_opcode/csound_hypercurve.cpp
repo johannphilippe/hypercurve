@@ -673,10 +673,10 @@ struct cs_run_curve_interpolate : public csnd::Plugin<1, 2>
 
   double interpolate()
   {
-      i_phasor = floor(phasor * curve_map[index]->get_definition());
+      i_phasor = std::floor(phasor * curve_map[index]->get_definition());
       if( (phasor == 0) || (i_phasor >= (curve_map[index]->get_definition() - 1) ))
           return limit(-1, 1, curve_map[index]->get_sample_at(i_phasor));
-      n_phasor = ceil(phasor * curve_map[index]->get_definition());
+      n_phasor = i_phasor + 1;
       return limit(-1, 1, linear_interpolation(
                        curve_map[index]->get_sample_at(i_phasor),
                        curve_map[index]->get_sample_at(n_phasor),
