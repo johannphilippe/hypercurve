@@ -171,6 +171,7 @@ namespace fpng
 } // namespace fpng
 
 #include <random>
+#include<string>
 #ifndef M_PI
  #define M_PI 3.14159265358979323846
 #endif
@@ -297,7 +298,10 @@ inline T log_exp_point(T beg, T ending, int dur, int idx, double typ)
 inline double relative_position(double x1, double x2, double x)
 {
     if(!(x >= x1 && x <= x2) || !(x1 < x2))
-        throw(std::runtime_error( std::string("Make sure x1 <= x <= x2 and x1 < x2 \nx1 = ")  + std::to_string(x1) + " & x = " + std::to_string(x) + " & x2 = " + std::to_string(x2)));
+        throw(std::runtime_error( std::string("Make sure x1 <= x <= x2 and x1 < x2 \nx1 = ")
+                                  + std::to_string(x1) + " & x = "
+                                  + std::to_string(x) + " & x2 = "
+                                  + std::to_string(x2)));
     const double factor = 1.0 / (x2 - x1);
     return (x * factor) - (x1 * factor);
 }
@@ -513,7 +517,7 @@ struct png
         {
             size_t yb = 0;
             size_t ye = height;
-            size_t x = i * fraction(width, xdiv);
+            size_t x = i * hypercurve::fraction(width, xdiv);
             for(size_t y = yb; y < ye; ++y)
             {
                 set(x, y, c);
@@ -523,7 +527,7 @@ struct png
         {
             size_t xb = 0;
             size_t xe = width;
-            size_t y = i * fraction(height, ydiv);
+            size_t y = i * hypercurve::fraction(height, ydiv);
             for(size_t x = xb; x < xe; ++x)
             {
                 set(x, y, c);
@@ -537,7 +541,7 @@ struct png
     {
         for(size_t i = 0; i < size; ++i)
         {
-            double x = fraction(i,size);
+            double x = hypercurve::fraction(i,size);
             double y = (waveform) ? (samples[i] + 1.0) / 2.0 : samples[i];
             if(fill)
                 fill_curve_point(x, y, waveform);
@@ -818,13 +822,13 @@ public:
     inline virtual double process(double x) {return x;};
     // When you want to retrieve a single sample from a curve, it is recommanded to use this one. It is not necessary to override it for simple curves,
     // but may be necessary for complex (bezier, spline, catmullrom ...)
-    inline virtual double process(size_t i, size_t size) {return process(fraction(i, size));}
+    inline virtual double process(size_t i, size_t size) {return process(hypercurve::fraction(i, size));}
     inline virtual double process_all(size_t size, memory_vector<double>::iterator &it)
     {
         double max = 0.0;
         for(size_t i = 0; i < size; ++i)
         {
-            const double x = fraction(i, size);
+            const double x = hypercurve::fraction(i, size);
             double res = scale(x);
             if( std::abs(res) > max) max = std::abs(res);
             if(inverted) res = process_invert(x, res);
@@ -1323,7 +1327,7 @@ public:
     // This one should be implemented instead of the above one (if wanted to process single bezier point)
     inline virtual double process(size_t i, size_t size) override
     {
-        return process(fraction(i, size));
+        return process(hypercurve::fraction(i, size));
     }
 protected:
     inline virtual std::pair<double, double> process_bezier(double x) {return {x,0};}
@@ -1435,7 +1439,7 @@ public:
         for(size_t i = 0; i < size; i++)
         {
             if( std::abs(res[i]) > max ) max = std::abs(res[i]);
-            if(inverted) res[i] = process_invert(fraction(i, size), res[i]);
+            if(inverted) res[i] = process_invert(hypercurve::fraction(i, size), res[i]);
             *it = res[i];
             ++it;
         }
@@ -2007,7 +2011,7 @@ public:
         double max = 0.0;
         for(size_t i = 0; i < size; ++i)
         {
-            const double x = fraction(i, size);
+            const double x = hypercurve::fraction(i, size);
             double res = Amp::get_amplitude(x) * process(x);
             if( std::abs(res) > max) max = std::abs(res);
             *it = res;
@@ -2151,29 +2155,32 @@ enum curve_base_index {
     size_i
 };
 
-std::unordered_map<curve_base_index, std::string> curve_base_index_map = {
-    {linear_i, "linear"},
-    {diocles_i, "diocles"},
-    {cubic_i, "cubic"},
-    {power_i, "power"},
-    {hanning_i, "hanning"},
-    {hamming_i, "hamming"},
-    {blackman_i, "blackman"},
-    {gaussian_i, "gaussian"},
-    {toxoid_i, "toxoid"},
-    {catenary_i, "catenary"},
-    {tightrope_walker_i, "tightrope_walker"},
-    {cubic_bezier_i, "cubic_bezier"},
-    {quadratic_bezier_i, "quad_bezier"},
-    {cubic_spline_i, "cubic_spline"},
-    {catmull_rom_spline_i, "catmull_rom"},
-    {polynomial_i, "polynomial"},
-    {user_defined_i, "user_defined_"},
-    {typed_i, "typed"},
-    {mouse_i, "mouse"},
-    {bicorn_i, "bicorn"},
-    {lagrange_polynomial_i, "lagrange"}
-};
+const char *get_curve_base_name (curve_base_index b)
+{
+    switch(b) {
+       case linear_i: return "linear";
+       case diocles_i: return "diocles";
+       case cubic_i: return "cubic";
+       case power_i: return "power";
+       case hanning_i: return "hanning";
+       case hamming_i: return "hamming";
+       case blackman_i: return "blackman";
+       case gaussian_i: return "gaussian";
+       case toxoid_i: return "toxoid";
+       case catenary_i: return "catenary";
+       case tightrope_walker_i: return "tightrope_walker";
+       case cubic_bezier_i: return "cubic_bezier";
+       case quadratic_bezier_i: return "quadratic_bezier";
+       case cubic_spline_i: return "cubic_spline";
+       case catmull_rom_spline_i: return "catmull_rom_spline";
+       case polynomial_i: return "polynomial";
+       case user_defined_i: return "user_defined";
+       case typed_i: return "typed";
+       case mouse_i: return "mouse";
+       case bicorn_i: return "bicorn";
+       case lagrange_polynomial_i: return "lagrange_polynomial";
+    }
+}
 
 std::shared_ptr<curve_base> get_curve_from_index(curve_base_index n,
                                                  std::vector<double> args,
@@ -2294,7 +2301,7 @@ std::pair<curve, std::string> random_curve_composer( size_t max_segs = 16, int m
         while( index == user_defined_i || (envelop && ((index == polynomial_i) || (index == lagrange_polynomial_i) || (index == cubic_spline_i))))
             index = gen_curve();
 
-        cnames += curve_base_index_map[index] + "_";
+        cnames += std::string(get_curve_base_name(index)) + "_";
         std::pair<std::vector<double>, std::vector<control_point>> args = random_args_generator(index);
         if(i == (nsegs - 1) && (envelop | waveform) )
             dest = 0;
@@ -2582,8 +2589,8 @@ static double hc_runi(int index, double phasor)
              faust_curve_map[index]->get_sample_at(i_phasor),
              faust_curve_map[index]->get_sample_at(n_phasor),
              relative_position(
-                 fraction(i_phasor, faust_curve_map[index]->get_definition()),
-                 fraction(n_phasor, faust_curve_map[index]->get_definition()),
+                 hypercurve::fraction(i_phasor, faust_curve_map[index]->get_definition()),
+                 hypercurve::fraction(n_phasor, faust_curve_map[index]->get_definition()),
                  phasor)));
 
 }

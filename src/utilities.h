@@ -364,7 +364,7 @@ struct png
         {
             size_t yb = 0;
             size_t ye = height;
-            size_t x = i * fraction(width, xdiv);
+            size_t x = i * hypercurve::fraction(width, xdiv);
             for(size_t y = yb; y < ye; ++y)
             {
                 set(x, y, c);
@@ -374,7 +374,7 @@ struct png
         {
             size_t xb = 0;
             size_t xe = width;
-            size_t y = i * fraction(height, ydiv);
+            size_t y = i * hypercurve::fraction(height, ydiv);
             for(size_t x = xb; x < xe; ++x)
             {
                 set(x, y, c);
@@ -388,7 +388,7 @@ struct png
     {
         for(size_t i = 0; i < size; ++i)
         {
-            double x = fraction(i,size);
+            double x = hypercurve::fraction(i,size);
             double y = (waveform) ? (samples[i] + 1.0) / 2.0 : samples[i];
             if(fill)
                 fill_curve_point(x, y, waveform);

@@ -1,14 +1,15 @@
 os = library("oscillators.lib");
 hc = library("hypercurve.lib");
-
+si = library("signals.lib");
+ve = library("vaeffects.lib");
 // Simple example
 // crv = hc.hypercurve(2048, 0, (hc.segment(0.3, 1, hc.diocles_curve(1)), (hc.segment(1/3, 1, hc.linear_curve), hc.segment(0.3, 0, hc.diocles_curve(0.6)))));
 
 // Spline example
-//crv = hc.hypercurve(2048, 0,
-//     (hc.segment(1/2, 1, hc.cubic_bezier_curve(hc.control_point(0.45, 0.02), hc.control_point(0.55, 0.98))),
-//      hc.segment(1/2, 0, hc.cubic_curve)
-//      ));
+crv = hc.hypercurve(2048, 0,
+     (hc.segment(1/2, 1, hc.cubic_bezier_curve(hc.control_point(0.45, 0.02), hc.control_point(0.55, 0.98))),
+      hc.segment(1/2, 0, hc.cubic_curve)
+      ));
 
 //crv = hc.hypercurve(2048, 0,
 //     (hc.segment(1/2, 1, hc.quadratic_bezier_curve(hc.control_point(0.45, 0.02)))));
@@ -33,7 +34,10 @@ hc = library("hypercurve.lib");
 
 //crv = hc.hypercurve(4096, 0, (hc.segment(1, 1, hc.linear_curve)));
 
-crv = hc.hypercurve(4096, 0, ( hc.segment(1, 1, hc.lagrange_polynomial_curve( ( hc.control_point(0.2, 0.8), hc.control_point(0.4, 0.1))))));
+//crv = hc.hypercurve(4096, 0, ( hc.segment(1, 1, hc.lagrange_polynomial_curve( ( hc.control_point(0.2, 0.8), hc.control_point(0.4, 0.1))))));
 
-res = hc.run(crv, os.phasor(1, 1));
-process = os.sawtooth(440) * res;
+amp = hslider("amp", 0.3, 0, 1, 0.01) : si.smoo;
+fq_amp = hslider("freq_mult", 0.1, 0, 0.8, 0.001);
+
+res = hc.run(crv, os.phasor(1, 0.3));
+process = os.sawtooth(100) : ve.korg35LPF(fq_amp * res + 0.1, 1) : *(amp) : *(res);

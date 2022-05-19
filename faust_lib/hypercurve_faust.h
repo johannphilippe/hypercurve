@@ -278,8 +278,8 @@ static double hc_runi(int index, double phasor)
              faust_curve_map[index]->get_sample_at(i_phasor),
              faust_curve_map[index]->get_sample_at(n_phasor),
              relative_position(
-                 fraction(i_phasor, faust_curve_map[index]->get_definition()),
-                 fraction(n_phasor, faust_curve_map[index]->get_definition()),
+                 hypercurve::fraction(i_phasor, faust_curve_map[index]->get_definition()),
+                 hypercurve::fraction(n_phasor, faust_curve_map[index]->get_definition()),
                  phasor)));
 
 }

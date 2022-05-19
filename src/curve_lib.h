@@ -29,13 +29,13 @@ public:
     inline virtual double process(double x) {return x;};
     // When you want to retrieve a single sample from a curve, it is recommanded to use this one. It is not necessary to override it for simple curves,
     // but may be necessary for complex (bezier, spline, catmullrom ...)
-    inline virtual double process(size_t i, size_t size) {return process(fraction(i, size));}
+    inline virtual double process(size_t i, size_t size) {return process(hypercurve::fraction(i, size));}
     inline virtual double process_all(size_t size, memory_vector<double>::iterator &it)
     {
         double max = 0.0;
         for(size_t i = 0; i < size; ++i)
         {
-            const double x = fraction(i, size);
+            const double x = hypercurve::fraction(i, size);
             double res = scale(x);
             if( std::abs(res) > max) max = std::abs(res);
             if(inverted) res = process_invert(x, res);
@@ -538,7 +538,7 @@ public:
     // This one should be implemented instead of the above one (if wanted to process single bezier point)
     inline virtual double process(size_t i, size_t size) override
     {
-        return process(fraction(i, size));
+        return process(hypercurve::fraction(i, size));
     }
 protected:
     inline virtual std::pair<double, double> process_bezier(double x) {return {x,0};}
@@ -653,7 +653,7 @@ public:
         for(size_t i = 0; i < size; i++)
         {
             if( std::abs(res[i]) > max ) max = std::abs(res[i]);
-            if(inverted) res[i] = process_invert(fraction(i, size), res[i]);
+            if(inverted) res[i] = process_invert(hypercurve::fraction(i, size), res[i]);
             *it = res[i];
             ++it;
         }

@@ -47,29 +47,32 @@ enum curve_base_index {
     size_i
 };
 
-std::unordered_map<curve_base_index, std::string> curve_base_index_map = {
-    {linear_i, "linear"},
-    {diocles_i, "diocles"},
-    {cubic_i, "cubic"},
-    {power_i, "power"},
-    {hanning_i, "hanning"},
-    {hamming_i, "hamming"},
-    {blackman_i, "blackman"},
-    {gaussian_i, "gaussian"},
-    {toxoid_i, "toxoid"},
-    {catenary_i, "catenary"},
-    {tightrope_walker_i, "tightrope_walker"},
-    {cubic_bezier_i, "cubic_bezier"},
-    {quadratic_bezier_i, "quad_bezier"},
-    {cubic_spline_i, "cubic_spline"},
-    {catmull_rom_spline_i, "catmull_rom"},
-    {polynomial_i, "polynomial"},
-    {user_defined_i, "user_defined_"},
-    {typed_i, "typed"},
-    {mouse_i, "mouse"},
-    {bicorn_i, "bicorn"},
-    {lagrange_polynomial_i, "lagrange"}
-};
+const char *get_curve_base_name (curve_base_index b)
+{
+    switch(b) {
+       case linear_i: return "linear";
+       case diocles_i: return "diocles";
+       case cubic_i: return "cubic";
+       case power_i: return "power";
+       case hanning_i: return "hanning";
+       case hamming_i: return "hamming";
+       case blackman_i: return "blackman";
+       case gaussian_i: return "gaussian";
+       case toxoid_i: return "toxoid";
+       case catenary_i: return "catenary";
+       case tightrope_walker_i: return "tightrope_walker";
+       case cubic_bezier_i: return "cubic_bezier";
+       case quadratic_bezier_i: return "quadratic_bezier";
+       case cubic_spline_i: return "cubic_spline";
+       case catmull_rom_spline_i: return "catmull_rom_spline";
+       case polynomial_i: return "polynomial";
+       case user_defined_i: return "user_defined";
+       case typed_i: return "typed";
+       case mouse_i: return "mouse";
+       case bicorn_i: return "bicorn";
+       case lagrange_polynomial_i: return "lagrange_polynomial";
+    }
+}
 
 std::shared_ptr<curve_base> get_curve_from_index(curve_base_index n,
                                                  std::vector<double> args,
@@ -191,7 +194,7 @@ std::pair<curve, std::string> random_curve_composer( size_t max_segs = 16, int m
         while( index == user_defined_i || (envelop && ((index == polynomial_i) || (index == lagrange_polynomial_i) || (index == cubic_spline_i))))
             index = gen_curve();
 
-        cnames += curve_base_index_map[index] + "_";
+        cnames += std::string(get_curve_base_name(index)) + "_";
         std::pair<std::vector<double>, std::vector<control_point>> args = random_args_generator(index);
         if(i == (nsegs - 1) && (envelop | waveform) )
             dest = 0;
