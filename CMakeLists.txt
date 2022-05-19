@@ -21,11 +21,10 @@ set(BUILD_SHARED_LIBS ON CACHE BOOL "Build Shared libs")
 add_subdirectory(libsndfile)
 target_compile_options(sndfile PRIVATE -fPIC)
 
-if(DEFINED BUILD_ALL)
-   set(BUILD_CSOUND_OPCODE TRUE)
-   set(BUILD_LUA_MODULE TRUE)
-   set(BUILD_FAUST_LIB TRUE)
-endif()
+option(BUILD_CSOUND_OPCODE "Build Csound opcodes")
+option(BUILD_LUA_MODULE "Build Lua module")
+option(BUILD_FAUST_LIB	"Build Faust library")
+
 
 #############################################
 ##### 	Build Hypercurve library
@@ -99,7 +98,7 @@ target_include_directories(hypercurve_test PUBLIC
    )
 
 target_link_libraries(hypercurve_test
-   hypercurve
+   hypercurve_static
    sndfile
    )
 
@@ -107,7 +106,7 @@ target_link_libraries(hypercurve_test
 ##### 	Build Lua Module
 #############################################
 
-if(BUILD_LUA_MODULE)
+if(BUILD_LUA_MODULE OR BUILD_ALL)
    message(STATUS "Building Lua module")
    add_subdirectory(lua_module)
    target_link_libraries(lua_hypercurve PUBLIC hypercurve_static sndfile ${LUA_LIBRARIES})
@@ -117,7 +116,7 @@ endif()
 ##### 	Build Csound Opcode
 #############################################
 
-if(BUILD_CSOUND_OPCODE)
+if(BUILD_CSOUND_OPCODE OR BUILD_ALL)
    message(STATUS "Building Csound opcode")
    add_subdirectory(csound_opcode)
    target_link_libraries(csound_hypercurve PUBLIC hypercurve_static)
@@ -128,7 +127,7 @@ endif()
 ##### 	Build Faust lib
 #############################################
 
-if(BUILD_FAUST_LIB)
+if(BUILD_FAUST_LIB OR BUILD_ALL)
    message(STATUS "Building Faust library")
    add_subdirectory(faust_lib)
 endif()

@@ -15,17 +15,31 @@ if(NOT ${Lua_FOUND})
    message(FATAL_ERROR "Lua not found")
 endif()
 
+
+message(STATUS "Shared exports generated")
+
 add_library(lua_hypercurve SHARED
    lua_hypercurve.cpp
    lua-compat-5.3/c-api/compat-5.3.h
    )
+
+include (GenerateExportHeader)
+GENERATE_EXPORT_HEADER(lua_hypercurve
+    BASE_NAME lua_hypercurve
+    EXPORT_MACRO_NAME SHARED_EXPORTS
+    EXPORT_FILE_NAME ${CMAKE_BINARY_DIR}/exports/SHARED_EXPORTS.h
+    STATIC_DEFINE SHARED_EXPORTS_BUILT_AS_STATIC)
+
 target_include_directories(lua_hypercurve PUBLIC
    ${LUA_INCLUDE_DIR}
    lua-compat-5.3/c-api/
+   ${CMAKE_BINARY_DIR}/exports
    )
+
 set_target_properties(lua_hypercurve PROPERTIES LINKER_LANGUAGE CXX)
 target_link_libraries(lua_hypercurve PUBLIC ${LUA_LIBRARIES})
 target_compile_options(lua_hypercurve PUBLIC -fPIC)
+
 
 ## Lua C Test
 

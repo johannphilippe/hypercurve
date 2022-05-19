@@ -9,7 +9,12 @@ extern "C" {
 }
 
 #ifndef WIN32
-#include<unistd.h>
+    #include<unistd.h>
+    #define SHARED_EXPORT
+#else
+extern "C" {
+    #include "SHARED_EXPORTS.h"
+}
 #endif
 
 #include<memory.h>
@@ -20,6 +25,7 @@ extern "C" {
 #include"../src/utilities.h"
 #include"compat-5.3.h"
 
+extern "C" {
 struct luahc_curve_base_t
 {
     luahc_curve_base_t(hypercurve::curve_base *cb)
@@ -456,7 +462,7 @@ int luahc_curve_normalize_y(lua_State *lua)
     return 0;
 }
 
-extern "C" {
+//extern "C" {
 ///////////////////////////////////////////:
 // Methods registration
 ///////////////////////////////////////////:
@@ -622,7 +628,7 @@ static const luaL_Reg luahc_static_meth[] =
     { NULL      ,NULL      }
 };
 
-int luaopen_liblua_hypercurve (lua_State *lua)
+SHARED_EXPORTS int luaopen_liblua_hypercurve(lua_State *lua)
 {
     luaL_newmetatable(lua, "hypercurve.segment");
     lua_pushstring(lua, "__index");

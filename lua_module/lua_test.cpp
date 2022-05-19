@@ -3,6 +3,9 @@ extern "C" {
 #include "lauxlib.h"
 #include "lua.h"
 #include "lualib.h"
+#ifdef _WIN32
+#include"SHARED_EXPORTS.h"
+#endif
 }
 
 int main() {
