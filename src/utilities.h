@@ -16,6 +16,7 @@
 #include<functional>
 #include"fpng/src/fpng.h"
 #include <random>
+#include<string>
 #ifndef M_PI
  #define M_PI 3.14159265358979323846
 #endif
@@ -142,7 +143,10 @@ inline T log_exp_point(T beg, T ending, int dur, int idx, double typ)
 inline double relative_position(double x1, double x2, double x)
 {
     if(!(x >= x1 && x <= x2) || !(x1 < x2))
-        throw(std::runtime_error( std::string("Make sure x1 <= x <= x2 and x1 < x2 \nx1 = ")  + std::to_string(x1) + " & x = " + std::to_string(x) + " & x2 = " + std::to_string(x2)));
+        throw(std::runtime_error( std::string("Make sure x1 <= x <= x2 and x1 < x2 \nx1 = ")
+                                  + std::to_string(x1) + " & x = "
+                                  + std::to_string(x) + " & x2 = "
+                                  + std::to_string(x2)));
     const double factor = 1.0 / (x2 - x1);
     return (x * factor) - (x1 * factor);
 }
