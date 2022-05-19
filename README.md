@@ -136,6 +136,7 @@ In order to build the Faust library, you will need [Quom](https://pypi.org/proje
 
 The PNG writer [fpng](https://github.com/richgel999/fpng) used for hypercurve has SSE support. This can be enabled with `-DSSE=1`.
 # TODO
+* hc.runi broken in Faust (probably in csound too)
 * Waveform scaling : will only work if min_y = max_y : make a specific function
 * Expose random generators to frontends (Lua, Csound, Faust).
 * Tests on invert function (Lua and Csound)

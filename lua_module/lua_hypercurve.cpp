@@ -10,7 +10,7 @@ extern "C" {
 
 #ifndef WIN32
     #include<unistd.h>
-    #define SHARED_EXPORT
+    #define SHARED_EXPORTS
 #else
 extern "C" {
     #include "SHARED_EXPORTS.h"

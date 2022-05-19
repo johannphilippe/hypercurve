@@ -2155,31 +2155,33 @@ enum curve_base_index {
     size_i
 };
 
-const char *get_curve_base_name (curve_base_index b)
+const char *get_curve_base_name (const curve_base_index b)
 {
     switch(b) {
-       case linear_i: return "linear";
-       case diocles_i: return "diocles";
-       case cubic_i: return "cubic";
-       case power_i: return "power";
-       case hanning_i: return "hanning";
-       case hamming_i: return "hamming";
-       case blackman_i: return "blackman";
-       case gaussian_i: return "gaussian";
-       case toxoid_i: return "toxoid";
-       case catenary_i: return "catenary";
-       case tightrope_walker_i: return "tightrope_walker";
-       case cubic_bezier_i: return "cubic_bezier";
-       case quadratic_bezier_i: return "quadratic_bezier";
-       case cubic_spline_i: return "cubic_spline";
-       case catmull_rom_spline_i: return "catmull_rom_spline";
-       case polynomial_i: return "polynomial";
-       case user_defined_i: return "user_defined";
-       case typed_i: return "typed";
-       case mouse_i: return "mouse";
-       case bicorn_i: return "bicorn";
-       case lagrange_polynomial_i: return "lagrange_polynomial";
+    case linear_i: return "linear";
+    case diocles_i: return "diocles";
+    case cubic_i: return "cubic";
+    case power_i: return "power";
+    case hanning_i: return "hanning";
+    case hamming_i: return "hamming";
+    case blackman_i: return "blackman";
+    case gaussian_i: return "gaussian";
+    case toxoid_i: return "toxoid";
+    case catenary_i: return "catenary";
+    case tightrope_walker_i: return "tightrope_walker";
+    case cubic_bezier_i: return "cubic_bezier";
+    case quadratic_bezier_i: return "quadratic_bezier";
+    case cubic_spline_i: return "cubic_spline";
+    case catmull_rom_spline_i: return "catmull_rom_spline";
+    case polynomial_i: return "polynomial";
+    case user_defined_i: return "user_defined";
+    case typed_i: return "typed";
+    case mouse_i: return "mouse";
+    case bicorn_i: return "bicorn";
+    case lagrange_polynomial_i: return "lagrange_polynomial";
+    default: return "";
     }
+    return "";
 }
 
 std::shared_ptr<curve_base> get_curve_from_index(curve_base_index n,
@@ -2310,7 +2312,7 @@ std::pair<curve, std::string> random_curve_composer( size_t max_segs = 16, int m
 
     double y_start = (envelop | waveform) ? 0 : random<double>(0, 1);
     curve c(definition, y_start, segs);
-    //c.normalize_y(min, max);
+    c.normalize_y(min, max);
     return {c, cnames};
 }
 
