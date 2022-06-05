@@ -16,12 +16,14 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin )
 
 #############################################
-##### 	Build libsndfile
+##### 	Options
 #############################################
 
-option(BUILD_CSOUND_OPCODE "Build Csound opcodes")
-option(BUILD_LUA_MODULE "Build Lua module")
-option(BUILD_FAUST_LIB	"Build Faust library")
+option(BUILD_CSOUND_OPCODE "Build Csound opcodes" ON)
+option(BUILD_LUA_MODULE "Build Lua module" ON)
+option(BUILD_LUAJIT "Build Luajit" OFF)
+option(BUILD_FAUST_LIB	"Build Faust library" ON)
+option(SSE, "SSE support for FPNG" ON)
 
 #############################################
 ##### 	Build libsndfile
@@ -56,7 +58,6 @@ set(HYPERCURVE_SOURCES
    src/asciiplot/asciiplotter.cpp
    )
 
-option(SSE, "SSE support for FPNG")
 
 add_library(hypercurve SHARED
    ${HYPERCURVE_SOURCES}
@@ -117,6 +118,14 @@ target_link_libraries(hypercurve_test
 #############################################
 
 if(BUILD_LUA_MODULE OR BUILD_ALL)
+
+   if(BUILD_LUAJIT)
+      add_subdirectory(LuaJIT)
+      target_compile_options(libluajit PRIVATE -fPIC)
+      set(LUA_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/LuaJIT/src)
+      set(LUA_LIBRARIES libluajit)
+   endif()
+
    message(STATUS "Building Lua module ON")
    add_subdirectory(lua_module)
    target_link_libraries(lua_hypercurve PUBLIC hypercurve_static sndfile)

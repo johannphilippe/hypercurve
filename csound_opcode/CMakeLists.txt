@@ -34,6 +34,8 @@ target_link_libraries(csound_test PUBLIC ${CSOUND_LIBRARIES})
 target_include_directories(csound_test PUBLIC ${CSOUND_INCLUDE_DIRS})
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/test.csd
    DESTINATION ${CMAKE_BINARY_DIR}/bin)
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/hypertest.csd
+   DESTINATION ${CMAKE_BINARY_DIR}/bin)
 
 # Installation
 #[[

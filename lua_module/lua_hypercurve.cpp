@@ -11,7 +11,7 @@ extern "C" {
 #ifndef WIN32
     #include<unistd.h>
     #define SHARED_EXPORTS
-    #define LUA_EXPORT
+    #define LUA_EXPORT extern
 #else
 extern "C" {
     #include "SHARED_EXPORTS.h"
@@ -428,8 +428,15 @@ LUA_EXPORT int luahc_curve_write_png(lua_State *lua)
 {
     hypercurve::curve *crv = *(hypercurve::curve **) luaL_checkudata(lua, 1, "hypercurve.curve");
     std::string path = lua_tostring(lua, 2);
-    hypercurve::png p;
-    p.draw_curve(crv->get_samples(), crv->get_definition(), lua_toboolean(lua, 3), lua_toboolean(lua, 4));
+    int args = lua_gettop(lua);
+
+    bool waveform = (args > 2) ? lua_toboolean(lua, 3) : false;
+    bool fill = (args > 3) ? lua_toboolean(lua, 4) : true;
+    bool draw_grid = (args  >  4) ? lua_toboolean(lua, 5) : true;
+    bool invert = (args > 5) ? lua_toboolean(lua, 6) : false;
+    hypercurve::png p(2048, 1024, invert ? hypercurve::white : hypercurve::black, invert ? hypercurve::red : hypercurve::purple);
+    p.draw_curve(crv->get_samples(), crv->get_definition(), fill, waveform);
+    if(draw_grid) p.draw_grid(10, 10, invert ? hypercurve::black : hypercurve::white);
     p.write_as_png(path);
     return 0;
 }
@@ -630,7 +637,7 @@ LUA_EXPORT const luaL_Reg luahc_static_meth[] =
     { NULL      ,NULL      }
 };
 
-LUA_EXPORT int luaopen_liblua_hypercurve(lua_State *lua)
+LUA_EXPORT int luaopen_lua_hypercurve(lua_State *lua)
 {
     luaL_newmetatable(lua, "hypercurve.segment");
     lua_pushstring(lua, "__index");

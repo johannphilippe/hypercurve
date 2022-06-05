@@ -1,3 +1,4 @@
+package.cpath = package.cpath .. ";./lib?.so;./lib?.dylib"
 -- Find package if not in standard Lua CPATH
 function pp(str)
 	print("FROM_LUA", str)

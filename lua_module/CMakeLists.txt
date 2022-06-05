@@ -39,17 +39,25 @@ target_link_libraries(lua_hypercurve PUBLIC ${LUA_LIBRARIES})
 target_compile_options(lua_hypercurve PUBLIC -fPIC)
 
 if(WIN32)
-    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS 1)
-    set(WIN_COMPILE_FLAGS "/c /nologo /MD /TP /DWIN32")
-    set(WIN_LINK_FLAGS "/nologo /dll")
-    set_target_properties(lua_hypercurve
-        PROPERTIES
-        LINKER_LANGUAGE CXX
-        COMPILE_FLAGS ${WIN_COMPILE_FLAGS}
-        LINK_FLAGS ${WIN_LINK_FLAGS}
-        PREFIX ""
-        OUTPUT_NAME "lua_hypercurve"
-        )
+   set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS 1)
+   set(WIN_COMPILE_FLAGS "/c /nologo /MD /TP /DWIN32")
+   set(WIN_LINK_FLAGS "/nologo /dll")
+   set_target_properties(lua_hypercurve
+      PROPERTIES
+      LINKER_LANGUAGE CXX
+      COMPILE_FLAGS ${WIN_COMPILE_FLAGS}
+      LINK_FLAGS ${WIN_LINK_FLAGS}
+      PREFIX ""
+      OUTPUT_NAME "liblua_hypercurve"
+      )
+else()
+
+   set_target_properties(lua_hypercurve
+      PROPERTIES
+      LINKER_LANGUAGE CXX
+      PREFIX "lib"
+      OUTPUT_NAME "lua_hypercurve"
+      )
 endif()
 
 ## Lua CPP Test

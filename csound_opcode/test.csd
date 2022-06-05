@@ -1,7 +1,7 @@
 <CsoundSynthesizer>
 <CsOptions>
 -o dac
---opcode-lib=./csound_opcode/libcsound_hypercurve.so
+--opcode-lib=./libcsound_hypercurve.so
 </CsOptions>
 <CsInstruments>
 sr = 48000
@@ -36,7 +36,9 @@ gipolynomial = hc_hypercurve(2048, 0,
 gilagrange = hc_hypercurve(2048, 0, 
                 hc_segment(1, 1, hc_lagrange_curve(  hc_control_point(0.2, 0.8), hc_control_point(0.4, 0.1), hc_control_point(0.75, 0.5))))
 
-hc_normalize_y(gipolynomial, 0, 3)
+
+hc_normalize_y(gipolynomial, 0, 1)
+hc_write_as_png(gipolynomial, "./poly.png", 1, 1)
 
 giadd = hc_add(gicub, gidiocles)
 gisub = hc_sub(gicub_bez, gipolynomial)

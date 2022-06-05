@@ -33,6 +33,7 @@ public:
         seg->process(it, std::floor(seg->fractional_size * _definition));
     }
 
+    double *get_samples() {return samples.data();}
     double get_sample_at(size_t i) {return samples[i]; }
     size_t get_definition() {return _definition;}
 
@@ -830,6 +831,28 @@ struct cs_div_curve : public csnd::Plugin<1, 2>, cs_operator
     csnd::AuxMem<double> mem;
 };
 
+
+struct cs_export_png : public csnd::InPlug<6>
+{
+    int init()
+    {
+        curve_map.dump();
+        if(!curve_map.has(args[0])) return NOTOK;
+        std::string path(args.str_data(1).data);
+
+        hypercurve::png png(2048, 1024, args[5] != 0 ? white : black, args[5] != 0 ? red : purple);
+        cs_rt_hypercurve *crv = curve_map[int(args[0])];
+
+        png.draw_curve(crv->get_samples(), crv->get_definition(), int(args[3]) != 0, int(args[2]) != 0);
+        if(args[4] != 0) {
+            std::cout << "drawing grid " << std::endl;
+            png.draw_grid(10, 10, args[5] != 0 ? black : white);
+        }
+        png.write_as_png(path);
+        return OK;
+    }
+};
+
 #include <modload.h>
 
 void csnd::on_load(Csound *csound) {
@@ -843,6 +866,8 @@ void csnd::on_load(Csound *csound) {
     csnd::plugin<cs_sub_curve>(csound, "hc_sub", "i", "ii" , csnd::thread::i);
     csnd::plugin<cs_mult_curve>(csound, "hc_mult", "i", "ii" , csnd::thread::i);
     csnd::plugin<cs_div_curve>(csound, "hc_div", "i", "ii" , csnd::thread::i);
+
+    csnd::plugin<cs_export_png>(csound, "hc_write_as_png", "", "iSoppo", csnd::thread::i);
 
     // Curve types
     csnd::plugin<cs_diocles_curve>(csound, "hc_diocles_curve", "i", "i", csnd::thread::i);

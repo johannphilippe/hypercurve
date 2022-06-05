@@ -127,11 +127,15 @@ hc.segment(0.5, 0, hc.cissoid(1))
 
 crv:ascii_display("MyHybridCurve", "half cubic, half cissoid", "*")
 
-local  fill = true
+local  fill = true -- optional default to true
 
-local  is_waveform = false -- waveform will scale the png from -1 to 1
+local  is_waveform = false -- optional, default to false ,waveform will scale the png from -1 to 1
 
-crv:write_as_png("path_to/curve.png", fill, is_waveform)
+local draw_grid = true -- optional, default to true
+ 
+local invert_color = false -- optional, default to false
+
+crv:write_as_png("path_to/curve.png", is_waveform, fill, draw_grid, invert_color) -- arguments after path are optional
 
 crv:write_as_wav( "path/curve.wav" )
   
@@ -157,6 +161,13 @@ icrv = hc_hypercurve(2048, 0,
 hc_segment(0.5, 1, hc_cubic_curve()),
 
 hc_segment(0.5, 0, hc_cissoid_curve(1)))
+
+// Arguments after  path are optional
+// is_waveform (0 or 1) default to 0
+// fill (0 or 1) default to 1
+// draw_grid (0 or 1) default to 1
+// invert_color (0 or 1) default to 0
+hc_write_as_png(icrv, "my/path/curve.png", 0, 1, 1, 1)
 
 // Will run the curve in the time of the i event in an instrument
 

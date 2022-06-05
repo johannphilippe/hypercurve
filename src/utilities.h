@@ -432,6 +432,21 @@ struct increment_map  : public std::unordered_map<int, T>
         }
     }
 
+    bool has(int index)
+    {
+        return this->find(index) != this->end();
+    }
+
+
+    void dump()
+    {
+        std::cout << "index now is : " << _index << std::endl;
+        for(size_t i = 1; i < _index; ++i)
+        {
+            std::cout << "incr map : " << i << " ptr : " << &this->at(i) << std::endl;
+        }
+    }
+
     size_t _index = 1;
 };
 

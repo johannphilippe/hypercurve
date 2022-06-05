@@ -12,13 +12,13 @@ nchnls = 2
 
 
 instr 1
-	icrv = hypercurve(16384, 0, 
-			segment(1/8, 1, gauss_curve(10, 0.5)), 
-			segment(1/8, 0.5, blackman_curve()),
-			segment(4/8, 0.2, catmull_rom_curve( control_point(-2, -1), control_point(2, 2))),
-			segment(2/8, 0, cissoid_curve(1)))
+	icrv = hc_hypercurve(16384, 0, 
+			hc_segment(1/8, 1, hc_gauss_curve(10, 0.5)), 
+			hc_segment(1/8, 0.5, hc_blackman_curve()),
+			hc_segment(4/8, 0.2, hc_catmull_rom_curve( hc_control_point(-2, -1), hc_control_point(2, 2))),
+			hc_segment(2/8, 0, hc_cissoid_curve(1)))
 
-	kenv = run_hypercurve(icrv, linseg:k(0, p3, 1))
+	kenv = hc_run(icrv, linseg:k(0, p3, 1))
 	ao = lowresx(vco2(0.3, p4), p4 + (kenv * p4), (kenv * 0.7) + 0.1) * kenv
 
 	outs ao, ao
