@@ -11,9 +11,11 @@ extern "C" {
 #ifndef WIN32
     #include<unistd.h>
     #define SHARED_EXPORTS
+    #define LUA_EXPORT
 #else
 extern "C" {
     #include "SHARED_EXPORTS.h"
+    #define LUA_EXPORT extern SHARED_EXPORTS
 }
 #endif
 
@@ -26,7 +28,7 @@ extern "C" {
 #include"compat-5.3.h"
 
 extern "C" {
-struct luahc_curve_base_t
+struct SHARED_EXPORTS luahc_curve_base_t
 {
     luahc_curve_base_t(hypercurve::curve_base *cb)
         : crv( cb )
@@ -34,14 +36,14 @@ struct luahc_curve_base_t
     std::shared_ptr<hypercurve::curve_base> crv;
 };
 
-static luahc_curve_base_t** lua_curve_helper(lua_State *lua, hypercurve::curve_base *cb)
+LUA_EXPORT luahc_curve_base_t** lua_curve_helper(lua_State *lua, hypercurve::curve_base *cb)
 {
     luahc_curve_base_t **crv = (luahc_curve_base_t **) lua_newuserdata(lua, sizeof(luahc_curve_base_t*));
     *crv = new luahc_curve_base_t(cb);
     return crv;
 }
 
-struct luahc_user_defined_curve_t : public hypercurve::user_defined_curve
+struct SHARED_EXPORTS luahc_user_defined_curve_t : public hypercurve::user_defined_curve
 {
     luahc_user_defined_curve_t(int reg, lua_State *lua)
         : _lua_registry_index(reg)
@@ -64,11 +66,10 @@ struct luahc_user_defined_curve_t : public hypercurve::user_defined_curve
     lua_State *lua_state;
 };
 
-//extern "C" {
 ///////////////////////////////////////////
 // Control point
 ///////////////////////////////////////////
-int luahc_control_point(lua_State *lua)
+LUA_EXPORT int luahc_control_point(lua_State *lua)
 {
     double x = lua_tonumber(lua, 1);
     double y = lua_tonumber(lua, 2);
@@ -81,7 +82,7 @@ int luahc_control_point(lua_State *lua)
     return 1;
 }
 
-int luahc_control_point_x(lua_State *lua)
+LUA_EXPORT int luahc_control_point_x(lua_State *lua)
 {
     int args = lua_gettop(lua);
     hypercurve::control_point *ctp = *(hypercurve::control_point **) luaL_checkudata(lua, 1, "hypercurve.control_point");
@@ -94,7 +95,7 @@ int luahc_control_point_x(lua_State *lua)
     return 1;
 }
 
-int luahc_control_point_y(lua_State *lua)
+LUA_EXPORT int luahc_control_point_y(lua_State *lua)
 {
     int args = lua_gettop(lua);
     hypercurve::control_point *ctp = *(hypercurve::control_point **) luaL_checkudata(lua, 1, "hypercurve.control_point");
@@ -107,7 +108,7 @@ int luahc_control_point_y(lua_State *lua)
     return 1;
 }
 
-int luahc_control_point_xy(lua_State *lua)
+LUA_EXPORT int luahc_control_point_xy(lua_State *lua)
 {
     int args = lua_gettop(lua);
     hypercurve::control_point *ctp = *(hypercurve::control_point **) luaL_checkudata(lua, 1, "hypercurve.control_point");
@@ -128,7 +129,7 @@ int luahc_control_point_xy(lua_State *lua)
 // Syntax : hypercurve.curve_base()
 ///////////////////////////////////////////
 
-int luahc_curve_base(lua_State *lua)
+LUA_EXPORT int luahc_curve_base(lua_State *lua)
 {
     lua_curve_helper(lua, new hypercurve::curve_base);
     luaL_getmetatable(lua, "hypercurve.curve_base");
@@ -136,7 +137,7 @@ int luahc_curve_base(lua_State *lua)
     return 1;
 }
 
-int luahc_cubic_curve(lua_State *lua)
+LUA_EXPORT int luahc_cubic_curve(lua_State *lua)
 {
     lua_curve_helper(lua, new hypercurve::cubic_curve);
     luaL_getmetatable(lua, "hypercurve.curve_base");
@@ -144,7 +145,7 @@ int luahc_cubic_curve(lua_State *lua)
     return 1;
 }
 
-int luahc_power_curve(lua_State *lua)
+LUA_EXPORT int luahc_power_curve(lua_State *lua)
 {
     lua_curve_helper(lua, new hypercurve::power_curve(lua_tonumber(lua, 1)));
     luaL_getmetatable(lua, "hypercurve.curve_base");
@@ -152,7 +153,7 @@ int luahc_power_curve(lua_State *lua)
     return 1;
 }
 
-int luahc_cissoid_curve(lua_State *lua)
+LUA_EXPORT int luahc_cissoid_curve(lua_State *lua)
 {
     const double a = lua_tonumber(lua, 1);
     lua_curve_helper(lua, new hypercurve::cissoid_curve(a));
@@ -162,21 +163,21 @@ int luahc_cissoid_curve(lua_State *lua)
     return 1;
 }
 
-int luahc_hanning_curve(lua_State *lua)
+LUA_EXPORT int luahc_hanning_curve(lua_State *lua)
 {
     lua_curve_helper(lua, new hypercurve::hanning_curve);
     luaL_getmetatable(lua, "hypercurve.curve_base");
     lua_setmetatable(lua, -2);
     return 1;
 }
-int luahc_hamming_curve(lua_State *lua)
+LUA_EXPORT int luahc_hamming_curve(lua_State *lua)
 {
     lua_curve_helper(lua, new hypercurve::hamming_curve);
     luaL_getmetatable(lua, "hypercurve.curve_base");
     lua_setmetatable(lua, -2);
     return 1;
 }
-int luahc_blackman_curve(lua_State *lua)
+LUA_EXPORT int luahc_blackman_curve(lua_State *lua)
 {
     lua_curve_helper(lua, new hypercurve::blackman_curve);
     luaL_getmetatable(lua, "hypercurve.curve_base");
@@ -184,7 +185,7 @@ int luahc_blackman_curve(lua_State *lua)
     return 1;
 }
 
-int luahc_gauss_curve(lua_State *lua)
+LUA_EXPORT int luahc_gauss_curve(lua_State *lua)
 {
     lua_curve_helper(lua, new hypercurve::gauss_curve(
                          lua_tonumber(lua, 1), lua_tonumber(lua, 2)));
@@ -193,7 +194,7 @@ int luahc_gauss_curve(lua_State *lua)
     return 1;
 }
 
-int luahc_catenary_curve(lua_State *lua)
+LUA_EXPORT int luahc_catenary_curve(lua_State *lua)
 {
     lua_curve_helper(lua, new hypercurve::catenary_curve(lua_tonumber(lua, 1)));
     luaL_getmetatable(lua, "hypercurve.curve_base");
@@ -201,7 +202,7 @@ int luahc_catenary_curve(lua_State *lua)
     return 1;
 }
 
-int luahc_toxoid_curve(lua_State *lua)
+LUA_EXPORT int luahc_toxoid_curve(lua_State *lua)
 {
     lua_curve_helper(lua, new hypercurve::toxoid_curve(lua_tonumber(lua, 1)));
     luaL_getmetatable(lua, "hypercurve.curve_base");
@@ -209,7 +210,7 @@ int luahc_toxoid_curve(lua_State *lua)
     return 1;
 }
 
-int luahc_mouse_curve(lua_State *lua)
+LUA_EXPORT int luahc_mouse_curve(lua_State *lua)
 {
     lua_curve_helper(lua, new hypercurve::mouse_curve());
     luaL_getmetatable(lua, "hypercurve.curve_base");
@@ -217,7 +218,7 @@ int luahc_mouse_curve(lua_State *lua)
     return 1;
 }
 
-int luahc_bicorn_curve(lua_State *lua)
+LUA_EXPORT int luahc_bicorn_curve(lua_State *lua)
 {
     lua_curve_helper(lua, new hypercurve::bicorn_curve(lua_toboolean(lua, 1)));
     luaL_getmetatable(lua, "hypercurve.curve_base");
@@ -225,7 +226,7 @@ int luahc_bicorn_curve(lua_State *lua)
     return 1;
 }
 
-int luahc_typed_curve(lua_State *lua)
+LUA_EXPORT int luahc_typed_curve(lua_State *lua)
 {
     lua_curve_helper(lua, new hypercurve::typed_curve(
                          lua_tonumber(lua, 1)));
@@ -234,7 +235,7 @@ int luahc_typed_curve(lua_State *lua)
     return 1;
 }
 
-int luahc_tightrope_walker_curve(lua_State *lua)
+LUA_EXPORT int luahc_tightrope_walker_curve(lua_State *lua)
 {
     lua_curve_helper(lua, new hypercurve::tightrope_walker_curve(
                          lua_tonumber(lua, 1), lua_tonumber(lua, 2)));
@@ -243,7 +244,7 @@ int luahc_tightrope_walker_curve(lua_State *lua)
     return 1;
 }
 
-int luahc_quadratic_bezier_curve(lua_State *lua)
+LUA_EXPORT int luahc_quadratic_bezier_curve(lua_State *lua)
 {
     hypercurve::control_point *cp = *(hypercurve::control_point**) luaL_checkudata(lua, 1, "hypercurve.control_point");
     lua_curve_helper(lua, new hypercurve::quadratic_bezier_curve(*cp));
@@ -252,7 +253,7 @@ int luahc_quadratic_bezier_curve(lua_State *lua)
     return 1;
 }
 
-int luahc_cubic_bezier_curve(lua_State *lua)
+LUA_EXPORT int luahc_cubic_bezier_curve(lua_State *lua)
 {
     hypercurve::control_point *cp = *(hypercurve::control_point**) luaL_checkudata(lua, 1, "hypercurve.control_point");
     hypercurve::control_point *cp2 = *(hypercurve::control_point**) luaL_checkudata(lua, 2, "hypercurve.control_point");
@@ -262,7 +263,7 @@ int luahc_cubic_bezier_curve(lua_State *lua)
     return 1;
 }
 
-int luahc_cubic_spline_curve(lua_State *lua)
+LUA_EXPORT int luahc_cubic_spline_curve(lua_State *lua)
 {
     luaL_checktype(lua, 1, LUA_TTABLE);
     size_t size = luaL_len(lua, 1); //lua_objlen(lua, 3);
@@ -280,7 +281,7 @@ int luahc_cubic_spline_curve(lua_State *lua)
     return 1;
 }
 
-int luahc_catmull_rom_spline_curve(lua_State *lua)
+LUA_EXPORT int luahc_catmull_rom_spline_curve(lua_State *lua)
 {
     hypercurve::control_point *cp = *(hypercurve::control_point**) luaL_checkudata(lua, 1, "hypercurve.control_point");
     hypercurve::control_point *cp2 = *(hypercurve::control_point**) luaL_checkudata(lua, 2, "hypercurve.control_point");
@@ -290,7 +291,7 @@ int luahc_catmull_rom_spline_curve(lua_State *lua)
     return 1;
 }
 
-int luahc_user_defined_curve(lua_State *lua)
+LUA_EXPORT int luahc_user_defined_curve(lua_State *lua)
 {
     if(lua_gettop(lua) == 1 && lua_isfunction(lua, -1))
     {
@@ -303,7 +304,7 @@ int luahc_user_defined_curve(lua_State *lua)
     return 0;
 }
 
-int luahc_lagrange_interpolation_curve(lua_State *lua)
+LUA_EXPORT int luahc_lagrange_interpolation_curve(lua_State *lua)
 {
     hypercurve::memory_vector< hypercurve::control_point> vec(lua_gettop(lua));
     for(size_t i = 1; i <= vec.size(); ++i)
@@ -317,7 +318,7 @@ int luahc_lagrange_interpolation_curve(lua_State *lua)
     return 1;
 }
 
-int luahc_polynomial_curve(lua_State *lua)
+LUA_EXPORT int luahc_polynomial_curve(lua_State *lua)
 {
     hypercurve::memory_vector<double> vec(lua_gettop(lua));
     for(size_t i = 1; i <= vec.size(); ++i)
@@ -332,7 +333,7 @@ int luahc_polynomial_curve(lua_State *lua)
 // Invert curve
 ///////////////////////////////////////////
 
-int luahc_invert_curve(lua_State *lua)
+LUA_EXPORT int luahc_invert_curve(lua_State *lua)
 {
     luahc_curve_base_t *curve = *(luahc_curve_base_t **)luaL_checkudata(lua, 1, "hypercurve.curve_base");
     curve->crv->inverted = true;
@@ -348,7 +349,7 @@ int luahc_invert_curve(lua_State *lua)
 // Syntax : hypercurve.segment(double frac, double y_dest, curve crv)
 ///////////////////////////////////////////
 
-int luahc_segment(lua_State *lua)
+LUA_EXPORT int luahc_segment(lua_State *lua)
 {
     double frac = lua_tonumber(lua, 1);
     double y_dest = lua_tonumber(lua, 2);
@@ -371,7 +372,7 @@ int luahc_segment(lua_State *lua)
 // Syntax : hypercurve.curve()
 ///////////////////////////////////////////:
 
-int luahc_curve(lua_State *lua)
+LUA_EXPORT int luahc_curve(lua_State *lua)
 {
     int definition = lua_tointeger(lua, 1);
     double y_start = lua_tonumber(lua, 2);
@@ -403,7 +404,7 @@ int luahc_curve(lua_State *lua)
 // Syntax : hypercurve.write_as_wav(string path, curve c)
 ///////////////////////////////////////////:
 #include"sndfile.hh"
-int luahc_curve_write_as_wav(lua_State *lua)
+LUA_EXPORT int luahc_curve_write_as_wav(lua_State *lua)
 {
     hypercurve::curve *crv = *(hypercurve::curve **) luaL_checkudata(lua, 1, "hypercurve.curve");
     std::string path = lua_tostring(lua, 2);
@@ -413,7 +414,7 @@ int luahc_curve_write_as_wav(lua_State *lua)
     return 0;
 }
 
-int luahc_curve_ascii_display(lua_State *lua)
+LUA_EXPORT int luahc_curve_ascii_display(lua_State *lua)
 {
     hypercurve::curve *crv = *(hypercurve::curve **) luaL_checkudata(lua, 1, "hypercurve.curve");
     std::string name = lua_tostring(lua, 2);
@@ -423,7 +424,7 @@ int luahc_curve_ascii_display(lua_State *lua)
     return 0;
 }
 
-int luahc_curve_write_png(lua_State *lua)
+LUA_EXPORT int luahc_curve_write_png(lua_State *lua)
 {
     hypercurve::curve *crv = *(hypercurve::curve **) luaL_checkudata(lua, 1, "hypercurve.curve");
     std::string path = lua_tostring(lua, 2);
@@ -434,7 +435,7 @@ int luahc_curve_write_png(lua_State *lua)
 }
 
 // Return one sample
-int luahc_curve_get_sample_at(lua_State *lua)
+LUA_EXPORT int luahc_curve_get_sample_at(lua_State *lua)
 {
     hypercurve::curve *crv = *(hypercurve::curve **) luaL_checkudata(lua, 1, "hypercurve.curve");
     int index = lua_tonumber(lua, 2);
@@ -443,7 +444,7 @@ int luahc_curve_get_sample_at(lua_State *lua)
 }
 
 // Returns a lua table
-int luahc_curve_get_samples(lua_State *lua)
+LUA_EXPORT int luahc_curve_get_samples(lua_State *lua)
 {
     hypercurve::curve *crv = *(hypercurve::curve **) luaL_checkudata(lua, 1, "hypercurve.curve");
     lua_newtable(lua);
@@ -455,7 +456,7 @@ int luahc_curve_get_samples(lua_State *lua)
     return 1;
 }
 
-int luahc_curve_normalize_y(lua_State *lua)
+LUA_EXPORT int luahc_curve_normalize_y(lua_State *lua)
 {
     hypercurve::curve *crv = *(hypercurve::curve **) luaL_checkudata(lua, 1, "hypercurve.curve");
     crv->normalize_y(lua_tonumber(lua, 2), lua_tonumber(lua, 3));
@@ -467,14 +468,14 @@ int luahc_curve_normalize_y(lua_State *lua)
 // Methods registration
 ///////////////////////////////////////////:
 
-static int luahc_curve_class_gc(lua_State *lua) {
+LUA_EXPORT int luahc_curve_class_gc(lua_State *lua) {
     //printf("## __gc\n");
     hypercurve::curve *crv = *(hypercurve::curve **) luaL_checkudata(lua, 1, "hypercurve.curve");
     delete crv;
     return 0;
 }
 
-static int luahc_curve_class_add(lua_State *lua)
+LUA_EXPORT int luahc_curve_class_add(lua_State *lua)
 {
     hypercurve::curve *crv = *(hypercurve::curve **) luaL_checkudata(lua, 1, "hypercurve.curve");
     hypercurve::curve *crv2 = *(hypercurve::curve **) luaL_checkudata(lua, 2, "hypercurve.curve");
@@ -486,7 +487,7 @@ static int luahc_curve_class_add(lua_State *lua)
     return 1;
 }
 
-static int luahc_curve_class_sub(lua_State *lua)
+LUA_EXPORT int luahc_curve_class_sub(lua_State *lua)
 {
     hypercurve::curve *crv = *(hypercurve::curve **) luaL_checkudata(lua, 1, "hypercurve.curve");
     hypercurve::curve *crv2 = *(hypercurve::curve **) luaL_checkudata(lua, 2, "hypercurve.curve");
@@ -498,7 +499,7 @@ static int luahc_curve_class_sub(lua_State *lua)
     return 1;
 }
 
-static int luahc_curve_class_mult(lua_State *lua)
+LUA_EXPORT int luahc_curve_class_mult(lua_State *lua)
 {
     hypercurve::curve *crv = *(hypercurve::curve **) luaL_checkudata(lua, 1, "hypercurve.curve");
     hypercurve::curve *crv2 = *(hypercurve::curve **) luaL_checkudata(lua, 2, "hypercurve.curve");
@@ -510,7 +511,7 @@ static int luahc_curve_class_mult(lua_State *lua)
     return 1;
 }
 
-static int luahc_curve_class_div(lua_State *lua)
+LUA_EXPORT int luahc_curve_class_div(lua_State *lua)
 {
     hypercurve::curve *crv = *(hypercurve::curve **) luaL_checkudata(lua, 1, "hypercurve.curve");
     hypercurve::curve *crv2 = *(hypercurve::curve **) luaL_checkudata(lua, 2, "hypercurve.curve");
@@ -522,21 +523,21 @@ static int luahc_curve_class_div(lua_State *lua)
     return 1;
 }
 
-static int luahc_control_point_class_gc(lua_State *lua)
+LUA_EXPORT int luahc_control_point_class_gc(lua_State *lua)
 {
     hypercurve::control_point *cp = *(hypercurve::control_point **) luaL_checkudata(lua, 1, "hypercurve.control_point");
     delete cp;
     return 0;
 }
 
-static int luahc_index(lua_State *L) {
+LUA_EXPORT int luahc_index(lua_State *L) {
     //printf("## index\n");
     int i = luaL_checkinteger(L, 2);
     lua_pushinteger(L, i);
     return 1;
 }
 
-static const luaL_Reg luahc_curve_class_meta[] =
+LUA_EXPORT const luaL_Reg luahc_curve_class_meta[] =
 {
     { "__gc"        ,luahc_curve_class_gc          },
     { "__add" 		,luahc_curve_class_add		   },
@@ -546,13 +547,13 @@ static const luaL_Reg luahc_curve_class_meta[] =
     { NULL          ,NULL            }
 };
 
-static const luaL_Reg luahc_control_point_class_meta[] =
+LUA_EXPORT const luaL_Reg luahc_control_point_class_meta[] =
 {
     { "__gc"        ,luahc_control_point_class_gc          },
     { NULL          ,NULL            }
 };
 
-static const luaL_Reg luahc_curve_class_meth[] =
+LUA_EXPORT const luaL_Reg luahc_curve_class_meth[] =
 {
     {"ascii_display" ,luahc_curve_ascii_display },
     {"write_as_png" ,luahc_curve_write_png },
@@ -563,7 +564,7 @@ static const luaL_Reg luahc_curve_class_meth[] =
     { NULL          ,NULL            }
 };
 
-static const luaL_Reg luahc_control_point_class_meth[] =
+LUA_EXPORT const luaL_Reg luahc_control_point_class_meth[] =
 {
     {"x", luahc_control_point_x},
     {"y", luahc_control_point_y},
@@ -571,7 +572,7 @@ static const luaL_Reg luahc_control_point_class_meth[] =
     { NULL          ,NULL            }
 };
 
-static const luaL_Reg luahc_static_meta[] =
+LUA_EXPORT const luaL_Reg luahc_static_meta[] =
 {
     { "__index" ,luahc_index },
     //{ "__gc"        ,luahc_curve_class_gc          },
@@ -579,7 +580,8 @@ static const luaL_Reg luahc_static_meta[] =
     //{ "__call"  ,luahc_curve   },
     { NULL      ,NULL      }
 };
-static const luaL_Reg luahc_static_meth[] =
+
+LUA_EXPORT const luaL_Reg luahc_static_meth[] =
 {
     {"hypercurve" , luahc_curve },
     {"curve" , luahc_curve },  // alias for hypercurve
@@ -628,7 +630,7 @@ static const luaL_Reg luahc_static_meth[] =
     { NULL      ,NULL      }
 };
 
-SHARED_EXPORTS int luaopen_liblua_hypercurve(lua_State *lua)
+LUA_EXPORT int luaopen_liblua_hypercurve(lua_State *lua)
 {
     luaL_newmetatable(lua, "hypercurve.segment");
     lua_pushstring(lua, "__index");

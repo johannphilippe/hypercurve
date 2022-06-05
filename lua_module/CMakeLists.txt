@@ -15,7 +15,6 @@ if(NOT ${Lua_FOUND})
    message(FATAL_ERROR "Lua not found")
 endif()
 
-
 message(STATUS "Shared exports generated")
 
 add_library(lua_hypercurve SHARED
@@ -36,14 +35,43 @@ target_include_directories(lua_hypercurve PUBLIC
    ${CMAKE_BINARY_DIR}/exports
    )
 
-set_target_properties(lua_hypercurve PROPERTIES LINKER_LANGUAGE CXX)
 target_link_libraries(lua_hypercurve PUBLIC ${LUA_LIBRARIES})
 target_compile_options(lua_hypercurve PUBLIC -fPIC)
 
+if(WIN32)
+    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS 1)
+    set(WIN_COMPILE_FLAGS "/c /nologo /MD /TP /DWIN32")
+    set(WIN_LINK_FLAGS "/nologo /dll")
+    set_target_properties(lua_hypercurve
+        PROPERTIES
+        LINKER_LANGUAGE CXX
+        COMPILE_FLAGS ${WIN_COMPILE_FLAGS}
+        LINK_FLAGS ${WIN_LINK_FLAGS}
+        PREFIX ""
+        OUTPUT_NAME "lua_hypercurve"
+        )
+endif()
 
-## Lua C Test
-
+## Lua CPP Test
 add_executable(lua_test lua_test.cpp)
-target_link_libraries(lua_test lua_hypercurve)
+target_link_libraries(lua_test ${LUA_LIBRARIES})
+target_include_directories(lua_test PUBLIC ${LUA_INCLUDE_DIR})
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/test.lua
-   DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+   DESTINATION ${CMAKE_BINARY_DIR}/bin)
+
+if(WIN32)
+    string(REPLACE ".lib" ".dll" LUA_DLL ${LUA_LIBRARIES})
+    message(STATUS ${LUA_DLL})
+    file(COPY ${LUA_DLL} DESTINATION ${CMAKE_BINARY_DIR}/bin)
+endif()
+
+if(NOT DEFINED LUA_INSTALL_PATH)
+    get_filename_component(LUA_INSTALL_PATH ${LUA_LIBRARIES} DIRECTORY)
+endif()
+message(STATUS "Lua Install path : ${LUA_INSTALL_PATH}")
+install(TARGETS lua_hypercurve sndfile
+    RUNTIME DESTINATION ${LUA_INSTALL_PATH}
+    PUBLIC_HEADER DESTINATION ${LUA_INSTALL_PATH}
+    LIBRARY DESTINATION ${LUA_INSTALL_PATH})
+install(FILES ${LUA_DLL}
+    DESTINATION ${LUA_INSTALL_PATH})

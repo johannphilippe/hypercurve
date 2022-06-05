@@ -1,11 +1,14 @@
 -- Find package if not in standard Lua CPATH
-package.cpath = package.cpath .. ";/home/johann/Documents/GitHub/build-hypercurve-Clang10-Debug/?.so;"
+function pp(str)
+	print("FROM_LUA", str)
+end
 
-local hc =  require("liblua_hypercurve")
+pp("Start")
 
+local hc =  require("lua_hypercurve")
 
+pp("Required")
 
-print("Print Lua module components")
 function tp(v, str)
 
 	for k,v in pairs(v) do
@@ -31,6 +34,7 @@ local hybrid = hc.curve(16384, 0,
 
 	})
 	
+print("hybrid curve created")
 
 -- You can access samples as a table
 local samples = hybrid:get_samples()

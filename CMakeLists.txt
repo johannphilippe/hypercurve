@@ -12,19 +12,28 @@ endif()
 
 set(CMAKE_CXX_FLAGS_DEBUG "-g")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+set( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin )
+
+#############################################
+##### 	Build libsndfile
+#############################################
+
+option(BUILD_CSOUND_OPCODE "Build Csound opcodes")
+option(BUILD_LUA_MODULE "Build Lua module")
+option(BUILD_FAUST_LIB	"Build Faust library")
 
 #############################################
 ##### 	Build libsndfile
 #############################################
 set(ENABLE_EXTERNAL_LIBS OFF CACHE BOOL "Build libsndfile external libs")
 set(BUILD_SHARED_LIBS ON CACHE BOOL "Build Shared libs")
+set(BUILD_EXAMPLES OFF CACHE BOOL "Not Building Examples for libsndfile")
+set(BUILD_PROGRAMS OFF CACHE BOOL "Not Building Programs for libsndfile")
+set(BUILD_TESTING OFF CACHE BOOL "Not Build testing for libsndfile")
+#set(ENABLE_STATIC_RUNTIME ON CACHE BOOL "Enable static runtime")
 add_subdirectory(libsndfile)
 target_compile_options(sndfile PRIVATE -fPIC)
-
-option(BUILD_CSOUND_OPCODE "Build Csound opcodes")
-option(BUILD_LUA_MODULE "Build Lua module")
-option(BUILD_FAUST_LIB	"Build Faust library")
-
 
 #############################################
 ##### 	Build Hypercurve library
@@ -65,6 +74,7 @@ target_compile_options(hypercurve
    ${HYPERCURVE_OPTIONS}
    )
 
+# Static version
 add_library(hypercurve_static STATIC
    ${HYPERCURVE_SOURCES}
    )
@@ -107,9 +117,9 @@ target_link_libraries(hypercurve_test
 #############################################
 
 if(BUILD_LUA_MODULE OR BUILD_ALL)
-   message(STATUS "Building Lua module")
+   message(STATUS "Building Lua module ON")
    add_subdirectory(lua_module)
-   target_link_libraries(lua_hypercurve PUBLIC hypercurve_static sndfile ${LUA_LIBRARIES})
+   target_link_libraries(lua_hypercurve PUBLIC hypercurve_static sndfile)
 endif()
 
 #############################################
@@ -117,7 +127,7 @@ endif()
 #############################################
 
 if(BUILD_CSOUND_OPCODE OR BUILD_ALL)
-   message(STATUS "Building Csound opcode")
+   message(STATUS "Building Csound opcode ON")
    add_subdirectory(csound_opcode)
    target_link_libraries(csound_hypercurve PUBLIC hypercurve_static)
 endif()
@@ -128,6 +138,6 @@ endif()
 #############################################
 
 if(BUILD_FAUST_LIB OR BUILD_ALL)
-   message(STATUS "Building Faust library")
+   message(STATUS "Building Faust library ON")
    add_subdirectory(faust_lib)
 endif()

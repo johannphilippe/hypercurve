@@ -111,7 +111,6 @@ env = hc.runi(curve, os.phasor(1, 1));
 
 # Build
 
-
 First clone the repo with submodules : 
 ``` git clone https://github.com/johannphilippe/hypercurve.git --recurse-submodules ```
 You should check that Lua is installed on your system. If it is not, or if compilation retrns error, you should install a Lua 5.1 version to the standard installation path. Make sure you have the dynamic library installed, and the headers `lauxlib.h` and `lua.h` are available on your system.
@@ -132,9 +131,16 @@ On some platforms (e.g. Windows) you might need to set the Lua paths with the fo
 ```
 cmake .. -DBUILD_LUA_MODULE=TRUE -DLUA_INCLUDE_DIR=/you/dir/include -DLUA_LIBRARIES=/path/to/lua.lib
 ```
+
+Windows build for Lua is a bit more complicated, due to the way Windows searches for dynamic libraries. Wheter you provide `LUA_LIBRARIES` yourself or let CMake find it, you will need the `.lib` and `.dll` libraries of Lua to share the same name (except the extension) and the same path (as it is the case in standard Lua distributions). This will allow CMake to copy the Lua `.dll` dynamic library next to `lua_hypercurve` in the bin folder.
+
 In order to build the Faust library, you will need [Quom](https://pypi.org/project/quom/) to be installed in your system. See the Faust [README](faust_lib/README.md)
 
 The PNG writer [fpng](https://github.com/richgel999/fpng) used for hypercurve has SSE support. This can be enabled with `-DSSE=1`.
+
+The resulting binaries will all be located in `bin` directory. On Windows, `lua_hypercurve.dll` and `hypercurve.dll` require `sndfile.dll` to be in the same folder. `lua_hypercurve.dll` also requires the Lua `.dll` you linked against (e.g. `lua5.1.dll`). 
+This must be considered when packaging the library to be embedded or used by another application.
+
 # TODO
 * Waveform scaling : will only work if min_y = max_y : make a specific function
 * Expose random generators to frontends (Lua, Csound, Faust).
