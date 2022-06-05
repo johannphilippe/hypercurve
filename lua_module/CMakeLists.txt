@@ -35,12 +35,18 @@ target_include_directories(lua_hypercurve PUBLIC
    ${CMAKE_BINARY_DIR}/exports
    )
 
-target_link_libraries(lua_hypercurve PUBLIC ${LUA_LIBRARIES})
+target_link_libraries(lua_hypercurve PUBLIC ${LUA_LIBRARIES} hypercurve_static sndfile)
 target_compile_options(lua_hypercurve PUBLIC -fPIC)
 
 if(WIN32)
    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS 1)
-   set(WIN_COMPILE_FLAGS "/c /nologo /MD /TP /DWIN32")
+   if(${CMAKE_BUILD_TYPE} MATCHES "Release")
+       message(STATUS "Build Release")
+       set(WIN_COMPILE_FLAGS "/c /nologo /MD /TP /Dx64")
+   else()
+       message(STATUS "Build debug")
+       set(WIN_COMPILE_FLAGS "/c /nologo /MDd /TP /Dx64")
+   endif()
    set(WIN_LINK_FLAGS "/nologo /dll")
    set_target_properties(lua_hypercurve
       PROPERTIES
@@ -67,7 +73,7 @@ target_include_directories(lua_test PUBLIC ${LUA_INCLUDE_DIR})
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/test.lua
    DESTINATION ${CMAKE_BINARY_DIR}/bin)
 
-if(WIN32)
+if(WIN32 AND NOT BUILD_LUAJIT)
     string(REPLACE ".lib" ".dll" LUA_DLL ${LUA_LIBRARIES})
     message(STATUS ${LUA_DLL})
     file(COPY ${LUA_DLL} DESTINATION ${CMAKE_BINARY_DIR}/bin)

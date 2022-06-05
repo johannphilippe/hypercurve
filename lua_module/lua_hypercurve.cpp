@@ -27,7 +27,6 @@ extern "C" {
 #include"../src/utilities.h"
 #include"compat-5.3.h"
 
-extern "C" {
 struct SHARED_EXPORTS luahc_curve_base_t
 {
     luahc_curve_base_t(hypercurve::curve_base *cb)
@@ -395,7 +394,6 @@ LUA_EXPORT int luahc_curve(lua_State *lua)
     *l_crv = crv;
     luaL_getmetatable(lua, "hypercurve.curve");
     lua_setmetatable(lua, -2);
-
     return 1;
 }
 
@@ -637,6 +635,7 @@ LUA_EXPORT const luaL_Reg luahc_static_meth[] =
     { NULL      ,NULL      }
 };
 
+extern "C" {
 LUA_EXPORT int luaopen_lua_hypercurve(lua_State *lua)
 {
     luaL_newmetatable(lua, "hypercurve.segment");

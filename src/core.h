@@ -248,7 +248,7 @@ protected:
         double x = 0;
         for(auto & it : segs)
             x += it.fractional_size;
-        if( (x > 1.0) ||  (x < 1.0) )
+        if( x != 1.0 )
         {
             this->rescale(x);
         }

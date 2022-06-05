@@ -10,6 +10,15 @@ if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
 endif()
 
+if(${CMAKE_BUILD_TYPE} MATCHES "Release")
+    message(STATUS "Release")
+    #add_compile_definitions($<$<CONFIG:Release>:_ITERATOR_DEBUG_LEVEL=0>)
+else()
+    message(STATUS "Debug")
+    #add_compile_definitions($<$<CONFIG:Debug>:_ITERATOR_DEBUG_LEVEL=1>)
+
+endif()
+
 set(CMAKE_CXX_FLAGS_DEBUG "-g")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
@@ -128,7 +137,7 @@ if(BUILD_LUA_MODULE OR BUILD_ALL)
 
    message(STATUS "Building Lua module ON")
    add_subdirectory(lua_module)
-   target_link_libraries(lua_hypercurve PUBLIC hypercurve_static sndfile)
+   #target_link_libraries(lua_hypercurve PUBLIC hypercurve_static sndfile)
 endif()
 
 #############################################

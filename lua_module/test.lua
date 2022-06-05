@@ -1,4 +1,4 @@
-package.cpath = package.cpath .. ";./lib?.so;./lib?.dylib"
+package.cpath = package.cpath .. ";./lib?.so;./lib?.dylib;./lib?.dll"
 -- Find package if not in standard Lua CPATH
 function pp(str)
 	print("FROM_LUA", str)
@@ -22,9 +22,10 @@ function tp(v, str)
 end
 tp(hc, "")
 
+pp("Create hybrid")
 -- Here a simple hybrid curve example
 local div = 6
-local hybrid = hc.curve(16384, 0, 
+local hybrid = hc.hypercurve(16384, 0, 
 	{
 		hc.segment(1/div, 1, hc.cubic()),
 		hc.segment(1/div, 0.8, hc.diocles(1)),
@@ -32,9 +33,7 @@ local hybrid = hc.curve(16384, 0,
 		hc.segment(1/div, 0.25, hc.cubic()),
 		hc.segment(1/div, 0.388, hc.cissoid(1)),
 		hc.segment(1/div, 0.123, hc.linear())
-
 	})
-	
 print("hybrid curve created")
 
 -- You can access samples as a table
@@ -54,7 +53,7 @@ hybrid:ascii_display("luacurve", "y = luacurve(x)", "*")
 
 -- Then a bezier curve example
 --
-local bez = hc.curve(16384, 0, 
+local bez = hc.hypercurve(16384, 0, 
 	{
 		hc.segment(1/2, 1, hc.quadratic_bezier( 
 					hc.control_point(1/4, 0.1))),
