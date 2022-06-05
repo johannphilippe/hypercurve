@@ -8,8 +8,8 @@ else()
 endif()
 
 message(STATUS ${LUA_VERSION_STRING})
-message(STATUS ${LUA_INCLUDE_DIR})
-message(STATUS ${LUA_LIBRARIES})
+message(STATUS "${LUA_INCLUDE_DIR}")
+message(STATUS "${LUA_LIBRARIES}")
 
 if(NOT ${Lua_FOUND})
    message(FATAL_ERROR "Lua not found")
@@ -65,8 +65,10 @@ if(WIN32)
     file(COPY ${LUA_DLL} DESTINATION ${CMAKE_BINARY_DIR}/bin)
 endif()
 
+# Installation
+#[[
 if(NOT DEFINED LUA_INSTALL_PATH)
-    get_filename_component(LUA_INSTALL_PATH ${LUA_LIBRARIES} DIRECTORY)
+    get_filename_component(LUA_INSTALL_PATH "${LUA_LIBRARIES}" DIRECTORY)
 endif()
 message(STATUS "Lua Install path : ${LUA_INSTALL_PATH}")
 install(TARGETS lua_hypercurve sndfile
@@ -75,3 +77,4 @@ install(TARGETS lua_hypercurve sndfile
     LIBRARY DESTINATION ${LUA_INSTALL_PATH})
 install(FILES ${LUA_DLL}
     DESTINATION ${LUA_INSTALL_PATH})
+]]

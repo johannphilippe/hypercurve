@@ -15,7 +15,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
 set(CMAKE_CXX_FLAGS  ${CMAKE_CXX_FLAGS}  "-std=c++17")
 
 # Csound opcode build
-find_package(CSOUND)
+find_package(Csound REQUIRED)
 
 function(make_plugin pluginlib srcs)
   if(APPLE)
@@ -27,19 +27,16 @@ function(make_plugin pluginlib srcs)
   target_compile_options(${pluginlib} PRIVATE -O3)
 endfunction(make_plugin)
 
-if(CSOUND_FOUND)
-  message(STATUS "Building Opcodes")
-  make_plugin(csound_hypercurve csound_hypercurve.cpp)
-  add_executable(csound_test test_csound.cpp)
-  target_link_libraries(csound_test PUBLIC ${CSOUND_LIBRARIES})
-  target_include_directories(csound_test PUBLIC ${CSOUND_INCLUDE_DIRS})
-  file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/test.csd
-     DESTINATION ${CMAKE_BINARY_DIR}/bin)
+message(STATUS "Building Opcodes")
+make_plugin(csound_hypercurve csound_hypercurve.cpp)
+add_executable(csound_test test_csound.cpp)
+target_link_libraries(csound_test PUBLIC ${CSOUND_LIBRARIES})
+target_include_directories(csound_test PUBLIC ${CSOUND_INCLUDE_DIRS})
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/test.csd
+   DESTINATION ${CMAKE_BINARY_DIR}/bin)
 
-else()
-  message(STATUS "Csound installation not found")
-endif()
-
+# Installation
+#[[
 if(NOT DEFINED CSOUND_INSTALL_PATH)
     set(CSOUND_INSTALL_PATH ${CSOUND_PLUGINS_DIR})
 endif()
@@ -48,3 +45,4 @@ install(TARGETS csound_hypercurve
     RUNTIME DESTINATION "${CSOUND_INSTALL_PATH}"
     LIBRARY DESTINATION "${CSOUND_INSTALL_PATH}"
     )
+]]

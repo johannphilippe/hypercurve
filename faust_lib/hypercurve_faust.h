@@ -273,7 +273,7 @@ static double hc_runi(int index, double phasor)
     size_t i_phasor = std::floor(phasor * faust_curve_map[index]->get_definition());
     if( (i_phasor == 0) || (i_phasor >= (faust_curve_map[index]->get_definition() - 1) ))
         return limit(-1, 1, faust_curve_map[index]->get_sample_at(i_phasor));
-    size_t n_phasor = i_phasor + 1; //ceil(phasor * faust_curve_map[index]->get_definition());
+    size_t n_phasor = i_phasor + 1;
     return limit(-1, 1, linear_interpolation(
              faust_curve_map[index]->get_sample_at(i_phasor),
              faust_curve_map[index]->get_sample_at(n_phasor),
