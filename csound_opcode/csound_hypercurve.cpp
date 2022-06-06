@@ -885,6 +885,83 @@ struct cs_export_png : public csnd::InPlug<6>
     }
 };
 
+
+
+
+struct cs_gen : public csnd::Plugin<1, 64>, public cs_rt_hypercurve
+{
+  int init()
+  {
+      double *t_ptr = nullptr;
+      if(inargs[0] > 0) {
+          t_nbr = int(inargs[0]);
+      } else {
+          // Automatic table number
+          t_nbr = 0;
+          do {
+              ++t_nbr;
+              csound->get_csound()->GetTable(csound->get_csound(), &t_ptr, t_nbr);
+          } while(t_ptr != (MYFLT*)NULL);
+      }
+
+      int size = inargs[1];
+      int res = csound->get_csound()->FTAlloc(csound->get_csound(),  t_nbr, size);
+      if(res != 0) return csound->get_csound()->InitError(csound->get_csound(), "Error init Hypercurve GEN %d", res);
+      std::cout << "Hypercurve allocated " << std::endl;
+      csound->get_csound()->GetTable(csound->get_csound(), &t_ptr, t_nbr );
+      std::cout << "csound get _table called " << std::endl;
+
+      _initialize(inargs[1], inargs[2], t_ptr);
+      std::cout << "initialized " << std::endl;
+      check_total_size();
+      std::cout << "resized " << std::endl;
+      process_init();
+      std::cout << "readdy to process " << std::endl;
+
+
+      for(size_t i = 3; i < in_count(); ++i)
+      {
+          if(segment_map.find(int(inargs[i])) == segment_map.end())
+              return NOTOK;
+
+          y_start = (double) ((i > 3) ?  segment_map[inargs[i - 1] ]->y_destination : inargs[2]);
+          segment_map[inargs[i]]->init(y_start, segment_map[inargs[i]]->fractional_size * _definition);
+          process_one(segment_map[inargs[i]]);
+      }
+      std::cout << "processed " << std::endl;
+
+      // Weirdly, it works below
+      AsciiPlotter p("hc_hypercurve : "  + std::to_string(t_nbr)  , 80, 15);
+      p.addPlot( std::vector<double>(this->samples.begin(), this->samples.end()), "helloplot", '*');
+      p.show();
+      outargs[0] = t_nbr;
+      return OK;
+  }
+
+    void check_total_size()
+    {
+        double x = 0;
+        for(size_t i = 3; i < in_count(); ++i)
+            x += segment_map[inargs[i]]->fractional_size;
+        if( (x > 1.0) ||  (x < 1.0) )
+        {
+            this->rescale(x);
+        }
+    }
+
+    void rescale(double x)
+    {
+        double factor = 1. / x;
+        for(size_t i = 3; i < in_count(); ++i) {
+            segment_map[inargs[i]]->rescale_x(factor);
+        }
+    }
+
+
+  int t_nbr;
+  double y_start;
+};
+
 #include <modload.h>
 
 void csnd::on_load(Csound *csound) {
@@ -945,4 +1022,7 @@ void csnd::on_load(Csound *csound) {
     // With interpolation
     csnd::plugin<cs_run_curve_interpolate>(csound, "hc_runi", "k", "ik", csnd::thread::ik);
     csnd::plugin<cs_run_curve_interpolate>(csound, "hc_runi", "a", "ia", csnd::thread::ia);
+
+
+    csnd::plugin<cs_gen>(csound, "hc_gen", "i", "iiim", csnd::thread::i);
 }
