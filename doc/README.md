@@ -18,7 +18,9 @@ It is available in several frontends : C++, Lua, and Csound.
 
 3.2 [Invert curve base](#invert-curve-base)
 
-3.3 [Normalize hypercurve](#normalize-hypercurve)
+3.3 [Mirror curve base](#mirror-curve-base)
+
+3.4 [Normalize hypercurve](#normalize-hypercurve)
 
 4. [Hypercurve Segment](#segment)
 
@@ -176,6 +178,17 @@ kenv = hc_run(icrv, linseg:k(0, p3, 1))
 
 // Or with linearinterpolation
 kenv = hc_runi(icrv, linseg:k(0, p3, 1))
+
+
+
+// Another way (new one) to create an hypercurve, is by registring it directly as a FTable
+gidiocles = hc_gen(0, 2048, 0, 
+              hc_segment(1/2, 1, hc_diocles(0.51))
+              hc_segment(1/2, 0, hc_diocles(1.5)))
+
+// It can then be used as any other FTable, with Csound opcodes
+kenv = tablei:k(linseg(0, p3, 1), gidiocles, 1)
+
 ```
 
   
@@ -335,10 +348,10 @@ crv_div = hc.div(crv1, crv2);
 ```
 
 
+
 #### Invert curve base 
 
-This function will make a symetry of the curve on a x_start/y_start - x_destination/y_destination axis
-
+Vertical symetry of the curve base.
 
 
 C++ :
@@ -369,6 +382,44 @@ Faust :
 ```
 hc.invert(hc.cubic_curve());
 ```
+
+
+
+#### Mirror curve base
+
+This function will make a symetry of the curve on a x_start/y_start - x_destination/y_destination axis
+
+C++ :
+
+```c++
+
+hypercurve::mirror(hypercurve::share( hypercurve::cubic_curve() ));
+
+```
+
+Lua :
+
+```Lua
+
+hc.mirror(hc.cubic())
+
+```
+
+Csound :
+
+```Csound
+
+hc_mirror(hc_cubic_curve())
+
+```
+
+Faust : 
+```
+hc.mirror(hc.cubic_curve());
+```
+
+
+
 
 #### Normalize hypercurve
 
