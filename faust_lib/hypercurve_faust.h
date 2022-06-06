@@ -38,6 +38,12 @@ static int hc_invert_curve_base(int cb)
     return cb;
 }
 
+static int hc_mirror_curve_base(int cb)
+{
+    mirror(faust_curve_base_map[cb]);
+    return cb;
+}
+
 // Operators on hypercurves
 static int hc_add(int h1, int h2)
 {

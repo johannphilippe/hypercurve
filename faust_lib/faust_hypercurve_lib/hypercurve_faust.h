@@ -233,6 +233,15 @@ struct point
 
     point() {}
 
+    point operator/(point &other) {return point{this->x/other.x, this->y/other.y};}
+    point operator*(point &other) {return point{this->x*other.x, this->y*other.y};}
+    point operator+(point &other) {return point{this->x+other.x, this->y+other.y};}
+    point operator-(point &other) {return point{this->x-other.x, this->y-other.y};}
+    point &operator--() {--x; --y; return *this;}
+    point &operator--(int) {--x; --y; return *this;}
+    point &operator++() {++x; ++y; return *this;}
+    point &operator++(int) {++x; ++y; return *this;}
+
     template<typename T>
     double distance_to(T &p)
     {
@@ -359,6 +368,8 @@ struct memory_vector
       iterator& operator=(const iterator&o) {ptr = o.ptr; return *this;}
       iterator& operator++() {++ptr; return *this;} //prefix increment
       iterator& operator++(int) {return ptr++;}
+      iterator operator+(int add) {return ptr+add;}
+      iterator operator-(int add) {return ptr-add;}
       T * operator->() {return ptr;}
       T& operator*() const {return *ptr;}
       bool operator==(const iterator& i) {return ptr == i.ptr;}
@@ -582,6 +593,20 @@ struct increment_map  : public std::unordered_map<int, T>
         if(this->find(index) != this->end())
         {
             this->erase(index);
+        }
+    }
+
+    bool has(int index)
+    {
+        return this->find(index) != this->end();
+    }
+
+    void dump()
+    {
+        std::cout << "index now is : " << _index << std::endl;
+        for(size_t i = 1; i < _index; ++i)
+        {
+            std::cout << "incr map : " << i << " ptr : " << &this->at(i) << std::endl;
         }
     }
 
@@ -825,16 +850,58 @@ public:
     inline virtual double process(size_t i, size_t size) {return process(hypercurve::fraction(i, size));}
     inline virtual double process_all(size_t size, memory_vector<double>::iterator &it)
     {
+        memory_vector<double>::iterator begin_ptr = it;
         double max = 0.0;
         for(size_t i = 0; i < size; ++i)
         {
             const double x = hypercurve::fraction(i, size);
             double res = scale(x);
             if( std::abs(res) > max) max = std::abs(res);
-            if(inverted) res = process_invert(x, res);
+            //if(inverted) res = process_invert(x, res);
             *it = res;
             ++it;
         }
+
+        if(inverted)
+        {
+            memory_vector<double> tmp(definition);
+            for(size_t i = 0; i < definition; ++i)
+            {
+                // Trouver la valeur en X correspondant à un y linéaire donné
+
+                point diff(1, y_destination - y_start);
+                double x_itp = fraction(i, definition);
+                point perp_origin(0 + x_itp, diff.y);
+                point perp_dest(1 + x_itp, -diff.y);
+                bool found = false;
+                size_t start_x = i;
+                double y = linear_interpolation(perp_dest.y, perp_origin.y, fraction(i, definition));
+                while(!found)
+                {
+                    start_x --;
+                    double y_itp = linear_interpolation(perp_dest.y, perp_origin.y, fraction(start_x, definition) );
+
+                    // Faux
+                    double curve_y = *(begin_ptr + start_x);
+
+                    std::cout << y << " " << y_itp << " " << curve_y << std::endl;
+
+                    if(( y_itp > curve_y && y < curve_y) || (y_itp < curve_y && y > curve_y))
+                    {
+                        found = true;
+                        tmp[i] = curve_y;
+                        break;
+
+                    }
+                    y = y_itp;
+                }
+
+            }
+
+            for(size_t i = 0; i < definition; ++i)
+                *(begin_ptr+i) = tmp[i];
+        }
+
         return max;
     }
 
@@ -859,14 +926,15 @@ protected:
     inline virtual double scale(double x)
     {
         if(y_start > y_destination)
-            return  process(1.0 - x) * abs_diff + offset;
+            return process(1.0 - x) * abs_diff + offset;
         return process(x) * abs_diff + offset;
     }
 
     inline double process_invert(double x, double y)
     {
+
         const double lin = linear_interpolation(y_start, y_destination, x);
-        return lin + (lin - y);
+        return lin + (lin-y); //return lin + (lin - y) ;
     }
 
     size_t definition;
@@ -1866,7 +1934,7 @@ protected:
         double x = 0;
         for(auto & it : segs)
             x += it.fractional_size;
-        if( (x > 1.0) ||  (x < 1.0) )
+        if( x != 1.0 )
         {
             this->rescale(x);
         }

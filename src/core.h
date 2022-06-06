@@ -44,6 +44,7 @@ public:
         fractional_size *= factor;
     }
 
+
     double fractional_size;
     double y_destination;
     double y_start = 0;

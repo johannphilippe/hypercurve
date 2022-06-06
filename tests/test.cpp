@@ -459,12 +459,59 @@ void dummy_test()
 
 }
 
+
+void inversion_test()
+{
+    const double start = 0.3;
+    const double end = 0.8;
+    curve dio(4096, start, {
+                 segment(0.5, end, share(tightrope_walker_curve(1.1, 0.1))),
+                 segment(0.5, 0, share(diocles_curve(2)))
+              });
+    dio.ascii_display("Diocles", "dio", '*');
+    write_as_png(dio, false, "dio.png");
+
+    curve inv(4096, start, {
+                 segment(0.5, end, invert(share(tightrope_walker_curve(1.1, 0.1)))),
+                 segment(0.5, 0, invert(share(diocles_curve(2))))
+              });
+
+    inv.ascii_display("Inverted", "Inv", '*');
+    inv.normalize_y(0, 1);
+    write_as_png(inv, false, "inv.png");
+
+
+    AsciiPlotter p("comp", 80, 30);
+    std::vector<double> dio_vec(dio.get_definition());
+    ::memcpy(dio_vec.data(), dio.get_samples(), sizeof(double) * dio.get_definition());
+    std::vector<double> inv_vec(dio.get_definition());
+    ::memcpy(inv_vec.data(), inv.get_samples(), sizeof(double) * inv.get_definition());
+
+
+    curve linear_axis(4096, start, {
+                         segment(0.5, end, share(linear_curve())),
+                         segment(0.5, 0, share(linear_curve()))
+                      });
+    std::vector<double> linear_vec(linear_axis.get_definition());
+    ::memcpy(linear_vec.data(), linear_axis.get_samples(), sizeof(double) * linear_axis.get_definition());
+
+    p.addPlot(dio_vec, "diocles", '\\');
+    p.addPlot(inv_vec, "inverted", '/');
+
+
+    p.addPlot(linear_vec, "linear", '|');
+    p.legend();
+    p.show();
+}
+
 int main()
 {
 
     //dummy_test();
     //unit_tests();
-    random_generator_test();
+    //random_generator_test();
+    inversion_test();
+
     //generate_curve_pictures();
 
     return 0;

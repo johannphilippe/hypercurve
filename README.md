@@ -142,6 +142,7 @@ The resulting binaries will all be located in `bin` directory. On Windows, `lua_
 This must be considered when packaging the library to be embedded or used by another application.
 
 # TODO
+* Fix invert curve (axial symmetry) -> implement it in segment rather than in curve_base
 * Waveform scaling : will only work if min_y = max_y : make a specific function
 * Expose random generators to frontends (Lua, Csound, Faust).
 * Tests on invert function (Lua and Csound)

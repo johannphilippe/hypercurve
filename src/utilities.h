@@ -17,6 +17,11 @@
 #include"fpng/src/fpng.h"
 #include <random>
 #include<string>
+#include<vector>
+#include<complex>
+typedef std::complex<double> pnt;
+
+
 #ifndef M_PI
  #define M_PI 3.14159265358979323846
 #endif
@@ -77,6 +82,15 @@ struct point
     {}
 
     point() {}
+
+    point operator/(point &other) {return point{this->x/other.x, this->y/other.y};}
+    point operator*(point &other) {return point{this->x*other.x, this->y*other.y};}
+    point operator+(point &other) {return point{this->x+other.x, this->y+other.y};}
+    point operator-(point &other) {return point{this->x-other.x, this->y-other.y};}
+    point &operator--() {--x; --y; return *this;}
+    point &operator--(int) {--x; --y; return *this;}
+    point &operator++() {++x; ++y; return *this;}
+    point &operator++(int) {++x; ++y; return *this;}
 
     template<typename T>
     double distance_to(T &p)
@@ -204,6 +218,8 @@ struct memory_vector
       iterator& operator=(const iterator&o) {ptr = o.ptr; return *this;}
       iterator& operator++() {++ptr; return *this;} //prefix increment
       iterator& operator++(int) {return ptr++;}
+      iterator operator+(int add) {return ptr+add;}
+      iterator operator-(int add) {return ptr-add;}
       T * operator->() {return ptr;}
       T& operator*() const {return *ptr;}
       bool operator==(const iterator& i) {return ptr == i.ptr;}
@@ -298,6 +314,55 @@ struct memory_vector
    T *_data;
    size_t _size;
 };
+
+
+inline bool sort_complex(pnt p1, pnt p2)
+{
+    return p1.real() < p2.real();
+}
+
+void mirror(memory_vector<double>::iterator &it, size_t definition, double y_start, double y_destination)
+{
+    auto begin_ptr = it;
+    std::vector<pnt> tmp(definition);
+    auto reflect = [&](pnt p, pnt a, pnt b)
+    {
+        pnt pt = p - a;
+        pnt bt = b - a;
+        pnt pr = pt / bt;
+        return conj(pr)*bt +a;
+    };
+    const pnt a(0, y_start);
+    const pnt b(1, y_destination);
+    for(size_t i = 0; i< definition; ++i)
+    {
+        double f = fraction(i, definition);
+        tmp[i] = reflect(pnt(f, *(begin_ptr+i)), a, b);
+    }
+    std::sort(tmp.begin(), tmp.end(),  sort_complex);
+    size_t tmp_index = 0;
+    pnt p1 = tmp[tmp_index];
+    pnt p2 = tmp[tmp_index + 1];
+    for(size_t i = 0; i < definition -1; ++i)
+    {
+        double f = fraction(i, definition);
+        while( !(f >= p1.real() && f < p2.real()) && (tmp_index < definition) )
+        {
+            ++tmp_index;
+            p1 = tmp[tmp_index];
+            p2 = tmp[tmp_index + 1];
+        }
+
+    if(tmp_index >= (definition - 1) )
+        p2 = pnt(1.0, y_destination);
+
+
+    double relative_x = relative_position(p1.real(), p2.real(), f );
+    double y = linear_interpolation(p1.imag(), p2.imag(), relative_x);
+    *(begin_ptr + i) = y;
+
+    }
+}
 
 
 // PNG utils

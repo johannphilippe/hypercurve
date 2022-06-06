@@ -221,3 +221,14 @@ normalize_y = ffunction(int hc_normalize_y (int, float, float), "hypercurve_faus
       Does not copy the hypercurve, but  returns the hypercurve index.
 */
 invert = ffunction(int hc_invert_curve_base (int), "hypercurve_faust.h", "");
+
+/*
+      Mirrors a curve_base segment (axial symetry, where axis is a straight line between y_start and y_destination).
+      It does not copy the curve_base, but still returns its index.
+      mirror(int curve_base_index);
+      * curve_base_index : curve_base_index to be mirrored
+
+
+      Does not copy the hypercurve, but  returns the hypercurve index.
+*/
+mirror = ffunction(int hc_mirror_curve_base (int), "hypercurve_faust.h", "");

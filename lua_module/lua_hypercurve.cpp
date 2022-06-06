@@ -343,6 +343,17 @@ LUA_EXPORT int luahc_invert_curve(lua_State *lua)
     return 1;
 }
 
+LUA_EXPORT int luahc_mirror_curve(lua_State *lua)
+{
+    luahc_curve_base_t *curve = *(luahc_curve_base_t **)luaL_checkudata(lua, 1, "hypercurve.curve_base");
+    curve->crv->mirrored = true;
+    luahc_curve_base_t **crv = (luahc_curve_base_t **) lua_newuserdata(lua, sizeof(luahc_curve_base_t*));
+    *crv = curve;
+    luaL_getmetatable(lua, "hypercurve.curve_base");
+    lua_setmetatable(lua, -2);
+    return 1;
+}
+
 ///////////////////////////////////////////
 // Create curve segment
 // Syntax : hypercurve.segment(double frac, double y_dest, curve crv)
@@ -631,6 +642,7 @@ LUA_EXPORT const luaL_Reg luahc_static_meth[] =
 
     // Helpers
     {"invert", luahc_invert_curve},
+    {"mirror", luahc_mirror_curve},
 
     { NULL      ,NULL      }
 };

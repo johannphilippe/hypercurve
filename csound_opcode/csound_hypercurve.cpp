@@ -100,6 +100,27 @@ struct cs_control_point : public csnd::Plugin<1, 2>
 //////////////////////////////////////////////////
 // Curve lib
 //////////////////////////////////////////////////
+
+struct cs_linear_curve : public csnd::Plugin<1, 0>
+{
+  int init()
+  {
+      _curve = std::make_shared<linear_curve>();
+      index = curve_base_map.map(_curve);
+      outargs[0] = index;
+      return OK;
+  }
+
+  int deinit()
+  {
+    curve_base_map.unmap(index);
+    return OK;
+  }
+
+  std::shared_ptr<linear_curve> _curve;
+  int index;
+};
+
 struct cs_diocles_curve : public csnd::Plugin<1, 1>
 {
   int init()
@@ -488,15 +509,28 @@ struct cs_polynomial_curve : csnd::Plugin<1, 64>
 
 struct cs_invert_curve : public csnd::Plugin<1,1>
 {
-  int init()
-  {
+    int init()
+    {
+        if(curve_base_map.find(int(inargs[0])) == curve_base_map.end())
+            return NOTOK;
+        std::shared_ptr<curve_base> c = curve_base_map[int(inargs[0])];
+        c->inverted = true;
+        outargs[0] = int(inargs[0]);
+        return OK;
+    }
+};
+
+struct cs_mirror_curve : public csnd::Plugin<1, 1>
+{
+    int init()
+    {
       if(curve_base_map.find(int(inargs[0])) == curve_base_map.end())
           return NOTOK;
       std::shared_ptr<curve_base> c = curve_base_map[int(inargs[0])];
-      c->inverted = true;
+      c->mirrored = true;
       outargs[0] = int(inargs[0]);
       return OK;
-  }
+    }
 };
 
 //////////////////////////////////////////////////
@@ -836,7 +870,6 @@ struct cs_export_png : public csnd::InPlug<6>
 {
     int init()
     {
-        curve_map.dump();
         if(!curve_map.has(args[0])) return NOTOK;
         std::string path(args.str_data(1).data);
 
@@ -845,7 +878,6 @@ struct cs_export_png : public csnd::InPlug<6>
 
         png.draw_curve(crv->get_samples(), crv->get_definition(), int(args[3]) != 0, int(args[2]) != 0);
         if(args[4] != 0) {
-            std::cout << "drawing grid " << std::endl;
             png.draw_grid(10, 10, args[5] != 0 ? black : white);
         }
         png.write_as_png(path);
@@ -862,6 +894,7 @@ void csnd::on_load(Csound *csound) {
     csnd::plugin<cs_control_point>(csound, "hc_control_point", "i", "ii", csnd::thread::i);
     csnd::plugin<cs_control_point>(csound, "hc_point", "i", "ii", csnd::thread::i);
     csnd::plugin<cs_invert_curve>(csound, "hc_invert", "i", "i", csnd::thread::i);
+    csnd::plugin<cs_mirror_curve>(csound, "hc_mirror", "i", "i", csnd::thread::i);
     csnd::plugin<cs_add_curve>(csound, "hc_add", "i", "ii" , csnd::thread::i);
     csnd::plugin<cs_sub_curve>(csound, "hc_sub", "i", "ii" , csnd::thread::i);
     csnd::plugin<cs_mult_curve>(csound, "hc_mult", "i", "ii" , csnd::thread::i);
@@ -871,6 +904,7 @@ void csnd::on_load(Csound *csound) {
 
     // Curve types
     csnd::plugin<cs_diocles_curve>(csound, "hc_diocles_curve", "i", "i", csnd::thread::i);
+    csnd::plugin<cs_linear_curve>(csound, "hc_linear_curve", "i", "", csnd::thread::i);
     csnd::plugin<cs_cubic_curve>(csound, "hc_cubic_curve", "i", "", csnd::thread::i);
     csnd::plugin<cs_power>(csound, "hc_power_curve", "i", "i", csnd::thread::i);
     csnd::plugin<cs_hanning>(csound, "hc_hanning_curve", "i", "", csnd::thread::i);

@@ -14,6 +14,10 @@
 #include<vector>
 #include"cubic_spline.h"
 
+#include"asciiplot/asciiplotter.h"
+#include<complex>
+typedef std::complex<double> pnt;
+
 namespace  hypercurve {
 
 //////////////////////////////////////////////////
@@ -32,6 +36,7 @@ public:
     inline virtual double process(size_t i, size_t size) {return process(hypercurve::fraction(i, size));}
     inline virtual double process_all(size_t size, memory_vector<double>::iterator &it)
     {
+        memory_vector<double>::iterator begin_ptr = it;
         double max = 0.0;
         for(size_t i = 0; i < size; ++i)
         {
@@ -42,6 +47,8 @@ public:
             *it = res;
             ++it;
         }
+
+        post_processing(begin_ptr);
         return max;
     }
 
@@ -55,25 +62,32 @@ public:
         on_init();
     };
 
+    void post_processing(memory_vector<double>::iterator it)
+    {
+        if(mirrored) mirror(it, definition, y_start, y_destination);
+    }
+
     // Override this one insted of init to avoid y_start and y_destination
     // affectation repetition
     inline virtual void on_init() {}
 
     // Allows inversion of curve (y symetry on a linear x_start/x_end axis).
     bool inverted = false;
+    bool mirrored = false;
 protected:
 
     inline virtual double scale(double x)
     {
         if(y_start > y_destination)
-            return  process(1.0 - x) * abs_diff + offset;
+            return process(1.0 - x) * abs_diff + offset;
         return process(x) * abs_diff + offset;
     }
 
     inline double process_invert(double x, double y)
     {
+
         const double lin = linear_interpolation(y_start, y_destination, x);
-        return lin + (lin - y);
+        return lin + (lin - y) ;
     }
 
     size_t definition;
@@ -86,6 +100,12 @@ using linear_curve = curve_base;
 inline std::shared_ptr<curve_base> invert(std::shared_ptr<curve_base> cb)
 {
     cb->inverted = true;
+    return cb;
+}
+
+inline std::shared_ptr<curve_base> mirror(std::shared_ptr<curve_base> cb)
+{
+    cb->mirrored = true;
     return cb;
 }
 
@@ -501,6 +521,7 @@ class bezier_curve_base : public curve_base
 public:
     inline double process_all(size_t size, memory_vector<double>::iterator &it) override
     {
+        memory_vector<double>::iterator begin_ptr = it;
         double max = 0.0;
         size_t cnt = 0;
         std::pair<double, double> r1, r2;
@@ -526,7 +547,7 @@ public:
             *it = linear_interp;
             ++it;
         }
-
+        post_processing(begin_ptr);
         return max;
     }
 
@@ -648,6 +669,7 @@ public:
 
     inline virtual double process_all(size_t size, memory_vector<double>::iterator &it) override
     {
+        memory_vector<double>::iterator begin_ptr = it;
         std::vector<double>& res = spl.interpolate_from_points(_control_points, size, point{1.0, 1.0});
         double max = 0.0;
         for(size_t i = 0; i < size; i++)
@@ -657,6 +679,7 @@ public:
             *it = res[i];
             ++it;
         }
+        post_processing(begin_ptr);
         return max;
     }
 
@@ -688,6 +711,7 @@ public:
 
     inline virtual double process_all(size_t size, memory_vector<double>::iterator &it) override
     {
+        memory_vector<double>::iterator begin_ptr = it;
         size_t cnt = 0;
         std::pair<double, double> r1, r2;
         r1 = process_catmul_rom(0);
@@ -712,6 +736,8 @@ public:
             *it = linear_interp;
             ++it;
         }
+
+        post_processing(begin_ptr);
         return  max;
     }
 private:
