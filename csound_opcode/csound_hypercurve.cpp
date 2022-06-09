@@ -693,7 +693,10 @@ struct cs_operator_mult { double process(double a, double b) {return a * b;}};
 struct cs_operator_div { double process(double a, double b) {return a / b;}};
 
 template<typename T = cs_operator_add>
-struct cs_operator : public csnd::Plugin<1, 2>, public cs_rt_hypercurve, public T
+struct cs_operator
+        : public csnd::Plugin<1, 2>
+        , public cs_rt_hypercurve
+        , public T
 {
     int init()
     {
@@ -715,8 +718,12 @@ struct cs_operator : public csnd::Plugin<1, 2>, public cs_rt_hypercurve, public 
 
       // Weirdly, it works below
       const char * name = csound->get_csound()->GetOutputArgName(this, 0);
-      AsciiPlotter p(std::string(name)  +  " - Hypercurve GEN number : "  + std::to_string(table.fno)  , 80, 15);
-      p.addPlot( std::vector<double>(this->samples.begin(), this->samples.end()), std::string(" - ") + name , (char)(rand() % (126 - 92) + 92));
+      AsciiPlotter p(std::string(name)
+                     +  " - Hypercurve GEN number : "
+                     +  std::to_string(table.fno)  , 80, 15);
+      p.addPlot( std::vector<double>(this->samples.begin(), this->samples.end()),
+                 std::string(" - ") + name ,
+                 (char)(rand() % (126 - 92) + 92));
       p.show();
 
       curve_map[table.fno] = this;
@@ -805,7 +812,9 @@ struct cs_random_curve_composer : public csnd::Plugin<1, 7>,  public cs_rt_hyper
 
         const char * name = csound->get_csound()->GetOutputArgName(this, 0);
         AsciiPlotter p(std::string(name)  +  " - Hypercurve GEN number : "  + std::to_string(table.fno)  , 80, 15);
-        p.addPlot( std::vector<double>(this->samples.begin(), this->samples.end()), std::string(" - ") + name , (char)(rand() % (126 - 92) + 92));
+        p.addPlot( std::vector<double>(this->samples.begin(), this->samples.end()),
+                   std::string(" - ") + name ,
+                   (char)(rand() % (126 - 92) + 92));
         p.show();
         outargs[0] = table.fno;
         return OK;

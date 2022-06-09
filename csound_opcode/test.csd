@@ -54,7 +54,7 @@ hc_normalize_y(gidiv, 0, 1)
 
 instr 1
         icurve = p4
-        kenv = tablei:k( linseg(0, p3, 1), icurve)
+        kenv = tablei:k( linseg(0, p3, 1), icurve, 1)
         ao = vco2(0.3,  200 + (kenv * 200) ) * kenv
         outs ao,ao
 endin
