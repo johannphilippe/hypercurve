@@ -172,6 +172,10 @@ namespace fpng
 
 #include <random>
 #include<string>
+#include<vector>
+#include<complex>
+typedef std::complex<double> pnt;
+
 #ifndef M_PI
  #define M_PI 3.14159265358979323846
 #endif
@@ -464,6 +468,53 @@ struct memory_vector
    T *_data;
    size_t _size;
 };
+
+inline bool sort_complex(pnt p1, pnt p2)
+{
+    return p1.real() < p2.real();
+}
+
+void mirror(memory_vector<double>::iterator &it, size_t definition, double y_start, double y_destination)
+{
+    auto begin_ptr = it;
+    std::vector<pnt> tmp(definition);
+    auto reflect = [&](pnt p, pnt a, pnt b)
+    {
+        pnt pt = p - a;
+        pnt bt = b - a;
+        pnt pr = pt / bt;
+        return conj(pr)*bt +a;
+    };
+    const pnt a(0, y_start);
+    const pnt b(1, y_destination);
+    for(size_t i = 0; i< definition; ++i)
+    {
+        double f = fraction(i, definition);
+        tmp[i] = reflect(pnt(f, *(begin_ptr+i)), a, b);
+    }
+    std::sort(tmp.begin(), tmp.end(),  sort_complex);
+    size_t tmp_index = 0;
+    pnt p1 = tmp[tmp_index];
+    pnt p2 = tmp[tmp_index + 1];
+    for(size_t i = 0; i < definition -1; ++i)
+    {
+        double f = fraction(i, definition);
+        while( !(f >= p1.real() && f < p2.real()) && (tmp_index < definition) )
+        {
+            ++tmp_index;
+            p1 = tmp[tmp_index];
+            p2 = tmp[tmp_index + 1];
+        }
+
+    if(tmp_index >= (definition - 1) )
+        p2 = pnt(1.0, y_destination);
+
+    double relative_x = relative_position(p1.real(), p2.real(), f );
+    double y = linear_interpolation(p1.imag(), p2.imag(), relative_x);
+    *(begin_ptr + i) = y;
+
+    }
+}
 
 // PNG utils
 
@@ -832,6 +883,67 @@ protected:
 
 #endif // SPLINE_H
 
+/*
+MIT License
+
+Copyright (c) 2017  Joe Hood
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
+#include<vector>
+#include<string>
+
+#define MAX_CURVES 10
+
+using namespace std;
+
+class AsciiPlotter
+{
+private:
+	static const char _default_markers[10];
+	int _width;
+	int _height;
+	int _curves;
+	string _title;
+	string _xlabel;
+	string _ylabel;
+	bool _legend;
+	vector<double> _ydata[MAX_CURVES];
+	string _labels[MAX_CURVES];
+	char _markers[MAX_CURVES];
+public:
+	AsciiPlotter();
+	AsciiPlotter(string title);
+	AsciiPlotter(string title, int width, int height);
+	~AsciiPlotter();
+	void plot(const char *plotfile, const char *datafile);
+    void addPlot( vector<double> ydata, string label, char marker);
+    void show();
+	void xlabel(string label);
+	void ylabel(string label);
+	void legend();
+};
+
+#include<complex>
+typedef std::complex<double> pnt;
+
 namespace  hypercurve {
 
 //////////////////////////////////////////////////
@@ -857,51 +969,12 @@ public:
             const double x = hypercurve::fraction(i, size);
             double res = scale(x);
             if( std::abs(res) > max) max = std::abs(res);
-            //if(inverted) res = process_invert(x, res);
+            if(inverted) res = process_invert(x, res);
             *it = res;
             ++it;
         }
 
-        if(inverted)
-        {
-            memory_vector<double> tmp(definition);
-            for(size_t i = 0; i < definition; ++i)
-            {
-                // Trouver la valeur en X correspondant à un y linéaire donné
-
-                point diff(1, y_destination - y_start);
-                double x_itp = fraction(i, definition);
-                point perp_origin(0 + x_itp, diff.y);
-                point perp_dest(1 + x_itp, -diff.y);
-                bool found = false;
-                size_t start_x = i;
-                double y = linear_interpolation(perp_dest.y, perp_origin.y, fraction(i, definition));
-                while(!found)
-                {
-                    start_x --;
-                    double y_itp = linear_interpolation(perp_dest.y, perp_origin.y, fraction(start_x, definition) );
-
-                    // Faux
-                    double curve_y = *(begin_ptr + start_x);
-
-                    std::cout << y << " " << y_itp << " " << curve_y << std::endl;
-
-                    if(( y_itp > curve_y && y < curve_y) || (y_itp < curve_y && y > curve_y))
-                    {
-                        found = true;
-                        tmp[i] = curve_y;
-                        break;
-
-                    }
-                    y = y_itp;
-                }
-
-            }
-
-            for(size_t i = 0; i < definition; ++i)
-                *(begin_ptr+i) = tmp[i];
-        }
-
+        post_processing(begin_ptr);
         return max;
     }
 
@@ -915,12 +988,18 @@ public:
         on_init();
     };
 
+    void post_processing(memory_vector<double>::iterator it)
+    {
+        if(mirrored) mirror(it, definition, y_start, y_destination);
+    }
+
     // Override this one insted of init to avoid y_start and y_destination
     // affectation repetition
     inline virtual void on_init() {}
 
     // Allows inversion of curve (y symetry on a linear x_start/x_end axis).
     bool inverted = false;
+    bool mirrored = false;
 protected:
 
     inline virtual double scale(double x)
@@ -934,7 +1013,7 @@ protected:
     {
 
         const double lin = linear_interpolation(y_start, y_destination, x);
-        return lin + (lin-y); //return lin + (lin - y) ;
+        return lin + (lin - y) ;
     }
 
     size_t definition;
@@ -950,6 +1029,12 @@ inline std::shared_ptr<curve_base> invert(std::shared_ptr<curve_base> cb)
     return cb;
 }
 
+inline std::shared_ptr<curve_base> mirror(std::shared_ptr<curve_base> cb)
+{
+    cb->mirrored = true;
+    return cb;
+}
+
 //////////////////////////////////////////////////
 // Curve Library
 //////////////////////////////////////////////////
@@ -960,7 +1045,9 @@ public:
     diocles_curve(double a_)
         : a(a_)
         , compensation(1. / process_diocles(1.0) )
-    {}
+    {
+        if(a_ <= 0.5) throw(std::runtime_error("Diocles curve : 'a' parameter must be > to 0.5"));
+    }
     inline double process(double x) override
     {
         return process_diocles(x) * (compensation);
@@ -1358,6 +1445,7 @@ class bezier_curve_base : public curve_base
 public:
     inline double process_all(size_t size, memory_vector<double>::iterator &it) override
     {
+        memory_vector<double>::iterator begin_ptr = it;
         double max = 0.0;
         size_t cnt = 0;
         std::pair<double, double> r1, r2;
@@ -1383,7 +1471,7 @@ public:
             *it = linear_interp;
             ++it;
         }
-
+        post_processing(begin_ptr);
         return max;
     }
 
@@ -1502,6 +1590,7 @@ public:
 
     inline virtual double process_all(size_t size, memory_vector<double>::iterator &it) override
     {
+        memory_vector<double>::iterator begin_ptr = it;
         std::vector<double>& res = spl.interpolate_from_points(_control_points, size, point{1.0, 1.0});
         double max = 0.0;
         for(size_t i = 0; i < size; i++)
@@ -1511,6 +1600,7 @@ public:
             *it = res[i];
             ++it;
         }
+        post_processing(begin_ptr);
         return max;
     }
 
@@ -1540,6 +1630,7 @@ public:
 
     inline virtual double process_all(size_t size, memory_vector<double>::iterator &it) override
     {
+        memory_vector<double>::iterator begin_ptr = it;
         size_t cnt = 0;
         std::pair<double, double> r1, r2;
         r1 = process_catmul_rom(0);
@@ -1564,6 +1655,8 @@ public:
             *it = linear_interp;
             ++it;
         }
+
+        post_processing(begin_ptr);
         return  max;
     }
 private:
@@ -1638,64 +1731,6 @@ protected:
 
 }
 #endif // CURVE_LIB_H
-
-/*
-MIT License
-
-Copyright (c) 2017  Joe Hood
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-*/
-
-#include<vector>
-#include<string>
-
-#define MAX_CURVES 10
-
-using namespace std;
-
-class AsciiPlotter
-{
-private:
-	static const char _default_markers[10];
-	int _width;
-	int _height;
-	int _curves;
-	string _title;
-	string _xlabel;
-	string _ylabel;
-	bool _legend;
-	vector<double> _ydata[MAX_CURVES];
-	string _labels[MAX_CURVES];
-	char _markers[MAX_CURVES];
-public:
-	AsciiPlotter();
-	AsciiPlotter(string title);
-	AsciiPlotter(string title, int width, int height);
-	~AsciiPlotter();
-	void plot(const char *plotfile, const char *datafile);
-    void addPlot( vector<double> ydata, string label, char marker);
-    void show();
-	void xlabel(string label);
-	void ylabel(string label);
-	void legend();
-};
 
 #include<iostream>
 #include<utility>
@@ -2417,6 +2452,12 @@ static int hc_normalize_y(int crv, double min, double max)
 static int hc_invert_curve_base(int cb)
 {
     invert(faust_curve_base_map[cb]);
+    return cb;
+}
+
+static int hc_mirror_curve_base(int cb)
+{
+    mirror(faust_curve_base_map[cb]);
     return cb;
 }
 

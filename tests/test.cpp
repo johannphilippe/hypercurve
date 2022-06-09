@@ -509,8 +509,8 @@ int main()
 
     //dummy_test();
     //unit_tests();
-    //random_generator_test();
-    inversion_test();
+    random_generator_test();
+    //inversion_test();
 
     //generate_curve_pictures();
 

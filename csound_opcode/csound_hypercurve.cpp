@@ -15,6 +15,50 @@ using namespace hypercurve;
 
 #include<cstdarg>
 
+
+// Custom FTable utilities
+struct ftable_info
+{
+    int res; // Result for GetTable
+    int fno;
+    double *t_ptr;
+    size_t size = 0;
+};
+
+ftable_info allocate_gen(CSOUND_ *csound, int fno, size_t size)
+{
+    int t_nbr;
+    double *t_ptr = nullptr;
+    if(fno > 0) {
+        t_nbr = int(fno);
+    } else {
+        // Automatic table number
+        t_nbr = 0;
+        do {
+            ++t_nbr;
+            csound->GetTable(csound, &t_ptr, t_nbr);
+        } while(t_ptr != (MYFLT*)NULL);
+    }
+
+    int res = csound->FTAlloc(csound,  t_nbr, size);
+    if(res != 0) return {csound->InitError(csound, "Error alloc Hypercurve GEN %d with res = %d", t_nbr, res ) , fno, nullptr, 0};
+    size_t sz = csound->GetTable(csound, &t_ptr, t_nbr );
+    return {0, t_nbr, t_ptr, sz};
+}
+
+ftable_info get_gen(CSOUND_ *csound, int fno)
+{
+    double *t_ptr = nullptr;
+    size_t size = csound->GetTable(csound, &t_ptr, fno);
+    if(t_ptr == (MYFLT*)NULL)
+    {
+        return {
+            csound->InitError(csound, "Error init Hypercurve GEN %d", fno ) , fno, nullptr, 0
+        };
+    }
+    return {0, fno, t_ptr, size};
+}
+
 // Csound runtime hypercurve
 class cs_rt_hypercurve
 {
@@ -60,6 +104,7 @@ public:
         ambitus = std::abs(max - min);
     }
 
+    ftable_info table;
 protected:
 
     size_t _definition;
@@ -72,7 +117,7 @@ protected:
 static increment_map< std::shared_ptr<curve_base> > curve_base_map;
 static increment_map< std::shared_ptr<control_point> > control_point_map;
 static increment_map< std::shared_ptr<segment> > segment_map;
-static increment_map< cs_rt_hypercurve * > curve_map;
+static std::unordered_map< int,  cs_rt_hypercurve * > curve_map;
 
 //////////////////////////////////////////////////
 // Helpers
@@ -483,7 +528,6 @@ struct cs_polynomial_curve : csnd::Plugin<1, 64>
     int init()
     {
         args.allocate(csound, in_count());
-        std::cout << "in count polynomial : " << in_count() << std::endl;
         for(size_t i = 0; i < args.len(); ++i)
             args[i] = inargs[i];
         _curve = std::make_shared<polynomial_curve>(args.data(), args.len());
@@ -537,20 +581,20 @@ struct cs_mirror_curve : public csnd::Plugin<1, 1>
 // Normalize curve
 //////////////////////////////////////////////////
 
-struct cs_normalize_curve : public csnd::InPlug< 3>
+struct cs_normalize_curve : public csnd::InPlug<3>
 {
   int init()
   {
       if(curve_map.find(int(args[0])) == curve_map.end())
       {
+          std::cout << "Normalize cannot find the expected curve " << std::endl;
           return NOTOK;
       }
-      curve_map[int(args[0])]->normalize_y(args[1], args[2]);
+      cs_rt_hypercurve *crv = curve_map[int(args[0])];
+      crv->normalize_y(args[1], args[2]);
       return OK;
   }
 };
-
-
 
 //////////////////////////////////////////////////
 // Curve lib
@@ -577,341 +621,23 @@ private:
   int index;
 };
 
-struct cs_curve : public csnd::Plugin<1,64>, public cs_rt_hypercurve
-{
-  int init()
-  {
-      _mem.allocate(csound, (int)inargs[0]);
-      _initialize(inargs[0], inargs[1], _mem.data());
-      check_total_size();
-      process_init();
-
-
-      for(size_t i = 2; i < in_count(); ++i)
-      {
-          if(segment_map.find(int(inargs[i])) == segment_map.end())
-              return NOTOK;
-
-          y_start = (double) ((i > 2) ?  segment_map[inargs[i - 1] ]->y_destination : inargs[1]);
-          segment_map[inargs[i]]->init(y_start, segment_map[inargs[i]]->fractional_size * _definition);
-          process_one(segment_map[inargs[i]]);
-      }
-      index = curve_map.map(this);
-
-      // Weirdly, it works below
-      AsciiPlotter p("hc_hypercurve : "  + std::to_string(index)  , 80, 15);
-      p.addPlot( std::vector<double>(this->samples.begin(), this->samples.end()), "helloplot", '*');
-      p.show();
-
-      outargs[0] = index;
-      return OK;
-  }
-
-  int deinit()
-  {
-      curve_map.unmap(index);
-      return OK;
-  }
-
-  int index;
-  double y_start;
-  csnd::AuxMem<double> _mem;
-
-protected:
-
-    void check_total_size()
-    {
-        double x = 0;
-        for(size_t i = 2; i < in_count(); ++i)
-            x += segment_map[inargs[i]]->fractional_size;
-        if( (x > 1.0) ||  (x < 1.0) )
-        {
-            this->rescale(x);
-        }
-    }
-
-    void rescale(double x)
-    {
-        double factor = 1. / x;
-        for(size_t i = 2; i < in_count(); ++i) {
-            segment_map[inargs[i]]->rescale_x(factor);
-        }
-    }
-};
-
-// Do the same as below with trigger (trig_run_hypercurve) with frequency and trigger parameter.
-struct cs_run_curve : public csnd::Plugin<1, 2>
-{
-  int init()
-  {
-      index = inargs[0];
-      if(curve_map.find(index) == curve_map.end())
-          return NOTOK;
-      return OK;
-  }
-
-  int kperf()
-  {
-      phasor = inargs[1];
-      i_phasor = std::round(phasor * curve_map[index]->get_definition());
-      outargs[0] = limit(-1, 1, curve_map[index]->get_sample_at(i_phasor));
-      return OK;
-  }
-
-  int aperf()
-  {
-      for(size_t i = 0; i < nsmps; ++i)
-      {
-          phasor = inargs(1)[i];
-          i_phasor = std::round(phasor * curve_map[index]->get_definition());
-          outargs(0)[i] = limit(-1, 1, curve_map[index]->get_sample_at(i_phasor));
-
-      }
-
-      return OK;
-  }
-
-private:
-  double phasor;
-  size_t i_phasor;
-  int index;
-};
-
-
-struct cs_run_curve_interpolate : public csnd::Plugin<1, 2>
-{
-  int init()
-  {
-      index = inargs[0];
-      if(curve_map.find(index) == curve_map.end())
-          return NOTOK;
-      return OK;
-  }
-
-  int kperf()
-  {
-      phasor = inargs[1];
-      outargs[0] = interpolate();
-      return OK;
-  }
-
-  int aperf()
-  {
-      for(size_t i = 0; i < nsmps; ++i)
-      {
-          phasor = inargs(1)[i];
-          outargs(0)[i] = interpolate();
-      }
-
-      return OK;
-  }
-
-  double interpolate()
-  {
-      i_phasor = std::floor(phasor * curve_map[index]->get_definition());
-      if( (phasor == 0) || (i_phasor >= (curve_map[index]->get_definition() - 1) ))
-          return limit(-1, 1, curve_map[index]->get_sample_at(i_phasor));
-      n_phasor = i_phasor + 1;
-      return limit(-1, 1, linear_interpolation(
-                       curve_map[index]->get_sample_at(i_phasor),
-                       curve_map[index]->get_sample_at(n_phasor),
-                       relative_position(
-                           fraction(i_phasor, curve_map[index]->get_definition()),
-                           fraction(n_phasor, curve_map[index]->get_definition()),
-                           phasor)));
-  }
-
-private:
-  double phasor;
-  size_t i_phasor, n_phasor;
-  int index;
-};
-
-////////////////////////////////////////////////////////////////////////
-// Operators for curves
-////////////////////////////////////////////////////////////////////////
-
-struct cs_operator : public cs_rt_hypercurve
-{
-    void _allocate( csnd::Csound *cs)
-    {
-        mem.allocate(cs, _definition);
-        samples.init(mem.data(), _definition);
-    }
-
-    csnd::AuxMem<double> mem;
-};
-
-struct cs_add_curve : public csnd::Plugin<1, 2>, cs_operator
-{
-    int init()
-    {
-      if( (curve_map.find(int(inargs[0])) == curve_map.end())
-              || (curve_map.find(int(inargs[1])) == curve_map.end())
-              )
-          return NOTOK;
-      cs_rt_hypercurve *c1 = curve_map[int(inargs[0])];
-      cs_rt_hypercurve *c2 = curve_map[int(inargs[1])];
-
-      _definition = c1->get_definition();
-      _allocate(csound);
-
-      for(size_t i = 0; i < _definition; ++i) {
-          samples[i] = c1->get_sample_at(i) + c2->get_sample_at(i);
-      }
-      index = curve_map.map(this);
-
-      AsciiPlotter p("hc_hypercurve : "  + std::to_string(index)  , 80, 15);
-      p.addPlot( std::vector<double>(this->samples.begin(), this->samples.end()), "helloplot", '*');
-      p.show();
-
-      outargs[0] = index;
-      return OK;
-    }
-
-    int index;
-};
-
-struct cs_sub_curve : public csnd::Plugin<1, 2>, cs_operator
-{
-    int init()
-    {
-      if( (curve_map.find(int(inargs[0])) == curve_map.end())
-              || (curve_map.find(int(inargs[1])) == curve_map.end())
-              )
-          return NOTOK;
-      cs_rt_hypercurve *c1 = curve_map[int(inargs[0])];
-      cs_rt_hypercurve *c2 = curve_map[int(inargs[1])];
-
-      _definition = c1->get_definition();
-      _allocate(csound);
-
-      for(size_t i = 0; i < _definition; ++i) {
-          samples[i] = c1->get_sample_at(i) - c2->get_sample_at(i);
-      }
-      index = curve_map.map(this);
-
-      AsciiPlotter p("hc_hypercurve : "  + std::to_string(index)  , 80, 15);
-      p.addPlot(std::vector<double>(this->samples.begin(), this->samples.end()), "helloplot", '*');
-      p.show();
-
-      outargs[0] = index;
-      return OK;
-    }
-
-    int index;
-    csnd::AuxMem<double> mem;
-};
-
-struct cs_mult_curve : public csnd::Plugin<1, 2>, cs_operator
-{
-    int init()
-    {
-      if( (curve_map.find(int(inargs[0])) == curve_map.end())
-              || (curve_map.find(int(inargs[1])) == curve_map.end())
-              )
-          return NOTOK;
-      cs_rt_hypercurve *c1 = curve_map[int(inargs[0])];
-      cs_rt_hypercurve *c2 = curve_map[int(inargs[1])];
-
-      _definition = c1->get_definition();
-      _allocate(csound);
-
-      for(size_t i = 0; i < _definition; ++i) {
-          samples[i] = c1->get_sample_at(i) * c2->get_sample_at(i);
-      }
-      index = curve_map.map(this);
-
-      AsciiPlotter p("hc_hypercurve : "  + std::to_string(index)  , 80, 15);
-      p.addPlot(std::vector<double>(this->samples.begin(), this->samples.end()), "helloplot", '*');
-      p.show();
-
-      outargs[0] = index;
-      return OK;
-    }
-
-    int index;
-    csnd::AuxMem<double> mem;
-};
-
-struct cs_div_curve : public csnd::Plugin<1, 2>, cs_operator
-{
-    int init()
-    {
-      if( (curve_map.find(int(inargs[0])) == curve_map.end())
-              || (curve_map.find(int(inargs[1])) == curve_map.end())
-              )
-          return NOTOK;
-      cs_rt_hypercurve *c1 = curve_map[int(inargs[0])];
-      cs_rt_hypercurve *c2 = curve_map[int(inargs[1])];
-
-      _definition = c1->get_definition();
-      _allocate(csound);
-
-      for(size_t i = 0; i < _definition; ++i) {
-          samples[i] = c1->get_sample_at(i) / c2->get_sample_at(i);
-      }
-      index = curve_map.map(this);
-
-      AsciiPlotter p("hc_hypercurve : "  + std::to_string(index)  , 80, 15);
-      p.addPlot(std::vector<double>(this->samples.begin(), this->samples.end()), "helloplot", '*');
-      p.show();
-
-      outargs[0] = index;
-      return OK;
-    }
-
-    int index;
-    csnd::AuxMem<double> mem;
-};
-
-
-struct cs_export_png : public csnd::InPlug<6>
-{
-    int init()
-    {
-        if(!curve_map.has(args[0])) return NOTOK;
-        std::string path(args.str_data(1).data);
-
-        hypercurve::png png(2048, 1024, args[5] != 0 ? white : black, args[5] != 0 ? red : purple);
-        cs_rt_hypercurve *crv = curve_map[int(args[0])];
-
-        png.draw_curve(crv->get_samples(), crv->get_definition(), int(args[3]) != 0, int(args[2]) != 0);
-        if(args[4] != 0) {
-            png.draw_grid(10, 10, args[5] != 0 ? black : white);
-        }
-        png.write_as_png(path);
-        return OK;
-    }
-};
-
-
-
-
+// Hypercurve implemented as GEN
 struct cs_gen : public csnd::Plugin<1, 64>, public cs_rt_hypercurve
 {
   int init()
   {
-      double *t_ptr = nullptr;
-      if(inargs[0] > 0) {
-          t_nbr = int(inargs[0]);
-      } else {
-          // Automatic table number
-          t_nbr = 0;
-          do {
-              ++t_nbr;
-              csound->get_csound()->GetTable(csound->get_csound(), &t_ptr, t_nbr);
-          } while(t_ptr != (MYFLT*)NULL);
+      std::cout << "alloc gen " << std::endl;
+      table = allocate_gen(csound->get_csound(), inargs[0], inargs[1]);
+      if(table.res != 0) {
+          return table.res;
       }
-
-      int size = inargs[1];
-      int res = csound->get_csound()->FTAlloc(csound->get_csound(),  t_nbr, size);
-      if(res != 0) return csound->get_csound()->InitError(csound->get_csound(), "Error init Hypercurve GEN %d", res);
-      csound->get_csound()->GetTable(csound->get_csound(), &t_ptr, t_nbr );
-
-      _initialize(inargs[1], inargs[2], t_ptr);
+      std::cout << "allocated "<< std::endl;
+      _initialize(inargs[1], inargs[2], table.t_ptr);
+      std::cout << "initialized" << std::endl;
       check_total_size();
+      std::cout << "resized " << std::endl;
       process_init();
+      std::cout << "init process " <<std::endl;
 
       for(size_t i = 3; i < in_count(); ++i)
       {
@@ -925,10 +651,13 @@ struct cs_gen : public csnd::Plugin<1, 64>, public cs_rt_hypercurve
 
       // Weirdly, it works below
       const char * name = csound->get_csound()->GetOutputArgName(this, 0);
-      AsciiPlotter p(std::string(name)  +  " - Hypercurve GEN number : "  + std::to_string(t_nbr)  , 80, 15);
+      AsciiPlotter p(std::string(name)  +  " - Hypercurve GEN number : "  + std::to_string(table.fno)  , 80, 15);
       p.addPlot( std::vector<double>(this->samples.begin(), this->samples.end()), std::string(" - ") + name , (char)(rand() % (126 - 92) + 92));
       p.show();
-      outargs[0] = t_nbr;
+
+
+      curve_map[table.fno] = this;
+      outargs[0] = table.fno;
       return OK;
   }
 
@@ -951,9 +680,147 @@ struct cs_gen : public csnd::Plugin<1, 64>, public cs_rt_hypercurve
         }
     }
 
+};
 
-  int t_nbr;
-  double y_start;
+
+////////////////////////////////////////////////////////////////////////
+// Operators for curves
+////////////////////////////////////////////////////////////////////////
+
+struct cs_operator_add { double process(double a, double b) {return a + b;}};
+struct cs_operator_sub { double process(double a, double b) {return a - b;}};
+struct cs_operator_mult { double process(double a, double b) {return a * b;}};
+struct cs_operator_div { double process(double a, double b) {return a / b;}};
+
+template<typename T>
+struct cs_operator : public csnd::Plugin<1, 2>, public cs_rt_hypercurve, public T
+{
+    int init()
+    {
+        t1 = get_gen(csound->get_csound(), inargs[0]);
+        t2 = get_gen(csound->get_csound(), inargs[1]);
+      if(t1.res != 0 || t2.res != 0)
+          return NOTOK;
+
+      _definition = std::max(t1.size, t2.size);
+
+      table = allocate_gen(csound->get_csound(), 0, _definition);
+      if(table.res != 0)
+          return NOTOK;
+
+      _initialize(_definition, y_start, table.t_ptr);
+      for(size_t i = 0; i < table.size; ++i) {
+          table.t_ptr[i] = (t1.t_ptr[i] + t2.t_ptr[i]);
+      }
+
+      // Weirdly, it works below
+      const char * name = csound->get_csound()->GetOutputArgName(this, 0);
+      AsciiPlotter p(std::string(name)  +  " - Hypercurve GEN number : "  + std::to_string(table.fno)  , 80, 15);
+      p.addPlot( std::vector<double>(this->samples.begin(), this->samples.end()), std::string(" - ") + name , (char)(rand() % (126 - 92) + 92));
+      p.show();
+
+      curve_map[table.fno] = this;
+      outargs[0] = table.fno;
+      return OK;
+
+    }
+    ftable_info t1, t2;
+};
+
+struct cs_add_curve : public cs_operator<cs_operator_add>{};
+struct cs_sub_curve : public cs_operator<cs_operator_sub>{};
+struct cs_mult_curve : public cs_operator<cs_operator_mult>{};
+struct cs_div_curve : public cs_operator<cs_operator_div>{};
+
+struct cs_export_png : public csnd::InPlug<6>
+{
+    int init()
+    {
+        ftable_info finfo;
+        if(curve_map.find(int(args[0])) == curve_map.end()) {
+            return NOTOK;
+        }
+        std::string path(args.str_data(1).data);
+        hypercurve::png png(2048, 1024, args[5] != 0 ? white : black, args[5] != 0 ? red : purple);
+
+        png.draw_curve(finfo.t_ptr, finfo.size, int(args[3]) != 0, int(args[2]) != 0);
+        if(args[4] != 0) {
+            png.draw_grid(10, 10, args[5] != 0 ? black : white);
+        }
+        png.write_as_png(path);
+        return OK;
+    }
+};
+
+#define PP(X) std::cout << X << std::endl;
+
+// fno, size, max_segs, min, max, is_envelope, is_waveform
+struct cs_random_curve_composer : public csnd::Plugin<1, 7>,  public cs_rt_hypercurve
+{
+    int init()
+    {
+        PP("INIT RND")
+        table = allocate_gen(csound->get_csound(), inargs[0], inargs[1]);
+        if(table.res != 0) {
+            return NOTOK;
+        }
+
+        PP("ALLOCATED")
+        _initialize(inargs[1], inargs[2], table.t_ptr);
+        process_init();
+
+        int max_segs = inargs[2];
+        const double min = inargs[3];
+        const double max = inargs[4];
+        const bool envelop = inargs[5] == 1;
+        const bool waveform = inargs[6] == 1;
+
+        std::string cnames = "";
+        size_t nsegs = 1 + (rand() % max_segs);
+        if(nsegs < 2) nsegs = 2;
+
+        y_start = (envelop || waveform) ? 0 : random<double>(0, 1);
+        for(size_t i = 0; i < nsegs; ++i) {
+            double frac_size = random<double>(0.1, 1);
+            double dest = waveform ? random<double>(-1, 1) : random<double>(0, 1);
+            curve_base_index index =  gen_curve();
+
+            while( index == user_defined_i ||  (index == polynomial_i) || (index == lagrange_polynomial_i) || (index == cubic_spline_i) || index == catmull_rom_spline_i)
+            {
+                index = gen_curve();
+                PP(get_curve_base_name(index))
+            }
+
+            PP( std::string("final curve = " ) +  get_curve_base_name(index))
+
+            cnames += std::string(get_curve_base_name(index)) + "_";
+            std::pair<std::vector<double>, std::vector<control_point>> args = random_args_generator(index);
+            if(i == (nsegs - 1) && (envelop | waveform) )
+                dest = 0;
+
+            auto seg = std::make_shared<segment>(frac_size, dest, get_curve_from_index(index, args.first, args.second) );
+            process_one(seg);
+        }
+        PP(cnames)
+        PP("LOOP OK")
+
+        normalize_y(min, max);
+
+        const char * name = csound->get_csound()->GetOutputArgName(this, 0);
+        AsciiPlotter p(std::string(name)  +  " - Hypercurve GEN number : "  + std::to_string(table.fno)  , 80, 15);
+        p.addPlot( std::vector<double>(this->samples.begin(), this->samples.end()), std::string(" - ") + name , (char)(rand() % (126 - 92) + 92));
+        p.show();
+        PP("DISPLAY OK ")
+        outargs[0] = table.fno;
+        return OK;
+    }
+
+
+    inline curve_base_index gen_curve()
+    {
+        return static_cast<curve_base_index>(rand() % static_cast<int>(size_i));
+    }
+
 };
 
 #include <modload.h>
@@ -972,6 +839,7 @@ void csnd::on_load(Csound *csound) {
     csnd::plugin<cs_div_curve>(csound, "hc_div", "i", "ii" , csnd::thread::i);
 
     csnd::plugin<cs_export_png>(csound, "hc_write_as_png", "", "iSoppo", csnd::thread::i);
+    csnd::plugin<cs_random_curve_composer>(csound, "hc_random_curve", "i", "iiiiioo", csnd::thread::i);
 
     // Curve types
     csnd::plugin<cs_diocles_curve>(csound, "hc_diocles_curve", "i", "i", csnd::thread::i);
@@ -1006,17 +874,7 @@ void csnd::on_load(Csound *csound) {
 
     // Core
     csnd::plugin<cs_segment>(csound, "hc_segment", "i", "iii", csnd::thread::i);
-    csnd::plugin<cs_curve>(csound, "hc_hypercurve", "i", "iim", csnd::thread::i);
-
-    // Run
-    csnd::plugin<cs_run_curve>(csound, "hc_run_hypercurve", "k", "ik", csnd::thread::ik);
-    csnd::plugin<cs_run_curve>(csound, "hc_run", "k", "ik", csnd::thread::ik);
-    csnd::plugin<cs_run_curve>(csound, "hc_run_hypercurve", "a", "ia", csnd::thread::ia);
-    csnd::plugin<cs_run_curve>(csound, "hc_run", "a", "ia", csnd::thread::ia);
-    // With interpolation
-    csnd::plugin<cs_run_curve_interpolate>(csound, "hc_runi", "k", "ik", csnd::thread::ik);
-    csnd::plugin<cs_run_curve_interpolate>(csound, "hc_runi", "a", "ia", csnd::thread::ia);
-
-
+    csnd::plugin<cs_gen>(csound, "hc_hypercurve", "i", "iiim", csnd::thread::i);
     csnd::plugin<cs_gen>(csound, "hc_gen", "i", "iiim", csnd::thread::i);
+
 }

@@ -119,7 +119,9 @@ public:
     diocles_curve(double a_)
         : a(a_)
         , compensation(1. / process_diocles(1.0) )
-    {}
+    {
+        if(a_ <= 0.5) throw(std::runtime_error("Diocles curve : 'a' parameter must be > to 0.5"));
+    }
     inline double process(double x) override
     {
         return process_diocles(x) * (compensation);
