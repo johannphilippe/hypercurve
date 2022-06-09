@@ -692,7 +692,7 @@ struct cs_operator_sub { double process(double a, double b) {return a - b;}};
 struct cs_operator_mult { double process(double a, double b) {return a * b;}};
 struct cs_operator_div { double process(double a, double b) {return a / b;}};
 
-template<typename T>
+template<typename T = cs_operator_add>
 struct cs_operator : public csnd::Plugin<1, 2>, public cs_rt_hypercurve, public T
 {
     int init()
@@ -710,7 +710,7 @@ struct cs_operator : public csnd::Plugin<1, 2>, public cs_rt_hypercurve, public 
 
       _initialize(_definition, y_start, table.t_ptr);
       for(size_t i = 0; i < table.size; ++i) {
-          table.t_ptr[i] = (t1.t_ptr[i] + t2.t_ptr[i]);
+          table.t_ptr[i] = this->process(t1.t_ptr[i], t2.t_ptr[i]);
       }
 
       // Weirdly, it works below
@@ -736,14 +736,15 @@ struct cs_export_png : public csnd::InPlug<6>
 {
     int init()
     {
-        ftable_info finfo;
         if(curve_map.find(int(args[0])) == curve_map.end()) {
             return NOTOK;
         }
+        cs_rt_hypercurve *crv = curve_map[int(args[0])];
+
         std::string path(args.str_data(1).data);
         hypercurve::png png(2048, 1024, args[5] != 0 ? white : black, args[5] != 0 ? red : purple);
 
-        png.draw_curve(finfo.t_ptr, finfo.size, int(args[3]) != 0, int(args[2]) != 0);
+        png.draw_curve(crv->table.t_ptr, crv->table.size, int(args[3]) != 0, int(args[2]) != 0);
         if(args[4] != 0) {
             png.draw_grid(10, 10, args[5] != 0 ? black : white);
         }
@@ -752,20 +753,17 @@ struct cs_export_png : public csnd::InPlug<6>
     }
 };
 
-#define PP(X) std::cout << X << std::endl;
 
 // fno, size, max_segs, min, max, is_envelope, is_waveform
 struct cs_random_curve_composer : public csnd::Plugin<1, 7>,  public cs_rt_hypercurve
 {
     int init()
     {
-        PP("INIT RND")
         table = allocate_gen(csound->get_csound(), inargs[0], inargs[1]);
         if(table.res != 0) {
             return NOTOK;
         }
 
-        PP("ALLOCATED")
         _initialize(inargs[1], inargs[2], table.t_ptr);
         process_init();
 
@@ -785,13 +783,15 @@ struct cs_random_curve_composer : public csnd::Plugin<1, 7>,  public cs_rt_hyper
             double dest = waveform ? random<double>(-1, 1) : random<double>(0, 1);
             curve_base_index index =  gen_curve();
 
-            while( index == user_defined_i ||  (index == polynomial_i) || (index == lagrange_polynomial_i) || (index == cubic_spline_i) || index == catmull_rom_spline_i)
+            while( index == user_defined_i ||
+                   (index == polynomial_i) ||
+                   (index == lagrange_polynomial_i) ||
+                   (index == cubic_spline_i) ||
+                   index == catmull_rom_spline_i)
             {
                 index = gen_curve();
-                PP(get_curve_base_name(index))
             }
 
-            PP( std::string("final curve = " ) +  get_curve_base_name(index))
 
             cnames += std::string(get_curve_base_name(index)) + "_";
             std::pair<std::vector<double>, std::vector<control_point>> args = random_args_generator(index);
@@ -801,16 +801,12 @@ struct cs_random_curve_composer : public csnd::Plugin<1, 7>,  public cs_rt_hyper
             auto seg = std::make_shared<segment>(frac_size, dest, get_curve_from_index(index, args.first, args.second) );
             process_one(seg);
         }
-        PP(cnames)
-        PP("LOOP OK")
-
         normalize_y(min, max);
 
         const char * name = csound->get_csound()->GetOutputArgName(this, 0);
         AsciiPlotter p(std::string(name)  +  " - Hypercurve GEN number : "  + std::to_string(table.fno)  , 80, 15);
         p.addPlot( std::vector<double>(this->samples.begin(), this->samples.end()), std::string(" - ") + name , (char)(rand() % (126 - 92) + 92));
         p.show();
-        PP("DISPLAY OK ")
         outargs[0] = table.fno;
         return OK;
     }
