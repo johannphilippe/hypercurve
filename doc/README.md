@@ -119,9 +119,9 @@ Lua :
 
 local  crv = hc.hypercurve(2048, 0, {
 
-hc.segment(0.5, 1, hc.cubic())
+hc.segment(0.5, 1, hc.cubic_curve())
 
-hc.segment(0.5, 0, hc.cissoid(1))
+hc.segment(0.5, 0, hc.cissoid_curve(1))
 
 })
 
@@ -158,7 +158,7 @@ Csound :
 
 ```Csound
 
-icrv = hc_hypercurve(2048, 0,
+icrv = hc_hypercurve(0, 2048, 0,
 
 hc_segment(0.5, 1, hc_cubic_curve()),
 
@@ -171,22 +171,12 @@ hc_segment(0.5, 0, hc_cissoid_curve(1)))
 // invert_color (0 or 1) default to 0
 hc_write_as_png(icrv, "my/path/curve.png", 0, 1, 1, 1)
 
-// Will run the curve in the time of the i event in an instrument
-
-// Run curve
-kenv = hc_run(icrv, linseg:k(0, p3, 1))
-
-// Or with linearinterpolation
-kenv = hc_runi(icrv, linseg:k(0, p3, 1))
-
-
-
-// Another way (new one) to create an hypercurve, is by registring it directly as a FTable
+// Alias for hc_hypercurve is hc_gen
 gidiocles = hc_gen(0, 2048, 0, 
-              hc_segment(1/2, 1, hc_diocles(0.51))
-              hc_segment(1/2, 0, hc_diocles(1.5)))
+              hc_segment(1/2, 1, hc_diocles_curve(0.51)), 
+              hc_segment(1/2, 0, hc_diocles_curve(1.5)))
 
-// It can then be used as any other FTable, with Csound opcodes
+// It can then be used as any FTable, with Csound opcodes that use FTables
 kenv = tablei:k(linseg(0, p3, 1), gidiocles, 1)
 
 ```
@@ -315,8 +305,8 @@ Lua :
 
 ```Lua
 
-  local c1 = hc.hypercurve(2048, 0, {hc.segment(1, 1, hc.cubic())})
-  local c2 = hc.hypercurve(2048, 0, {hc.segment(1, 1, hc.diocles(1))})
+  local c1 = hc.hypercurve(2048, 0, {hc.segment(1, 1, hc.cubic_curve())})
+  local c2 = hc.hypercurve(2048, 0, {hc.segment(1, 1, hc.diocles_curve(1))})
   local add = c1 + c2
   local sub = c1 - c2
   local prod = c1 * c2
@@ -366,7 +356,7 @@ Lua :
 
 ```Lua
 
-hc.invert(hc.cubic())
+hc.invert(hc.cubic_curve())
 
 ```
 
@@ -401,7 +391,7 @@ Lua :
 
 ```Lua
 
-hc.mirror(hc.cubic())
+hc.mirror(hc.cubic_curve())
 
 ```
 
@@ -438,7 +428,7 @@ C++ :
 Lua :
 
 ```Lua
-  local crv = hc.hypercurve(4096, 0, {hc.segment(1, 1, hc.cubic())})
+  local crv = hc.hypercurve(4096, 0, {hc.segment(1, 1, hc.cubic_curve())})
   crv:normalize_y(-1, 1)
 ```
 
@@ -605,11 +595,11 @@ Lua :
 
 ```Lua
 
-hc.diocles(number  a)
+hc.diocles_curve(number  a)
 
 -- Alias
 
-hc.cissoid(a)
+hc.cissoid_curve(a)
 
 ```
 
@@ -653,7 +643,7 @@ Lua :
 
 ```Lua
 
-hc.cubic()
+hc.cubic_curve()
 
 ```
 
@@ -694,7 +684,7 @@ Lua :
 
 ```Lua
 
-hc.power(number  power)
+hc.power_curve(number  power)
 
 ```
 
@@ -743,11 +733,11 @@ Lua :
 
 ```Lua
 
-hc.hamming()
+hc.hamming_curve()
 
-hc.hanning()
+hc.hanning_curve()
 
-hc.blackman()
+hc.blackman_curve()
 
 ```
 
@@ -795,11 +785,11 @@ Lua :
 
 ```Lua
 
-hc.gaussian(number  A, number  c)
+hc.gaussian_curve(number  A, number  c)
 
 -- Alias
 
-hc.gauss(number  A, number  c)
+hc.gauss_curve(number  A, number  c)
 
 ```
 
@@ -847,11 +837,11 @@ Lua :
 
 ```Lua
 
-hc.toxoid(number  a)
+hc.toxoid_curve(number  a)
 
 -- Alias
 
-hc.duplicatrix_cubic(number  a)
+hc.duplicatrix_cubic_curve(number  a)
 
 ```
 
@@ -900,11 +890,11 @@ Lua :
 
 ```Lua
 
-hc.catenary(number  a)
+hc.catenary_curve(number  a)
 
 -- Alias
 
-hc.funicular(number  a)
+hc.funicular_curve(number  a)
 
 ```
 
@@ -950,7 +940,7 @@ Lua :
 
 ```Lua
 
-hc.tightrope_walker(number  a, number  b)
+hc.tightrope_walker_curve(number  a, number  b)
 
 ```
 
@@ -983,7 +973,7 @@ Lua :
 
 ```Lua
 
-hc.quadratic_bezier( hc.control_point  cp )
+hc.quadratic_bezier_curve( hc.control_point  cp )
 
 ```
 
@@ -1020,7 +1010,7 @@ Lua :
 
 ```Lua
 
-hc.cubic_bezier(hc.control_point  cp1, hc.control_point  cp2)
+hc.cubic_bezier_curve(hc.control_point  cp1, hc.control_point  cp2)
 
 ```
 
@@ -1058,7 +1048,7 @@ Lua :
 
 ```Lua
 
-hc.cubic_spline(table {hc.control_point})
+hc.cubic_spline_curve(table {hc.control_point})
 
 ```
 
@@ -1096,7 +1086,7 @@ Lua :
 
 ```Lua
 
-hc.catmull_rom_spline(hc.control_point  cp1, hc.control_point  cp2)
+hc.catmull_rom_spline_curve(hc.control_point  cp1, hc.control_point  cp2)
 
 ```
 
@@ -1135,7 +1125,7 @@ hypercurve::share( hypercurve::polynomial_curve( {1.34, -1, -0.5, 0.1} ) );
 Lua :
 
 ```Lua
-hc.polynomial(1.34, -1, -0.5, 0.1)
+hc.polynomial_curve(1.34, -1, -0.5, 0.1)
 ```
 
 Csound :
@@ -1180,7 +1170,7 @@ hc.user_defined(function(x) return x * x * x end )
 function my_own_cubic(x)
   return x*x*x
 end
-hc.user_defined(my_own_cubic)
+hc.user_defined_curve(my_own_cubic)
 ```
 
 Csound :
@@ -1215,7 +1205,7 @@ hypercurve::share( hypercurve::typed_curve(-5));
 Lua :
 
 ```Lua
-hc.typed(-5)
+hc.typed_curve(-5)
 ```
 
 Csound :
@@ -1251,9 +1241,9 @@ hypercurve::share( hypercurve::kiss_curve());
 Lua :
 
 ```Lua
-hc.mouse()
+hc.mouse_curve()
 -- Alias
-hc.kiss()
+hc.kiss_curve()
 ```
 
 Csound :
@@ -1292,9 +1282,9 @@ hypercurve::share( hypercurve::cocked_hat_curve(bool));
 Lua :
 
 ```Lua
-hc.bicorn(bool 0 or 1)
+hc.bicorn_curve(bool 0 or 1)
 -- Alias
-hc.cocked_hat(bool 0 or 1)
+hc.cocked_hat_curve(bool 0 or 1)
 ```
 
 Csound :
@@ -1334,7 +1324,7 @@ hypercurve::share( hypercurve::lagrange_polynomial_curve( {control_point(0.2, 0.
 Lua :
 
 ```Lua
-hc.lagrange_polynomial( hc.control_point(0.2, 0.8), hc.control_point(0.4, 0.2) )
+hc.lagrange_polynomial_curve( hc.control_point(0.2, 0.8), hc.control_point(0.4, 0.2) )
 ```
 
 Csound :

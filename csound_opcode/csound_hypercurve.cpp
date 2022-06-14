@@ -43,6 +43,7 @@ ftable_info allocate_gen(CSOUND_ *csound, int fno, size_t size)
     int res = csound->FTAlloc(csound,  t_nbr, size);
     if(res != 0) return {csound->InitError(csound, "Error alloc Hypercurve GEN %d with res = %d", t_nbr, res ) , fno, nullptr, 0};
     size_t sz = csound->GetTable(csound, &t_ptr, t_nbr );
+    t_ptr[size] = 0;
     return {0, t_nbr, t_ptr, sz};
 }
 
@@ -739,6 +740,7 @@ struct cs_sub_curve : public cs_operator<cs_operator_sub>{};
 struct cs_mult_curve : public cs_operator<cs_operator_mult>{};
 struct cs_div_curve : public cs_operator<cs_operator_div>{};
 
+// args : crv, path, waveform , fill, grid, invert
 struct cs_export_png : public csnd::InPlug<6>
 {
     int init()
@@ -844,7 +846,7 @@ void csnd::on_load(Csound *csound) {
     csnd::plugin<cs_div_curve>(csound, "hc_div", "i", "ii" , csnd::thread::i);
 
     csnd::plugin<cs_export_png>(csound, "hc_write_as_png", "", "iSoppo", csnd::thread::i);
-    csnd::plugin<cs_random_curve_composer>(csound, "hc_random_curve", "i", "iiiiioo", csnd::thread::i);
+    //csnd::plugin<cs_random_curve_composer>(csound, "hc_random_curve", "i", "iiiiioo", csnd::thread::i);
 
     // Curve types
     csnd::plugin<cs_diocles_curve>(csound, "hc_diocles_curve", "i", "i", csnd::thread::i);

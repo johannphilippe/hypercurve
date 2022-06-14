@@ -628,9 +628,30 @@ LUA_EXPORT const luaL_Reg luahc_static_meth[] =
     {"lagrange_polynomial", luahc_lagrange_interpolation_curve},
     {"polynomial", luahc_polynomial_curve},
 
+    // Add curve suffix
+    {"linear_curve", luahc_curve_base},
+    {"cubic_curve", luahc_cubic_curve},
+    {"power_curve", luahc_power_curve},
+    {"diocles_curve", luahc_cissoid_curve},
+    {"hanning_curve", luahc_hanning_curve},
+    {"hamming_curve", luahc_hamming_curve},
+    {"blackman_curve", luahc_blackman_curve},
+    {"gauss_curve", luahc_gauss_curve},
+    {"toxoid_curve", luahc_toxoid_curve},
+    {"mouse_curve", luahc_mouse_curve},
+    {"bicorn_curve", luahc_bicorn_curve},
+    {"catenary_curve", luahc_catenary_curve},
+    {"tightrope_walker_curve", luahc_tightrope_walker_curve},
+    {"quadratic_bezier_curve", luahc_quadratic_bezier_curve},
+    {"cubic_bezier_curve", luahc_cubic_bezier_curve},
+    {"cubic_spline_curve", luahc_cubic_spline_curve},
+    {"catmull_rom_curve", luahc_catmull_rom_spline_curve},
+    {"lagrange_polynomial_curve", luahc_lagrange_interpolation_curve},
+    {"polynomial_curve", luahc_polynomial_curve},
+
+
     {"typed", luahc_typed_curve},
     {"user_defined", luahc_user_defined_curve},
-
 
     // Aliases
     {"cissoid", luahc_cissoid_curve},
@@ -639,6 +660,14 @@ LUA_EXPORT const luaL_Reg luahc_static_meth[] =
     {"funicular", luahc_catenary_curve},
     {"kiss", luahc_mouse_curve},
     {"cocked_hat", luahc_bicorn_curve},
+
+    // Add curve suffix for aliases
+    {"cissoid_curve", luahc_cissoid_curve},
+    {"gaussian_curve", luahc_gauss_curve},
+    {"duplicatrix_cubic_curve", luahc_toxoid_curve},
+    {"funicular_curve", luahc_catenary_curve},
+    {"kiss_curve", luahc_mouse_curve},
+    {"cocked_hat_curve", luahc_bicorn_curve},
 
     // Helpers
     {"invert", luahc_invert_curve},

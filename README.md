@@ -33,11 +33,29 @@ Every curve algorithm is different. In audio applications, we use to assign enve
 - Typed curves : inspired from Csounds [GEN16](http://www.csounds.com/manual/html/GEN16.html)
 - User defined curves - pass it a function (or a lambda in C++), that returns y for any x between 0 and 1. Not implemented in Csound.
 
+## How to install, and make it work 
+
+Go to [Releases](https://github.com/johannphilippe/hypercurve/releases), and download the latest version. 
+
+### Csound install
+
+To install for Csound, the recommanded way is to move the csound_hypercurve library to the plugins repository of Csound. 
+
+Usually, the following instructions will work. If Csound is installed in another location, just change the following path : 
+
+* On Windows, move `csound_hypercurve.dll` to `C:/Program Files/Csound6_x64/plugins64/`. 
+* On MacOS, move `libcsound_hypercurve.dylib` to `/Library/Frameworks/CsoundLib64.framework/Versions/6.0/Resources/Opcodes64`
+* On Linux (debian), move `libcsound_hypercurve.so` to `/usr/local/lib/csound/plugins64/`
+
+### Lua use 
+
+On every OS Hypercurve is compiled for, you can write a lua script using Hypercurve in the Hypercurve directory and just use it from the terminal with `./luajit myscript.lua`. Just change `myscript.lua` to the name of your script. 
+On Windows, it should be ̀`./luajit.exe myscript.lua`. 
 
 ## How to use it 
 
 
-There are three ways to use it : in C++, Csound or in Lua. Cmake will help you build libraries that can be used in those languages. You will find C++ example under hypercurve_test/test.cpp, Csound example under csound_opcode/test.csd, and Lua example under lua_module/test.lua. 
+There are three ways to use it : in C++, Csound, Faust or in Lua. Cmake will help you build libraries that can be used in those languages. You will find C++ example under hypercurve_test/test.cpp, Csound example under csound_opcode/test.csd, and Lua example under lua_module/test.lua. 
 
 The basic syntax stands as follow : 
 * `hypercurve(integer size, double y_start, {segment_list});`
@@ -85,8 +103,8 @@ local definition = 16384
 local y_start = 0
 local crv = hc.hypercurve(definition, y_start, 
 	{
-		hc.segment(1/2, 1.0, hc.cissoid(1.0)),
-		hc.sement(1/2, 0.0, hc.cubic(0.0))
+		hc.segment(1/2, 1.0, hc.cissoid_curve(1.0)),
+		hc.sement(1/2, 0.0, hc.cubic_curve(0.0))
 	})
 // Write as 24 bits 48KHz wav
 hc.write_as_wav("path/to/outfile.wav", crv)
