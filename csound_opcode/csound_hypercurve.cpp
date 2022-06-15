@@ -28,22 +28,28 @@ struct ftable_info
 ftable_info allocate_gen(CSOUND_ *csound, int fno, size_t size)
 {
     int t_nbr;
+    double t_dbl;
     double *t_ptr = nullptr;
     if(fno > 0) {
-        t_nbr = int(fno);
+        t_nbr = fno;
     } else {
         // Automatic table number
-        t_nbr = 0;
+        t_nbr = 100;
         do {
             ++t_nbr;
+            t_dbl = t_nbr;
             csound->GetTable(csound, &t_ptr, t_nbr);
-        } while(t_ptr != (MYFLT*)NULL);
+            FUNC* t = csound->FTnp2Finde(csound, &t_dbl);
+            if(t == NULL)
+                t_ptr = NULL;
+
+        } while(t_ptr != NULL);
     }
+
 
     int res = csound->FTAlloc(csound,  t_nbr, size);
     if(res != 0) return {csound->InitError(csound, "Error alloc Hypercurve GEN %d with res = %d", t_nbr, res ) , fno, nullptr, 0};
     size_t sz = csound->GetTable(csound, &t_ptr, t_nbr );
-    t_ptr[size] = 0;
     return {0, t_nbr, t_ptr, sz};
 }
 
@@ -59,6 +65,7 @@ ftable_info get_gen(CSOUND_ *csound, int fno)
     }
     return {0, fno, t_ptr, size};
 }
+
 
 // Csound runtime hypercurve
 class cs_rt_hypercurve
@@ -524,6 +531,36 @@ struct cs_lagrange_curve : csnd::Plugin<1, 64>
     std::shared_ptr<lagrange_polynomial_curve> _curve;
 };
 
+struct cs_cubic_spline_curve : csnd::Plugin<1, 64>
+{
+    int init()
+    {
+        int n = in_count() + 2 - 1;
+        int nn = (5 * n) + (3 * ( n + 1 )) + (n - 1)  + ( (n - 1) * n);
+        spline_memory.allocate(csound, nn);
+
+        cp.allocate(csound, in_count() + 2);
+        for(size_t i = 0; i < in_count(); ++i)
+            cp[i+1] = *control_point_map[inargs[i]];
+
+        _curve = std::make_shared<cubic_spline_curve>(cp.data(), cp.len(), spline_memory.data(), spline_memory.len());
+        index = curve_base_map.map(_curve);
+        outargs[0] = index;
+        return OK;
+    }
+
+    int deinit()
+    {
+        curve_base_map.unmap(index);
+        return OK;
+    }
+
+    int index;
+    csnd::AuxMem<double> spline_memory;
+    csnd::AuxMem<control_point> cp;
+    std::shared_ptr<cubic_spline_curve> _curve;
+};
+
 struct cs_polynomial_curve : csnd::Plugin<1, 64>
 {
     int init()
@@ -627,18 +664,14 @@ struct cs_gen : public csnd::Plugin<1, 64>, public cs_rt_hypercurve
 {
   int init()
   {
-      std::cout << "alloc gen " << std::endl;
       table = allocate_gen(csound->get_csound(), inargs[0], inargs[1]);
       if(table.res != 0) {
           return table.res;
       }
-      std::cout << "allocated "<< std::endl;
+
       _initialize(inargs[1], inargs[2], table.t_ptr);
-      std::cout << "initialized" << std::endl;
       check_total_size();
-      std::cout << "resized " << std::endl;
       process_init();
-      std::cout << "init process " <<std::endl;
 
       for(size_t i = 3; i < in_count(); ++i)
       {
@@ -655,7 +688,6 @@ struct cs_gen : public csnd::Plugin<1, 64>, public cs_rt_hypercurve
       AsciiPlotter p(std::string(name)  +  " - Hypercurve GEN number : "  + std::to_string(table.fno)  , 80, 15);
       p.addPlot( std::vector<double>(this->samples.begin(), this->samples.end()), std::string(" - ") + name , (char)(rand() % (126 - 92) + 92));
       p.show();
-
 
       curve_map[table.fno] = this;
       outargs[0] = table.fno;
@@ -869,6 +901,7 @@ void csnd::on_load(Csound *csound) {
     csnd::plugin<cs_cub_bezier>(csound, "hc_cubic_bezier_curve", "i", "ii", csnd::thread::i);
     csnd::plugin<cs_catmull_rom>(csound, "hc_catmull_rom_curve", "i" , "ii", csnd::thread::i);
     csnd::plugin<cs_lagrange_curve>(csound, "hc_lagrange_curve", "i", "m", csnd::thread::i);
+    csnd::plugin<cs_cubic_spline_curve>(csound, "hc_cubic_spline_curve", "i", "m", csnd::thread::i);
 
     // Aliases
     csnd::plugin<cs_toxoid>(csound, "hc_duplicatrix_cubic_curve", "i", "i", csnd::thread::i);

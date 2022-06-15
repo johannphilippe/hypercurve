@@ -369,6 +369,7 @@ struct memory_vector
       {}
       ~iterator() {
       }
+      T *get() {return ptr;}
       iterator& operator=(const iterator&o) {ptr = o.ptr; return *this;}
       iterator& operator++() {++ptr; return *this;} //prefix increment
       iterator& operator++(int) {return ptr++;}
@@ -695,12 +696,19 @@ class cubic_spline
 {
 public:
 
-    cubic_spline()
+    cubic_spline(double *ptr, size_t size, memory_vector<control_point> &pts)
+        : interp(ptr, size)
     {
+        interpolate_from_points(pts, size);
     }
 
     ~cubic_spline()
     {
+    }
+
+    void sp(const char *s)
+    {
+        std::cout << "SPLINE ::: " << s  << std::endl;
     }
 
     void gauss_elimination_ls(int m, int n)
@@ -768,19 +776,24 @@ public:
                 (c[i] * (xval - x_i)) + d[i];
     }
 
-    void calculate_interpolation(int)
+    void calculate_interpolation()
     {
         int key_index = 0;
         T key = x[key_index];
+        sp(std::string("Sizze" + std::to_string(interp.size())).c_str());
+        sp("loop");
         for (int i = 0; i < interp.size(); i++)
         {
+            sp(std::string("loop : " + std::to_string(i)).c_str());
             T xval = T(i) / T(n_precision);
             if((xval < x[0]) || (xval > x.back()) ) continue;
             if(xval > x[key_index + 1]) {
                 key_index++;
                 key = x[key_index];
             }
+            sp("interp");
             interp[i] = equation(xval, key, key_index);  //equation_map[key](xval);
+            sp("ok");
         }
        // equation_map.clear();
     }
@@ -807,9 +820,9 @@ public:
         }
     }
 
-    void reset(int n, vector<point> p)
+    void reset(int n, memory_vector<point> p)
     {
-        for(int i = 0; i < p.size(); i++)
+        for(size_t  i = 0; i < p.size(); i++)
         {
             x[i] = p[i].x;
             y[i] = p[i].y;
@@ -834,49 +847,63 @@ public:
     void interpolate(int n)
     {
 
+        sp("prepare");
         int i;
         for(i = 0; i < n; i++)
             h[i] = x[i + 1] - x[i];
 
+        sp("h calculated ");
         sig[0] = 0;
         sig[n] = 0;
 
+        sp("sig");
+        sp("tridiag");
         tridiagonal_cubic_splin_gen(n);
+        sp("gauss");
         gauss_elimination_ls(n -1, n);
 
+        sp("loop");
         for(i = 1; i < n; i++)
             sig[i] = sig_temp[i - 1];
 
+        sp("coef");
         cs_coeff_calculation(n);
-        calculate_interpolation(n);
+        sp("inteprolation");
+        calculate_interpolation();
     }
 
-    vector<T>& interpolate_from_points(vector<point> &p,
-                                            int precision, point)
+    void interpolate_from_points(memory_vector<point> &p,
+                                            int precision)
     {
+        sp("interpolate");
         int n = p.size() - 1;
         if(n_points != p.size())
         {
+            sp("resize");
             this->resize(n);
             n_points = p.size();
+            sp("ok");
         }
         if(precision != n_precision)
         {
-            interp.resize(precision);
+            sp("precision");
             n_precision = precision;
         }
+        sp("reset");
 
         reset(n, p);
 
-        this->interpolate(n);
+        sp("go interp");
 
-        return interp;
+        this->interpolate(n);
     }
 
 protected:
     int n_points = 0, n_precision = 0;
-    vector<T> x, y, interp, a, b, c, d, sig, sig_temp, h;
+    vector<T> x, y, a, b, c, d, sig, sig_temp, h;
     vector< vector<T> > tridiagonal;
+
+    memory_vector<double> interp;
 };
 
 }
@@ -1572,32 +1599,47 @@ class cubic_spline_curve : public virtual curve_base
 {
 public:
     cubic_spline_curve(std::vector<point> cp)
-        : _control_points( std::move(cp) )
+        : _control_points( /* std::move(cp) */ cp.size() + 2 )
     {
         if(_control_points.size() < 3)
+            throw(std::runtime_error("Control point list size must be >= 3"));
+        std::move(cp.begin(), cp.end(), _control_points.begin() + 1);
+    }
+
+    cubic_spline_curve(memory_vector<point> cp)
+        : _control_points( /* std::move(cp) */ cp.size() + 2 )
+    {
+        if(_control_points.size() < 3)
+            throw(std::runtime_error("Control point list size must be >= 3"));
+        std::move(cp.begin(), cp.end(), _control_points.begin() + 1);
+    }
+
+    cubic_spline_curve(point *p, size_t size)
+        : _control_points(p, size)
+    {
+        if(size < 3)
             throw(std::runtime_error("Control point list size must be >= 3"));
     }
 
     void on_init() override
     {
-       _control_points.insert(_control_points.begin(), curve_point(0, y_start));
-        // For each point, determine absolute position from relative position
-        for(size_t i = 1; i < _control_points.size(); i++)
-        {
-            _control_points[i].x += _control_points[i-1].x;
-        }
+
+        _control_points[0] = control_point(0, y_start);
+        _control_points[_control_points.size() - 1] = control_point(1, y_destination);
     }
 
     inline virtual double process_all(size_t size, memory_vector<double>::iterator &it) override
     {
         memory_vector<double>::iterator begin_ptr = it;
-        std::vector<double>& res = spl.interpolate_from_points(_control_points, size, point{1.0, 1.0});
+        double *data_ptr = it.get();
+        //std::vector<double>& res = spl.interpolate_from_points(_control_points, size, point{1.0, 1.0});
+        cubic_spline<double> spl(data_ptr, definition, _control_points);
+
         double max = 0.0;
         for(size_t i = 0; i < size; i++)
         {
-            if( std::abs(res[i]) > max ) max = std::abs(res[i]);
-            if(inverted) res[i] = process_invert(hypercurve::fraction(i, size), res[i]);
-            *it = res[i];
+            if( std::abs(*it) > max ) max = std::abs(*it);
+            if(inverted) *it = process_invert(hypercurve::fraction(i, size), *it);
             ++it;
         }
         post_processing(begin_ptr);
@@ -1605,8 +1647,8 @@ public:
     }
 
 private:
-    cubic_spline<double> spl;
-    std::vector<point> _control_points;
+    //cubic_spline<double> spl;
+    memory_vector<point> _control_points;
 };
 
 // User passes control points P0 and P3 assuming that P1(0,y) and P2(1,y). Calculation will be relative, and will be  rescaled after.

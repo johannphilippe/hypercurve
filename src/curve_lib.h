@@ -653,41 +653,62 @@ class cubic_spline_curve : public virtual curve_base
 {
 public:
     cubic_spline_curve(std::vector<point> cp)
-        : _control_points( std::move(cp) )
+        : _control_points( /* std::move(cp) */ cp.size() + 2 )
     {
         if(_control_points.size() < 3)
+            throw(std::runtime_error("Control point list size must be >= 3"));
+        std::move(cp.begin(), cp.end(), _control_points.begin() + 1);
+    }
+
+    cubic_spline_curve(memory_vector<point> cp)
+        : _control_points( /* std::move(cp) */ cp.size() + 2 )
+    {
+        if(_control_points.size() < 3)
+            throw(std::runtime_error("Control point list size must be >= 3"));
+        std::move(cp.begin(), cp.end(), _control_points.begin() + 1);
+    }
+
+    cubic_spline_curve(point *pts, size_t pts_size, double *spline_memory, size_t spline_mem_size)
+        : _control_points(pts, pts_size)
+        , _spline_memory(spline_memory)
+        , _spline_mem_size(spline_mem_size)
+    {
+        if(pts_size < 3)
             throw(std::runtime_error("Control point list size must be >= 3"));
     }
 
     void on_init() override
     {
-       _control_points.insert(_control_points.begin(), curve_point(0, y_start));
-        // For each point, determine absolute position from relative position
-        for(size_t i = 1; i < _control_points.size(); i++)
-        {
-            _control_points[i].x += _control_points[i-1].x;
-        }
+
+        _control_points[0] = control_point(0, y_start);
+        _control_points[_control_points.size() - 1] = control_point(1, y_destination);
     }
 
     inline virtual double process_all(size_t size, memory_vector<double>::iterator &it) override
     {
         memory_vector<double>::iterator begin_ptr = it;
-        std::vector<double>& res = spl.interpolate_from_points(_control_points, size, point{1.0, 1.0});
+        double *data_ptr = it.get();
+        //std::vector<double>& res = spl.interpolate_from_points(_control_points, size, point{1.0, 1.0});
+        spl.process(data_ptr, definition, _control_points, _spline_memory, _spline_mem_size);
+
+
         double max = 0.0;
         for(size_t i = 0; i < size; i++)
         {
-            if( std::abs(res[i]) > max ) max = std::abs(res[i]);
-            if(inverted) res[i] = process_invert(hypercurve::fraction(i, size), res[i]);
-            *it = res[i];
+            if( std::abs(*it) > max ) max = std::abs(*it);
+            if(inverted) *it = process_invert(hypercurve::fraction(i, size), *it);
             ++it;
         }
+
         post_processing(begin_ptr);
         return max;
     }
 
 private:
     cubic_spline<double> spl;
-    std::vector<point> _control_points;
+    memory_vector<point> _control_points;
+    double * _spline_memory;
+    size_t _spline_mem_size;
 };
 
 // User passes control points P0 and P3 assuming that P1(0,y) and P2(1,y). Calculation will be relative, and will be  rescaled after.

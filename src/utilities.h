@@ -215,6 +215,7 @@ struct memory_vector
       {}
       ~iterator() {
       }
+      T *get() {return ptr;}
       iterator& operator=(const iterator&o) {ptr = o.ptr; return *this;}
       iterator& operator++() {++ptr; return *this;} //prefix increment
       iterator& operator++(int) {return ptr++;}
@@ -292,6 +293,9 @@ struct memory_vector
    {
       return _data[index];
    }
+
+   T front() {return *_data;}
+   T back() {return *_data + (_size - 1);}
 
    T max() {
        T mx = 0;
