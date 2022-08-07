@@ -211,7 +211,7 @@ LUA_EXPORT int luahc_toxoid_curve(lua_State *lua)
 
 LUA_EXPORT int luahc_mouse_curve(lua_State *lua)
 {
-    lua_curve_helper(lua, new hypercurve::mouse_curve());
+    lua_curve_helper(lua, new hypercurve::mouth_curve());
     luaL_getmetatable(lua, "hypercurve.curve_base");
     lua_setmetatable(lua, -2);
     return 1;
@@ -408,6 +408,31 @@ LUA_EXPORT int luahc_curve(lua_State *lua)
     return 1;
 }
 
+
+LUA_EXPORT int luahc_concatenate(lua_State *lua)
+{
+
+    luaL_checktype(lua, 2, LUA_TTABLE);
+    size_t definition = lua_tointeger(lua, 1);
+    size_t arr_size = luaL_len(lua, 2);
+    std::vector<hypercurve::curve *> to_concat;
+    for(size_t i = 1; i <= arr_size; i++)
+    {
+        lua_rawgeti(lua, 2, i);
+        hypercurve::curve *crv = *(hypercurve::curve **)luaL_checkudata(lua, -1, "hypercurve.curve");
+        to_concat.push_back(crv);
+        lua_pop(lua, 1);
+    }
+
+    hypercurve::curve *crv = new hypercurve::curve(definition, to_concat);
+    hypercurve::curve **l_crv = (hypercurve::curve **)lua_newuserdata(lua, sizeof(hypercurve::curve *));
+    *l_crv = crv;
+    luaL_getmetatable(lua, "hypercurve.curve");
+    lua_setmetatable(lua, -2);
+    return 1;
+}
+
+
 ///////////////////////////////////////////:
 // Curve methods
 // Syntax : hypercurve.write_as_wav(string path, curve c)
@@ -574,9 +599,11 @@ LUA_EXPORT const luaL_Reg luahc_curve_class_meth[] =
     {"ascii_display" ,luahc_curve_ascii_display },
     {"write_as_png" ,luahc_curve_write_png },
     {"write_as_wav" ,luahc_curve_write_as_wav },
-    {"normalize_y", luahc_curve_normalize_y},
+    {"normalize", luahc_curve_normalize_y},
     {"get_samples", luahc_curve_get_samples},
     {"get_sample_at", luahc_curve_get_sample_at},
+    // deprecated
+    {"normalize_y", luahc_curve_normalize_y},
     { NULL          ,NULL            }
 };
 
@@ -638,7 +665,7 @@ LUA_EXPORT const luaL_Reg luahc_static_meth[] =
     {"blackman_curve", luahc_blackman_curve},
     {"gauss_curve", luahc_gauss_curve},
     {"toxoid_curve", luahc_toxoid_curve},
-    {"mouse_curve", luahc_mouse_curve},
+    {"mouth_curve", luahc_mouse_curve},
     {"bicorn_curve", luahc_bicorn_curve},
     {"catenary_curve", luahc_catenary_curve},
     {"tightrope_walker_curve", luahc_tightrope_walker_curve},
@@ -652,6 +679,13 @@ LUA_EXPORT const luaL_Reg luahc_static_meth[] =
 
     {"typed", luahc_typed_curve},
     {"user_defined", luahc_user_defined_curve},
+
+
+    // Helpers
+    {"invert", luahc_invert_curve},
+    {"mirror", luahc_mirror_curve},
+    {"concatenate", luahc_concatenate},
+
 
     // Aliases
     {"cissoid", luahc_cissoid_curve},
@@ -669,9 +703,10 @@ LUA_EXPORT const luaL_Reg luahc_static_meth[] =
     {"kiss_curve", luahc_mouse_curve},
     {"cocked_hat_curve", luahc_bicorn_curve},
 
-    // Helpers
-    {"invert", luahc_invert_curve},
-    {"mirror", luahc_mirror_curve},
+
+    {"concat", luahc_concatenate},
+
+
 
     { NULL      ,NULL      }
 };

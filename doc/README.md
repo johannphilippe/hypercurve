@@ -22,11 +22,15 @@ It is available in several frontends : C++, Lua, and Csound.
 
 3.4 [Normalize hypercurve](#normalize-hypercurve)
 
+3.5 [Concatenate hypercurves](#concatenate-hypercurves)
+
+3.6 [Resize hypercurve](#resize-hypercurve)
+
 4. [Hypercurve Segment](#segment)
 
 5. [Control point](#control-point)
 
-6. [Curve types](#curve-base)
+6. [Curve Algorithms](#curve-base)
 
 6.1. [Diocles cissoid curve](#diocles-cissoid-curve)
 
@@ -58,7 +62,7 @@ It is available in several frontends : C++, Lua, and Csound.
 
 6.15 [Typed Curve](#typed-curve)
 
-6.16 [Mouse Curve](#mouse-curve)
+6.16 [Mouth Curve](#mouth-curve)
 
 6.16 [Bicorn Curve](#bicorn-curve)
 
@@ -144,7 +148,7 @@ crv:write_as_wav( "path/curve.wav" )
 
 -- rescale the curve
 
-crv:normalize_y(-1, 1)
+crv:normalize(-1, 1)
 
 local  samp = crv:get_sample_at(1024)
 
@@ -420,7 +424,7 @@ C++ :
 
 ```c++
   hypercurve::curve c(4096, 0, {hypercurve::segment(1, 1, hypercurve::cubic_curve())});
-  c.normalize_y(-1, 1);
+  c.normalize(-1, 1);
   // Now "c" curve y start is -1 and its destination is 1
 
 ```
@@ -429,7 +433,7 @@ Lua :
 
 ```Lua
   local crv = hc.hypercurve(4096, 0, {hc.segment(1, 1, hc.cubic_curve())})
-  crv:normalize_y(-1, 1)
+  crv:normalize(-1, 1)
 ```
 
 Csound :
@@ -438,15 +442,53 @@ Csound :
 
   icrv = hc_hypercurve(4096, 0, hc_segment(1, 1, hc_cubic_curve()))
   // This function won't make a copy, it will only scale the corresponding curve
-  hc_normalize_y(icrv, -1, 1)
+  hc_normalize(icrv, -1, 1)
 ``` 
 
 
 Faust : 
 ```
 crv = hc.hypercurve(2048, 0, (hc.segment(1, 1, hc.cubic_curve())))
-hc.normalize_y(crv, -1, 1);
+hc.normalize(crv, -1, 1);
 ```
+
+
+### Concatenate hypercurves
+
+This function allows to contacenate two or more curves 
+
+C++ :
+
+```c++
+
+curve concatenated = hypercurve::concatenate(size_t new_size, {hypercurve::curve &crv1, hypercurve::curve &crv2, [...] } )
+// concat is an alias (also, the same function exist as a hypercurve::curve constructor)
+```
+
+Lua :
+
+```Lua
+
+local new_crv = hc.concatenate(new_size, {curve_list})
+-- hc.concat is an alias
+
+```
+
+Csound :
+
+```Csound
+
+iconcatenated, hc_concatenate(inew_ftable_number, inew_size, icrv1, [icrv2, ...] )
+; hc_concat is an alias
+
+```
+
+Faust : 
+```
+// Not implemented yet
+```
+
+### Resize hypercurve
 
 
 ## Segment
@@ -1056,7 +1098,7 @@ Csound :
 
 ```Csound
 
-// Not implemented yet
+hc_cubic_spline_curve(hc_control_point p1, [hc_control_point p2, ...])
 
 ```
 
@@ -1109,7 +1151,7 @@ hc.catmull_rom_spline_curve(hc.control_point cp1, hc.control_point cp2);
 
 The polynomial curve accepts an infinite number of arguments (up to 64 for Csound) and will evaluate curve with a polynomial expression  : 
 `(arg1*x)^3 + (arg2*x)^2 + (arg1*x)^1`
-In audio context, it is safer to scale the hypercurve in which you use a polynomial, as its y scale may be uncertain. Use the `normalize_y` method on your hypercurve to do so.
+In audio context, it is safer to scale the hypercurve in which you use a polynomial, as its y scale may be uncertain. Use the `normalize` method on your hypercurve to do so.
 
 ![Polynomial curve](png/polynomial.png)
   
@@ -1225,14 +1267,14 @@ hc.typed_curve(9.5);
 #### Mouse Curve
 
 
-![Mouse curve](png/mouse.png)
+![Mouth curve](png/mouth.png)
   
 
 C++ :
 
 ```c++
 
-hypercurve::share( hypercurve::mouse_curve());
+hypercurve::share( hypercurve::mouth_curve());
 // Alias
 hypercurve::share( hypercurve::kiss_curve());
 
@@ -1241,7 +1283,7 @@ hypercurve::share( hypercurve::kiss_curve());
 Lua :
 
 ```Lua
-hc.mouse_curve()
+hc.mouth_curve()
 -- Alias
 hc.kiss_curve()
 ```
@@ -1249,7 +1291,7 @@ hc.kiss_curve()
 Csound :
 
 ```Csound
-hc_mouse_curve()
+hc_mouth_curve()
 // Alias
 hc_kiss_curve()
 
@@ -1257,7 +1299,7 @@ hc_kiss_curve()
 
 Faust : 
 ```
-hc.mouse_curve();
+hc.mouth_curve();
 // Alias
 hc.kiss_curve();
 

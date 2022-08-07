@@ -448,6 +448,9 @@ struct memory_vector
       return _data[index];
    }
 
+   T front() {return *_data;}
+   T back() {return *_data + (_size - 1);}
+
    T max() {
        T mx = 0;
        for(size_t i = 0; i < size(); ++i)
@@ -696,19 +699,60 @@ class cubic_spline
 {
 public:
 
-    cubic_spline(double *ptr, size_t size, memory_vector<control_point> &pts)
+    inline double *spl_memory_incr(size_t s)
+    {
+        double *ptr = _spl_mem_incr;
+        _spl_mem_incr += s;
+        return ptr;
+    }
+
+    void process(double *ptr, size_t size, memory_vector<control_point> &pts, double * spline_memory, size_t spline_mem_size)
+    {
+
+        interp.init(ptr, size);
+        n = (pts.size() - 1);
+        _spline_memory =  spline_memory;
+        _spline_mem_size = (spline_mem_size);
+        _spl_mem_incr = (spline_memory);
+        x.init(spl_memory_incr(n + 1), n + 1);
+        y.init(spl_memory_incr(n + 1), n + 1);
+        a.init(spl_memory_incr(n), n);
+        b.init(spl_memory_incr(n), n);
+        c.init(spl_memory_incr(n), n);
+        d.init(spl_memory_incr(n), n);
+        h.init(spl_memory_incr(n), n);
+        sig.init(spl_memory_incr(n + 1), n + 1);
+        sig_temp.init(spl_memory_incr(n - 1), n - 1);
+        tridiagonal.init( _spl_mem_incr, (n - 1) * n);
+
+        interpolate_from_points(pts, size);
+
+    }
+
+    cubic_spline() {}
+
+    cubic_spline(double *ptr, size_t size, memory_vector<control_point> &pts, double * spline_memory, size_t spline_mem_size)
         : interp(ptr, size)
+        , n(pts.size() - 1)
+        , _spline_memory(spline_memory)
+        , _spline_mem_size(spline_mem_size)
+        , _spl_mem_incr(spline_memory)
+        , x(spl_memory_incr(n + 1), n + 1)
+        , y(spl_memory_incr(n + 1), n + 1)
+        , a(spl_memory_incr(n), n)
+        , b(spl_memory_incr(n), n)
+        , c(spl_memory_incr(n), n)
+        , d(spl_memory_incr(n), n)
+        , h(spl_memory_incr(n), n)
+        , sig(spl_memory_incr(n + 1), n + 1)
+        , sig_temp(spl_memory_incr(n - 1), n - 1)
+        , tridiagonal( _spl_mem_incr, (n - 1) * n)
     {
         interpolate_from_points(pts, size);
     }
 
     ~cubic_spline()
     {
-    }
-
-    void sp(const char *s)
-    {
-        std::cout << "SPLINE ::: " << s  << std::endl;
     }
 
     void gauss_elimination_ls(int m, int n)
@@ -718,11 +762,23 @@ public:
         {
             for(k = i + 1; k < m; k++)
             {
-                double term = tridiagonal[k][i] / tridiagonal[i][i];
+                int iii = (n * i) + i;
+                int kii = (n * k) + i;
+                //double term = tridiagonal[k][i] / tridiagonal[i][i];
+                double term = tridiagonal[kii] / tridiagonal[iii];
                 for(j = 0; j < n; j++)
                 {
+
+                    int kk = n * k;
+                    int jj = j;
+                    int ii = n * i;
+                    int fi = kk + jj;
+                    int li = jj + ii;
+                    tridiagonal[fi] = tridiagonal[fi] - term * tridiagonal[li];
+                    /*
                     tridiagonal[k][j] = tridiagonal[k][j] -
                             term * tridiagonal[i][j];
+                    */
                 }
             }
         }
@@ -730,12 +786,18 @@ public:
         // Back substitution
         for(i = m - 1; i >= 0; i--)
         {
-            sig_temp[i] = tridiagonal[i][n - 1];
+            int in = (i * n) + (n - 1);
+            sig_temp[i] = tridiagonal[in];
+            //sig_temp[i] = tridiagonal[i][n - 1];
             for(j = i + 1; j < n - 1; j++)
             {
-                sig_temp[i] = sig_temp[i] - tridiagonal[i][j] * sig_temp[j];
+                int ij = (i * n) + j;
+                //sig_temp[i] = sig_temp[i] - tridiagonal[i][j] * sig_temp[j];
+                sig_temp[i] = sig_temp[i] - tridiagonal[ij] * sig_temp[j];
             }
-            sig_temp[i] = sig_temp[i] / tridiagonal[i][i];
+            int ii = (i * n) + i;
+            sig_temp[i] = sig_temp[i] / tridiagonal[ii];
+            //sig_temp[i] = sig_temp[i] / tridiagonal[i][i];
         }
     }
 
@@ -756,17 +818,28 @@ public:
         int i;
         for(i = 0; i < n - 1; i++)
         {
-            tridiagonal[i][i] = 2 * (h[i]+ h[i + 1]);
+            double ii = (i * n) + i;
+            tridiagonal[ii] = 2 * (h[i] + h[i + 1]);
+            //tridiagonal[i][i] = 2 * (h[i]+ h[i + 1]);
         }
         for(i = 0; i < n - 2; i++)
         {
-            tridiagonal[i][i + 1] = h[i + 1];
-            tridiagonal[i + 1][i] = h[i + 1];
+            int ifirst = (n * i) + (i + 1);
+            tridiagonal[ifirst] = h[i +  1];
+            int ilast = (i+1) * n + i;
+            tridiagonal[ilast] = h[i + 1];
+            //tridiagonal[i][i + 1] = h[i + 1];
+            //tridiagonal[i + 1][i] = h[i + 1];
         }
         for(i = 1; i < n; i++)
         {
+            int ind = (i - 1) * n + (n - 1);
+            tridiagonal[ind] = (y[i + 1] - y[i]) * 6.0 / h[i] -
+                    (y[i] - y[i - 1]) * 6.0 / h[i - 1];
+            /*
             tridiagonal[i - 1][n - 1] = (y[i + 1] - y[i]) * 6.0 / h[i] -
                     (y[i] - y[i - 1]) * 6.0 / h[i - 1];
+            */
         }
     }
 
@@ -780,24 +853,20 @@ public:
     {
         int key_index = 0;
         T key = x[key_index];
-        sp(std::string("Sizze" + std::to_string(interp.size())).c_str());
-        sp("loop");
         for (int i = 0; i < interp.size(); i++)
         {
-            sp(std::string("loop : " + std::to_string(i)).c_str());
             T xval = T(i) / T(n_precision);
             if((xval < x[0]) || (xval > x.back()) ) continue;
             if(xval > x[key_index + 1]) {
                 key_index++;
                 key = x[key_index];
             }
-            sp("interp");
             interp[i] = equation(xval, key, key_index);  //equation_map[key](xval);
-            sp("ok");
         }
        // equation_map.clear();
     }
 
+    /*
     void resize(int n)
     {
         x.resize(n + 1);
@@ -819,9 +888,20 @@ public:
             tridiagonal[i].resize(n);
         }
     }
+    */
 
-    void reset(int n, memory_vector<point> p)
+    template<typename N>
+    void sn(N a)
     {
+        std::cout << std::to_string(a) << std::endl;
+    }
+
+    void  reset(int n, memory_vector<point> &p)
+    {
+        sn(n);
+        sn(x.size());
+        sn(y.size());
+        sn(p.size());
         for(size_t  i = 0; i < p.size(); i++)
         {
             x[i] = p[i].x;
@@ -836,74 +916,69 @@ public:
         ::memset(sig.data(), 0, (n + 1) * sizeof(T)  );
         ::memset(sig_temp.data(), 0, (n - 1) * sizeof(T) );
 
+        ::memset(tridiagonal.data(), 0, n * (n-1) * sizeof(T));
+
+        ::memset(interp.data(), 0, sizeof(T) * n_precision);
+        /*
         for(int i = 0; i < tridiagonal.size(); i++)
         {
             ::memset(tridiagonal[i].data(), 0, n * sizeof(T) );
         }
+        */
 
-        ::memset(interp.data(), 0, sizeof(T) * n_precision);
     }
 
     void interpolate(int n)
     {
 
-        sp("prepare");
         int i;
         for(i = 0; i < n; i++)
             h[i] = x[i + 1] - x[i];
 
-        sp("h calculated ");
         sig[0] = 0;
         sig[n] = 0;
 
-        sp("sig");
-        sp("tridiag");
         tridiagonal_cubic_splin_gen(n);
-        sp("gauss");
         gauss_elimination_ls(n -1, n);
 
-        sp("loop");
         for(i = 1; i < n; i++)
             sig[i] = sig_temp[i - 1];
 
-        sp("coef");
         cs_coeff_calculation(n);
-        sp("inteprolation");
         calculate_interpolation();
     }
 
     void interpolate_from_points(memory_vector<point> &p,
                                             int precision)
     {
-        sp("interpolate");
         int n = p.size() - 1;
         if(n_points != p.size())
         {
-            sp("resize");
-            this->resize(n);
+            //this->resize(n);
             n_points = p.size();
-            sp("ok");
         }
         if(precision != n_precision)
         {
-            sp("precision");
             n_precision = precision;
         }
-        sp("reset");
 
         reset(n, p);
-
-        sp("go interp");
 
         this->interpolate(n);
     }
 
 protected:
     int n_points = 0, n_precision = 0;
-    vector<T> x, y, a, b, c, d, sig, sig_temp, h;
-    vector< vector<T> > tridiagonal;
+    int n;
 
     memory_vector<double> interp;
+    double *_spline_memory;
+    double *_spl_mem_incr;
+    size_t _spline_mem_size;
+
+    memory_vector<T> x, y, a, b, c, d, sig, sig_temp, h;
+    //memory_vector< memory_vector<T> > tridiagonal;
+    memory_vector<T> tridiagonal;
 };
 
 }
@@ -1145,7 +1220,7 @@ public:
 };
 
 // See https://mathcurve.com/courbes2d/bouche/bouche.shtml
-class mouse_curve : public curve_base
+class mouth_curve : public curve_base
 {
 public:
     inline double process(double x) override
@@ -1614,10 +1689,12 @@ public:
         std::move(cp.begin(), cp.end(), _control_points.begin() + 1);
     }
 
-    cubic_spline_curve(point *p, size_t size)
-        : _control_points(p, size)
+    cubic_spline_curve(point *pts, size_t pts_size, double *spline_memory, size_t spline_mem_size)
+        : _control_points(pts, pts_size)
+        , _spline_memory(spline_memory)
+        , _spline_mem_size(spline_mem_size)
     {
-        if(size < 3)
+        if(pts_size < 3)
             throw(std::runtime_error("Control point list size must be >= 3"));
     }
 
@@ -1633,7 +1710,7 @@ public:
         memory_vector<double>::iterator begin_ptr = it;
         double *data_ptr = it.get();
         //std::vector<double>& res = spl.interpolate_from_points(_control_points, size, point{1.0, 1.0});
-        cubic_spline<double> spl(data_ptr, definition, _control_points);
+        spl.process(data_ptr, definition, _control_points, _spline_memory, _spline_mem_size);
 
         double max = 0.0;
         for(size_t i = 0; i < size; i++)
@@ -1642,13 +1719,16 @@ public:
             if(inverted) *it = process_invert(hypercurve::fraction(i, size), *it);
             ++it;
         }
+
         post_processing(begin_ptr);
         return max;
     }
 
 private:
-    //cubic_spline<double> spl;
+    cubic_spline<double> spl;
     memory_vector<point> _control_points;
+    double * _spline_memory;
+    size_t _spline_mem_size;
 };
 
 // User passes control points P0 and P3 assuming that P1(0,y) and P2(1,y). Calculation will be relative, and will be  rescaled after.
@@ -2292,7 +2372,7 @@ enum curve_base_index {
     polynomial_i = 15,
     user_defined_i = 16,
     typed_i = 17,
-    mouse_i = 18,
+    mouth_i = 18,
     bicorn_i = 19,
     lagrange_polynomial_i = 20,
 
@@ -2351,7 +2431,7 @@ std::shared_ptr<curve_base> get_curve_from_index(curve_base_index n,
     case polynomial_i: return share(polynomial_curve(args));
     case cubic_spline_i: return share(cubic_spline_curve(cps));
     case typed_i: return share(typed_curve(args[0]));
-    case mouse_i: return share(mouse_curve());
+    case mouth_i: return share(mouth_curve());
     case bicorn_i: return share(bicorn_curve(args[0] > 0 ));
     case lagrange_polynomial_i: return share(lagrange_polynomial_curve(cps));
     default: return share(linear_curve());
@@ -2538,7 +2618,7 @@ static int hc_catenary_curve(double a) {return faust_curve_base_map.map(share(ca
 static int hc_tightrope_walker_curve(double a, double b) {return faust_curve_base_map.map(share(tightrope_walker_curve(a, b)));}
 
 static int hc_typed_curve(double t) {return faust_curve_base_map.map(share(typed_curve(t)));}
-static int hc_mouse_curve(int) {return faust_curve_base_map.map(share(mouse_curve()));}
+static int hc_mouth_curve(int) {return faust_curve_base_map.map(share(mouth_curve()));}
 static int hc_bicorn_curve(int boolean) {return faust_curve_base_map.map(share(bicorn_curve(boolean != 0)));}
 
 static int hc_quadratic_bezier_curve(int cp) {

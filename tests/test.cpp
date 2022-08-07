@@ -44,7 +44,7 @@ void write_as_png(curve &c, bool waveform = true, std::string name = "h.png")
 {
     png p(2048, 1024);
     p.draw_curve(c.get_samples(), c.get_definition(), true, waveform);
-    p.draw_grid(10, 10, color{255, 255, 255, 100});
+    //p.draw_grid(10, 10, color{255, 255, 255, 100});
     std::string concat("/home/johann/Documents/" + name);
     p.write_as_png(concat);
 }
@@ -80,7 +80,7 @@ void generate_curve_pictures()
     curve hybrid(2048, 0, {
                     segment(fraction(1, segs), 1, share(diocles_curve(1))),
                     segment(fraction(1, segs), 0.2, share(toxoid_curve(0.01))),
-                    segment(fraction(2, segs), 0.8, share(mouse_curve())),
+                    segment(fraction(2, segs), 0.8, share(mouth_curve())),
                     segment(fraction(4, segs), 0, share(gauss_curve(10, 0.5)))
                  });
     hybrid.ascii_display("hybrid_curve", "hybrid", '*');
@@ -119,7 +119,7 @@ void generate_curve_pictures()
     write_doc_png(polynomial, "polynomial.png");
     curve typed(2048, 0, {segment(1, 1, share(typed_curve(-5)))});
     write_doc_png(typed, "typed.png");
-    curve mouse(2048, 0, {segment(1, 1, share(mouse_curve()))});
+    curve mouse(2048, 0, {segment(1, 1, share(mouth_curve()))});
     write_doc_png(mouse, "mouse.png");
     curve bicorn(2048, 0, {segment(1, 1, share(bicorn_curve(true)))});
     write_doc_png(bicorn, "bicorn.png");
@@ -378,8 +378,8 @@ void unit_tests()
     write_as_png(polynomial, false, "poly.png");
 
     curve mouse(def, 0, {
-                    segment(fraction(1,2), 1, share(mouse_curve())),
-                    segment(fraction(1,2), 0, share(mouse_curve()))
+                    segment(fraction(1,2), 1, share(mouth_curve())),
+                    segment(fraction(1,2), 0, share(mouth_curve()))
                 });
     mouse.ascii_display("mouse", "kiss", '*');
     write_as_png(mouse, false, "mouse.png");
@@ -395,7 +395,7 @@ void unit_tests()
     // Curves pictures for Doc
     curve rescale_test(def, 0, {
                            segment(fraction(1, 3), 1, share(bicorn_curve(false))),
-                           segment(fraction(1, 3), 0, share(mouse_curve()))
+                           segment(fraction(1, 3), 0, share(mouth_curve()))
                        });
     rescale_test.ascii_display("Rescaled", "rescaled 2/3", '*');
 
@@ -408,11 +408,11 @@ void random_generator_test()
     const int def = 16384;
 
     for(size_t i = 0; i < 100; ++i){
-        std::pair<curve, std::string> rand1 = random_curve_composer(4, -1, 1, def, true, true);
+        std::pair<curve, std::string> rand1 = random_curve_composer(4, 0, 1, def, true, false);
         rand1.first.ascii_display("random_curve" + std::to_string(i), rand1.second, '*');
 
         std::string rname = "rand_" + std::to_string(i) + "__" + rand1.second + ".png";
-        write_as_png(rand1.first, true, rname);
+        write_as_png(rand1.first, false, rname);
     }
 
 }
@@ -510,6 +510,19 @@ int main()
     //dummy_test();
     //unit_tests();
     random_generator_test();
+
+    auto crv = curve(16384, 0, {
+                        segment(0.5, 1, share(diocles_curve(0.51))),
+                        segment(0.5, 0, share(tightrope_walker_curve(1.1, 0.1)))
+                     });
+    write_as_png(crv, false, "dio_tightrope.png");
+
+    auto crv2 = curve(16384, 0, {
+                         segment(0.1, 1, share(tightrope_walker_curve(1.1, 0.1))),
+                         segment(0.4, 0.2, share(gauss_curve(1, 1))),
+                         segment(0.5, 0, share(kiss_curve()))
+                      });
+    write_as_png(crv2, false, "tightrope_gauss_kiss.png");
     //inversion_test();
 
     //generate_curve_pictures();

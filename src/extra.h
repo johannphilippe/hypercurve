@@ -39,7 +39,7 @@ enum curve_base_index {
     polynomial_i = 15,
     user_defined_i = 16,
     typed_i = 17,
-    mouse_i = 18,
+    mouth_i = 18,
     bicorn_i = 19,
     lagrange_polynomial_i = 20,
 
@@ -68,7 +68,7 @@ const char *get_curve_base_name (const curve_base_index b)
     case polynomial_i: return "polynomial";
     case user_defined_i: return "user_defined";
     case typed_i: return "typed";
-    case mouse_i: return "mouse";
+    case mouth_i: return "mouse";
     case bicorn_i: return "bicorn";
     case lagrange_polynomial_i: return "lagrange_polynomial";
     default: return "";
@@ -98,7 +98,7 @@ std::shared_ptr<curve_base> get_curve_from_index(curve_base_index n,
     case polynomial_i: return share(polynomial_curve(args));
     case cubic_spline_i: return share(cubic_spline_curve(cps));
     case typed_i: return share(typed_curve(args[0]));
-    case mouse_i: return share(mouse_curve());
+    case mouth_i: return share(mouth_curve());
     case bicorn_i: return share(bicorn_curve(args[0] > 0 ));
     case lagrange_polynomial_i: return share(lagrange_polynomial_curve(cps));
     default: return share(linear_curve());
@@ -166,7 +166,7 @@ std::pair<std::vector<double>, std::vector<control_point>> random_args_generator
         return {{}, cps};
     };
     case typed_i: return {{random<double>(-10, 10)}, {}};
-    case mouse_i: return {{},{}};
+    case mouth_i: return {{},{}};
     case bicorn_i: return {{(double)random<int>(-1, 1)}, {}};
 
     default: return {{},{}};

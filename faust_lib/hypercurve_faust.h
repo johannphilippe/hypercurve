@@ -79,7 +79,7 @@ static int hc_catenary_curve(double a) {return faust_curve_base_map.map(share(ca
 static int hc_tightrope_walker_curve(double a, double b) {return faust_curve_base_map.map(share(tightrope_walker_curve(a, b)));}
 
 static int hc_typed_curve(double t) {return faust_curve_base_map.map(share(typed_curve(t)));}
-static int hc_mouse_curve(int) {return faust_curve_base_map.map(share(mouse_curve()));}
+static int hc_mouth_curve(int) {return faust_curve_base_map.map(share(mouth_curve()));}
 static int hc_bicorn_curve(int boolean) {return faust_curve_base_map.map(share(bicorn_curve(boolean != 0)));}
 
 static int hc_quadratic_bezier_curve(int cp) {

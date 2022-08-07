@@ -70,6 +70,62 @@ public:
         process();
     }
 
+    // Concatenate constructor
+    // If definition is 0, it will be the sum of all curves
+    curve(size_t definition_, std::vector<curve*> to_concat)
+    {
+        double total_size = 0;
+        for(auto & it : to_concat)
+            total_size += it->definition;
+        if(definition_ == 0)
+        {
+            definition = total_size;
+        } else {
+            definition = definition_;
+        }
+
+        y_start = to_concat[0]->y_start;
+        samples.resize(definition);
+
+        if(definition_ == 0) {
+            // Full size, copy all samples
+            size_t index = 0;
+            for(auto &it : to_concat)
+            {
+                for(size_t i = 0; i < it->definition; ++i)
+                {
+                    samples[index] = it->samples[i];
+                    index++;
+                }
+            }
+        } else {
+            // Interpolate
+            double incr = double(total_size) / double(definition);
+            int passed = 0;
+            size_t current = 0;
+            for(size_t i = 0; i < definition; ++i)
+            {
+               double index = i * incr;
+               double cindex = index - passed;
+               if(cindex >= to_concat[current]->definition)
+               {
+                   passed += to_concat[current]->definition;
+                   current++;
+               }
+               if(cindex == 0)
+               {
+                   samples[i] = to_concat[current]->samples[0];
+               } else {
+                   int f = floor(cindex);
+                   int c = f + 1;
+                   double relative_x = relative_position(f, c, cindex);
+                   samples[i] = linear_interpolation(to_concat[current]->samples[f], to_concat[current]->samples[c], relative_x );
+               }
+
+            }
+        }
+    }
+
     curve() {}
     virtual  ~curve() {}
 
@@ -269,6 +325,9 @@ protected:
     memory_vector< segment > segs;
     memory_vector<double> samples;
 };
+
+inline curve concatenate(size_t new_size, std::vector<curve*> to_concat) {return curve(new_size, to_concat);}
+inline curve concat(size_t new_size, std::vector<curve*> to_concat) {return curve(new_size, to_concat);}
 
 }
 #endif // CORE_H

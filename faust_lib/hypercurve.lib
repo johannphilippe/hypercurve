@@ -54,9 +54,9 @@ blackman_curve  = blackman_curve_proxy(0)
 with {
       blackman_curve_proxy = ffunction(int hc_blackman_curve (int), "hypercurve_faust.h", "");
 };
-mouse_curve = mouse_curve_proxy(0)
+mouth_curve = mouth_curve_proxy(0)
 with {
-      mouse_curve_proxy = ffunction(int hc_mouse_curve (int), "hypercurve_faust.h", "");
+      mouth_curve_proxy = ffunction(int hc_mouth_curve (int), "hypercurve_faust.h", "");
 };
 
 // Splines

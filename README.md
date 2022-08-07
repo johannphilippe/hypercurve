@@ -2,7 +2,7 @@
 # Hypercurve
 
 ![Hybrid hypercurve](doc/png/hybrid.png)
-This hypercurve is a combination of 1/8 diocles curve, 1/8 toxoid curve, 2/8 mouse curve, and 4/8 gauss curve.
+This hypercurve is a combination of 1/8 diocles curve, 1/8 toxoid curve, 2/8 mouth curve, and 4/8 gauss curve.
 
 
 # What is it ? 
@@ -27,7 +27,7 @@ Every curve algorithm is different. In audio applications, we use to assign enve
 - Toxoid (aka duplicatrix_cubic)
 - Catenary (aka funicular)
 - Tightrope Walker curve  
-- Mouse curve
+- Mouth curve
 - Bicorn curve
 
 - Typed curves : inspired from Csounds [GEN16](http://www.csounds.com/manual/html/GEN16.html)
@@ -160,11 +160,14 @@ The resulting binaries will all be located in `bin` directory. On Windows, `lua_
 This must be considered when packaging the library to be embedded or used by another application.
 
 # TODO
+* Improve hc_resize to resize curve without creating new one (temp memory)
+* Documentation on hc_resize, and hc_cubic_spline_curve
+* Propagate resize to Lua, Faust and C++ api
+ 
 * Gen automatic number : does not take "f" statements into account
 * Waveform scaling : will only work if min_y = max_y : make a specific function
 * Expose random generators to frontends (Lua, Csound, Faust).
 * Tests on invert function (Lua and Csound)
-* Lua semantics : append "curve"  to curve_base methods and reflect this to Documentation
 * REAPER/Reascript -> see https://forum.cockos.com/showthread.php?p=2543755#post2543755
 * Lagrange interpolation for curve extraction ?
 * Hard one -> all curves allowing one sample processing (including cubic spline) to allow no-table processing.

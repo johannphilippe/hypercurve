@@ -193,7 +193,7 @@ public:
 };
 
 // See https://mathcurve.com/courbes2d/bouche/bouche.shtml
-class mouse_curve : public curve_base
+class mouth_curve : public curve_base
 {
 public:
     inline double process(double x) override
@@ -204,7 +204,7 @@ public:
 
     constexpr static const double a = 1.0;
 };
-using kiss_curve = mouse_curve;
+using kiss_curve = mouth_curve;
 
 // See https://mathcurve.com/courbes2d/bicorne/bicorne.shtml
 class bicorn_curve : public curve_base
