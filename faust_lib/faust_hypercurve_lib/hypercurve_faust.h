@@ -1231,7 +1231,7 @@ public:
 
     constexpr static const double a = 1.0;
 };
-using kiss_curve = mouse_curve;
+using kiss_curve = mouth_curve;
 
 // See https://mathcurve.com/courbes2d/bicorne/bicorne.shtml
 class bicorn_curve : public curve_base
@@ -1912,6 +1912,62 @@ public:
         process();
     }
 
+    // Concatenate constructor
+    // If definition is 0, it will be the sum of all curves
+    curve(size_t definition_, std::vector<curve*> to_concat)
+    {
+        double total_size = 0;
+        for(auto & it : to_concat)
+            total_size += it->definition;
+        if(definition_ == 0)
+        {
+            definition = total_size;
+        } else {
+            definition = definition_;
+        }
+
+        y_start = to_concat[0]->y_start;
+        samples.resize(definition);
+
+        if(definition_ == 0) {
+            // Full size, copy all samples
+            size_t index = 0;
+            for(auto &it : to_concat)
+            {
+                for(size_t i = 0; i < it->definition; ++i)
+                {
+                    samples[index] = it->samples[i];
+                    index++;
+                }
+            }
+        } else {
+            // Interpolate
+            double incr = double(total_size) / double(definition);
+            int passed = 0;
+            size_t current = 0;
+            for(size_t i = 0; i < definition; ++i)
+            {
+               double index = i * incr;
+               double cindex = index - passed;
+               if(cindex >= to_concat[current]->definition)
+               {
+                   passed += to_concat[current]->definition;
+                   current++;
+               }
+               if(cindex == 0)
+               {
+                   samples[i] = to_concat[current]->samples[0];
+               } else {
+                   int f = floor(cindex);
+                   int c = f + 1;
+                   double relative_x = relative_position(f, c, cindex);
+                   samples[i] = linear_interpolation(to_concat[current]->samples[f], to_concat[current]->samples[c], relative_x );
+               }
+
+            }
+        }
+    }
+
     curve() {}
     virtual  ~curve() {}
 
@@ -2111,6 +2167,9 @@ protected:
     memory_vector< segment > segs;
     memory_vector<double> samples;
 };
+
+inline curve concatenate(size_t new_size, std::vector<curve*> to_concat) {return curve(new_size, to_concat);}
+inline curve concat(size_t new_size, std::vector<curve*> to_concat) {return curve(new_size, to_concat);}
 
 }
 #endif // CORE_H
@@ -2401,7 +2460,7 @@ const char *get_curve_base_name (const curve_base_index b)
     case polynomial_i: return "polynomial";
     case user_defined_i: return "user_defined";
     case typed_i: return "typed";
-    case mouse_i: return "mouse";
+    case mouth_i: return "mouse";
     case bicorn_i: return "bicorn";
     case lagrange_polynomial_i: return "lagrange_polynomial";
     default: return "";
@@ -2499,7 +2558,7 @@ std::pair<std::vector<double>, std::vector<control_point>> random_args_generator
         return {{}, cps};
     };
     case typed_i: return {{random<double>(-10, 10)}, {}};
-    case mouse_i: return {{},{}};
+    case mouth_i: return {{},{}};
     case bicorn_i: return {{(double)random<int>(-1, 1)}, {}};
 
     default: return {{},{}};

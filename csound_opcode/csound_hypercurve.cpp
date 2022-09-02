@@ -87,7 +87,8 @@ public:
     void process_init() {it = samples.begin(); }
     void process_one(std::shared_ptr<segment> seg)
     {
-        seg->process(it, std::floor(seg->fractional_size * _definition));
+        //
+        seg->process(it, std::round(seg->fractional_size * _definition));
     }
 
     double *get_samples() {return samples.data();}
@@ -693,9 +694,11 @@ struct cs_gen : public csnd::Plugin<1, 67>, public cs_rt_hypercurve
   {
       csound->plugin_deinit(this);
       table = allocate_gen(csound->get_csound(), inargs[0], inargs[1]);
+      std::cout << "gen allocated with result : " << table.res << std::endl;
       if(table.res != 0) {
           return table.res;
       }
+
 
       _initialize(inargs[1], inargs[2], table.t_ptr);
       check_total_size();
@@ -743,6 +746,7 @@ struct cs_gen : public csnd::Plugin<1, 67>, public cs_rt_hypercurve
 
     int deinit()
     {
+        std::cout << "hypercurve deallocation for gen number : " << table.fno << std::endl;
         csound->get_csound()->FTDelete(csound->get_csound(), table.fno);
         curve_map.erase(table.fno);
         return OK;
@@ -759,7 +763,10 @@ struct cs_concat : public csnd::Plugin<1, 66>, public cs_rt_hypercurve
         size_t total_size = count_total_size();
         size_t size = (inargs[1] == 0) ? total_size : inargs[1];
         table = allocate_gen(csound->get_csound(), inargs[0], size);
-
+        std::cout << "gen allocated with result : " << table.res << std::endl;
+        if(table.res != 0) {
+            return table.res;
+        }
 
         t = get_gen(csound->get_csound(), inargs[2]);
         _initialize(size, *t.t_ptr, table.t_ptr);
@@ -841,6 +848,7 @@ struct cs_concat : public csnd::Plugin<1, 66>, public cs_rt_hypercurve
 
     int deinit()
     {
+        std::cout << "hypercurve deallocation for gen number : " << table.fno << std::endl;
         csound->get_csound()->FTDelete(csound->get_csound(), table.fno);
         curve_map.erase(table.fno);
         return OK;
