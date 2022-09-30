@@ -1410,7 +1410,7 @@ protected:
 //////////////////////////////////////////////////
 // Tightrope walker cure
 // https://mathcurve.com/courbes2d.gb/danseur/danseur.shtml
-// The more a is sperior to b, the more is is "straight"
+// The more a is superior to b, the more is is "straight"
 // abs(b) is the curve x max point
 // Also a must not be too close to b (undefined behavior) : a = 1.01 b = 1 is ok. a = 1.0001 is not.
 //////////////////////////////////////////////////
