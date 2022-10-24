@@ -1,13 +1,19 @@
 require("fileutils")
 require("os")
+exec_extention = ""
 extention = ""
 prefix = ""
+osname = ""
 if(OS.linux?) then 
+  osname = "linux"
   extension = ".so"
   prefix = "lib"
 elsif(OS.windows?) then 
+  osname = "windows"
+  exec_extention = ".exe"
   extension = ".dll"
 elsif(OS.mac?) then 
+  osname = "macos"
   extension = ".dylib"
   prefix = "lib"
 end
@@ -20,7 +26,7 @@ compiler_name = ARGV[1]
 
 
 # Platform name 
-package_name = "HYPERCURVE_" + RUBY_PLATFORM + "_" + compiler_name
+package_name = "HYPERCURVE_" + osname + "_" + compiler_name
 outfolder = File.join(path, package_name)
 
 puts "input path is " + path
@@ -39,17 +45,14 @@ Dir.foreach(path) do |filename|
     Dir.foreach(binpath) do |libname|
       next if libname == '.' or libname == '..'
       if(libname =~ /csound_hypercurve#{extension}/) then 
-        puts "csound"
         cs_path = File.join(outfolder, "Csound")
         FileUtils.mkdir_p(cs_path)
         FileUtils.cp( File.join(binpath, libname), cs_path)
       elsif (libname =~ /lua_hypercurve#{extension}/) then
-        puts "lua"
         lua_path = File.join(outfolder, "Lua")
         FileUtils.mkdir_p(lua_path)
         FileUtils.cp( File.join(binpath, libname), lua_path)
       elsif (libname =~ /luajit#{extension}/) then 
-        puts "luajit"
         lua_path = File.join(outfolder, "Lua")
         FileUtils.mkdir_p(lua_path)
         FileUtils.cp( File.join(binpath, libname), lua_path)
@@ -58,6 +61,10 @@ Dir.foreach(path) do |filename|
         hc_path = File.join(outfolder, "Hypercurve")
         FileUtils.mkdir_p(hc_path)
         FileUtils.cp( File.join(binpath, libname), hc_path)
+      elsif (libname =~ /luajit#{exec_extention}/) then
+        lua_path = File.join(outfolder, "Lua")
+        FileUtils.mkdir_p(lua_path)
+        FileUtils.cp( File.join(binpath, libname), lua_path)
       elsif(libname =~ /sndfile/) then
         lua_path = File.join(outfolder, "Lua")
         hc_path = File.join(outfolder, "Hypercurve")
