@@ -33,6 +33,7 @@ option(BUILD_CSOUND_OPCODE "Build Csound opcodes" ON)
 option(BUILD_LUA_MODULE "Build Lua module" ON)
 option(BUILD_LUAJIT "Build Luajit" OFF)
 option(BUILD_FAUST_LIB	"Build Faust library" ON)
+option(BUILD_ALL "Build all libraries" ON)
 option(SSE, "SSE support for FPNG" ON)
 
 #############################################
