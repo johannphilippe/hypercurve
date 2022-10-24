@@ -202,14 +202,16 @@ void unit_tests()
                  segment(1, 1, {
                      share(cubic_spline_curve({
                         point(0.2, 0.8),
-                        point(0.2, 0.2),
-                        point(0.3, 0.9),
-                        point(0.3, 1)
+                        point(0.3, 0.2),
+                        point(0.6, 0.9),
+                        point(0.8, 1)
                      }))
                  })
              });
     t.time_since_last("Cubic spline");
     c6.ascii_display("Cubic spline", "y = cspline(X)", '*');
+    c6.normalize_y(0.0, 1.0);
+    write_as_png(c6,  false, "cubic_spline.png");
 
     // CatmullRom
     t.reset();
@@ -298,10 +300,9 @@ void unit_tests()
     double hdiv = 9;
     curve c13(def, 0, {
                  segment(fraction(1, hdiv), 1, share(gauss_curve(5, 1))),
-                 segment(fraction(1, hdiv), 0.8, share(cissoid_curve(2))),
-                 segment(fraction(1, hdiv), 0.1, share(power_curve(9))),
+                 segment(fraction(1, hdiv), 0.5, share(cissoid_curve(0.51))),
+                 segment(fraction(1, hdiv), 0.3, share(power_curve(9))),
                  segment(fraction(6, hdiv), 0, share(cubic_bezier_curve(point(0.2, 0.9), point(0.8, 0.8))))
-                 //segment(fraction(6, hdiv), 0, share(cissoid_curve(1)))
               });
 
     c13.ascii_display("awesome hybrid curve", "A combination of gaussian, cissoid, power of 9, and cubic bezier curve", '*');
@@ -313,25 +314,29 @@ void unit_tests()
                 segment(fraction(1,2), 0, share(diocles_curve(1)))
               });
 
+    c14.ascii_display("Diocles", "diocles with 1", 'y');
+
     curve cheb(def, 0,
     {
                   segment(1, 1, share( chebyshev_modulator<amplitude_fixed>(1, 20)))
                });
 
-
+    cheb.ascii_display("chebyshev", "cheby", 'o');
 
     curve cat(def, 0,
     {
                  segment(1, 1, share(catenary_curve(0.1)))
               });
+    cat.ascii_display("catenary " , "experimental...", '@');
 
-    write_as_png(cat, false, "catenary_a1.png");
+    //write_as_png(cat, false, "catenary_a1.png");
     curve cat2(def, 0,
     {
                  segment(1, 1, share(catenary_curve(100000)))
               });
 
-    write_as_png(cat2, false, "catenary_a100");
+    cat2.ascii_display("catenary2 " , "experimental...", '@');
+    //write_as_png(cat2, false, "catenary_a100");
 
 
     curve tox(def, 0, {
@@ -400,6 +405,32 @@ void unit_tests()
     rescale_test.ascii_display("Rescaled", "rescaled 2/3", '*');
 
 
+
+    curve log(def, 0, {
+                 segment(fraction(1, 2), 1, share(logarithmic_curve())),
+                 segment(fraction(1, 2), 0, share(logarithmic_curve())),
+              });
+
+    log.ascii_display("logarithmic scaled", "not rescaled", '*');
+    write_as_png(log, false, "log.png");
+
+    // exponential as mirrored log
+    curve xp(def, 0, {
+                 segment(fraction(1, 2), 1, mirror(share(logarithmic_curve()))),
+                 segment(fraction(1, 2), 0, mirror(share(logarithmic_curve()))),
+              });
+
+    xp.ascii_display("exponential scaled", "not rescaled", '*');
+    write_as_png(xp, false, "log.png");
+
+    curve cmp(def, 0, {
+                 segment(fraction(1, 2), 1, share(power_curve(2))),
+                 segment(fraction(1, 2), 0, share(power_curve(2))),
+
+              });
+    cmp.ascii_display("cmp power", "not rescaled", '*');
+
+    check_equality(xp, cmp);
 }
 
 void random_generator_test()
@@ -508,9 +539,12 @@ int main()
 {
 
     //dummy_test();
-    //unit_tests();
-    random_generator_test();
+    unit_tests();
+    //random_generator_test();
+    //inversion_test();
+    //generate_curve_pictures();
 
+    /*
     auto crv = curve(16384, 0, {
                         segment(0.5, 1, share(diocles_curve(0.51))),
                         segment(0.5, 0, share(tightrope_walker_curve(1.1, 0.1)))
@@ -523,9 +557,8 @@ int main()
                          segment(0.5, 0, share(kiss_curve()))
                       });
     write_as_png(crv2, false, "tightrope_gauss_kiss.png");
-    //inversion_test();
+    */
 
-    //generate_curve_pictures();
 
     return 0;
 }

@@ -203,6 +203,49 @@ struct cs_diocles_curve : public csnd::Plugin<1, 1>
   int index;
 };
 
+
+struct cs_logarithmic_curve : public csnd::Plugin<1, 0>
+{
+  int init()
+  {
+      csound->plugin_deinit(this);
+      _curve = std::make_shared<logarithmic_curve>();
+      index = curve_base_map.map(_curve);
+      outargs[0] = index;
+      return OK;
+  }
+
+  int deinit()
+  {
+      curve_base_map.unmap(index);
+      return OK;
+  }
+
+  std::shared_ptr<logarithmic_curve> _curve;
+  int index;
+};
+
+struct cs_exponential_curve : public csnd::Plugin<1, 0>
+{
+  int init()
+  {
+      csound->plugin_deinit(this);
+      _curve = std::make_shared<exponential_curve>();
+      index = curve_base_map.map(_curve);
+      outargs[0] = index;
+      return OK;
+  }
+
+  int deinit()
+  {
+      curve_base_map.unmap(index);
+      return OK;
+  }
+
+  std::shared_ptr<exponential_curve> _curve;
+  int index;
+};
+
 struct cs_cubic_curve : public csnd::Plugin<1, 0>
 {
     int init()
@@ -636,7 +679,7 @@ struct cs_mirror_curve : public csnd::Plugin<1, 1>
       if(curve_base_map.find(int(inargs[0])) == curve_base_map.end())
           return NOTOK;
       std::shared_ptr<curve_base> c = curve_base_map[int(inargs[0])];
-      c->mirrored = true;
+      c->mirrored = !c->mirrored;
       outargs[0] = int(inargs[0]);
       return OK;
     }
@@ -1062,7 +1105,7 @@ struct cs_random_curve_composer : public csnd::Plugin<1, 7>,  public cs_rt_hyper
 #include <modload.h>
 
 void csnd::on_load(Csound *csound) {
-    std::cout << "loading csound hypercurve" << std::endl;
+    std::cout << "💫 Loading HYPERCURVE 💫" << std::endl;
     // Helpers
     csnd::plugin<cs_normalize_curve>(csound, "hc_normalize", "", "iii", csnd::thread::i);
 
@@ -1082,6 +1125,8 @@ void csnd::on_load(Csound *csound) {
 
     // Curve types
     csnd::plugin<cs_diocles_curve>(csound, "hc_diocles_curve", "i", "i", csnd::thread::i);
+    csnd::plugin<cs_logarithmic_curve>(csound, "hc_logarithmic_curve", "i", "", csnd::thread::i);
+    csnd::plugin<cs_exponential_curve>(csound, "hc_exponential_curve", "i", "", csnd::thread::i);
     csnd::plugin<cs_linear_curve>(csound, "hc_linear_curve", "i", "", csnd::thread::i);
     csnd::plugin<cs_cubic_curve>(csound, "hc_cubic_curve", "i", "", csnd::thread::i);
     csnd::plugin<cs_power>(csound, "hc_power_curve", "i", "i", csnd::thread::i);

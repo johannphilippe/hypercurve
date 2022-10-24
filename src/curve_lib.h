@@ -105,13 +105,43 @@ inline std::shared_ptr<curve_base> invert(std::shared_ptr<curve_base> cb)
 
 inline std::shared_ptr<curve_base> mirror(std::shared_ptr<curve_base> cb)
 {
-    cb->mirrored = true;
+    cb->mirrored = !cb->mirrored; //true;
     return cb;
 }
 
 //////////////////////////////////////////////////
 // Curve Library
 //////////////////////////////////////////////////
+
+
+
+//////////////////////////////////////////////////
+// Logarithmic and exponential approximations
+//////////////////////////////////////////////////
+class logarithmic_curve : public curve_base
+{
+public:
+    logarithmic_curve()
+    {
+    }
+    inline double process(double x) override
+    {
+        return scaled_log_point<double>(x + offset, offset, 1 + offset) / (1 + offset);
+    }
+
+    constexpr static const double offset = 0.1;
+};
+
+class exponential_curve : public logarithmic_curve
+{
+public:
+    exponential_curve()
+    {
+        mirrored = !mirrored;
+    }
+};
+
+
 
 class diocles_curve : public curve_base
 {
@@ -652,29 +682,46 @@ private:
 class cubic_spline_curve : public virtual curve_base
 {
 public:
+
+    // Internal allocator for Spline aux mem
     cubic_spline_curve(std::vector<point> cp)
-        : _control_points( /* std::move(cp) */ cp.size() + 2 )
+        : _control_points( cp.size() + 2 )
     {
         if(_control_points.size() < 3)
             throw(std::runtime_error("Control point list size must be >= 3"));
         std::move(cp.begin(), cp.end(), _control_points.begin() + 1);
+        int n = _control_points.size() - 1;
+        _spline_mem_size = (5 * n) + (3 * ( n + 1 )) + (n - 1)  + ( (n - 1) * n);
+        _spline_memory.resize(_spline_mem_size);
+        _spline_memory_ptr = _spline_memory.data();
     }
 
+    // Internal allocator for Spline aux mem
     cubic_spline_curve(memory_vector<point> cp)
-        : _control_points( /* std::move(cp) */ cp.size() + 2 )
+        : _control_points(  cp.size() + 2 )
     {
         if(_control_points.size() < 3)
             throw(std::runtime_error("Control point list size must be >= 3"));
+
+        int n = _control_points.size() - 1;
+        _spline_mem_size = (5 * n) + (3 * ( n + 1 )) + (n - 1)  + ( (n - 1) * n);
+        _spline_memory.resize(_spline_mem_size);
+        _spline_memory_ptr = _spline_memory.data();
         std::move(cp.begin(), cp.end(), _control_points.begin() + 1);
     }
 
+
+    // External allocator constructor
     cubic_spline_curve(point *pts, size_t pts_size, double *spline_memory, size_t spline_mem_size)
         : _control_points(pts, pts_size)
-        , _spline_memory(spline_memory)
+        , _spline_memory_ptr(spline_memory)
         , _spline_mem_size(spline_mem_size)
     {
         if(pts_size < 3)
             throw(std::runtime_error("Control point list size must be >= 3"));
+    }
+
+    ~cubic_spline_curve(){
     }
 
     void on_init() override
@@ -688,10 +735,7 @@ public:
     {
         memory_vector<double>::iterator begin_ptr = it;
         double *data_ptr = it.get();
-        //std::vector<double>& res = spl.interpolate_from_points(_control_points, size, point{1.0, 1.0});
-        spl.process(data_ptr, definition, _control_points, _spline_memory, _spline_mem_size);
-
-
+        spl.process(data_ptr, definition, _control_points, _spline_memory_ptr, _spline_mem_size);
         double max = 0.0;
         for(size_t i = 0; i < size; i++)
         {
@@ -699,7 +743,6 @@ public:
             if(inverted) *it = process_invert(hypercurve::fraction(i, size), *it);
             ++it;
         }
-
         post_processing(begin_ptr);
         return max;
     }
@@ -707,7 +750,11 @@ public:
 private:
     cubic_spline<double> spl;
     memory_vector<point> _control_points;
-    double * _spline_memory;
+
+    // Vector, automatically destroyed when using internal allocator
+    std::vector<double> _spline_memory;
+    // Ptr to allocated memory, whether it is allocated externally or internally
+    double* _spline_memory_ptr = nullptr;
     size_t _spline_mem_size;
 };
 

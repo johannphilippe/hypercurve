@@ -69,6 +69,8 @@ static const int max_segments = 64;
 static int hc_diocles_curve(double a) {return faust_curve_base_map.map(share(diocles_curve(a)));}
 static int hc_linear_curve(int) {return faust_curve_base_map.map(share(linear_curve()));}
 static int hc_cubic_curve(int) {return faust_curve_base_map.map(share(cubic_curve()));}
+static int hc_logarithmic_curve(int) {return faust_curve_base_map.map(share(logarithmic_curve()));}
+static int hc_exponential_curve(int) {return faust_curve_base_map.map(share(exponential_curve()));}
 static int hc_power_curve(double exponent) {return faust_curve_base_map.map(share(power_curve(exponent)));}
 static int hc_hanning_curve(int) {return faust_curve_base_map.map(share(hanning_curve()));}
 static int hc_hamming_curve(int) {return faust_curve_base_map.map(share(hamming_curve()));}

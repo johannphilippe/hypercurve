@@ -225,7 +225,7 @@ inline double limit(double min, double max, double v)
 template<typename T>
 inline std::shared_ptr<T> share(T t)
 {
-    return std::make_shared<T>(t);
+    return std::make_shared<T>(std::move(t));
 }
 
 struct point
@@ -294,7 +294,7 @@ inline double cubic_root(double x) {return std::pow(x, 1.0 / 3.0);}
 inline double squared(double x) {return x*x;}
 inline double cubed(double x) {return x*x*x;}
 
-// Linear or exp interpolation, based on Csound GEN16 algorithm
+// Typed curve interpolation, based on Csound GEN16 algorithm
 template<typename T>
 inline T log_exp_point(T beg, T ending, int dur, int idx, double typ)
 {
@@ -304,6 +304,12 @@ inline T log_exp_point(T beg, T ending, int dur, int idx, double typ)
         double type = limit(-10, 10, typ);
         return beg + (ending - beg) * (1 - std::exp(idx * type / (dur - 1))) / (1 - std::exp(type));
     }
+}
+
+// Scaled logarithm
+template<typename T>
+inline T scaled_log_point(T val, T min, T max) {
+    return ((std::log(val) - std::log(min)) / (std::log(max) - std::log(min))) * max;
 }
 
 // returns x between 0 and 1 (1 being x == x2, 0 being x == x1)
@@ -383,7 +389,15 @@ struct memory_vector
       T *ptr;
    };
 
-   memory_vector() {}
+   memory_vector() {
+           _size = 0; _data = nullptr;
+   };
+   memory_vector(memory_vector<T>& other)
+   {
+       _size = other._size;
+       _data = new T[_size];
+       std::copy(other._data, other._data + other._size, _data );
+   }
    memory_vector(const memory_vector<T>& other)
    {
        _size = other._size;
@@ -395,10 +409,11 @@ struct memory_vector
       _size = size_;
       _data = new T[_size];
    }
-   memory_vector(T *ptr, size_t size_)
+   memory_vector(T *ptr, size_t size_, bool owns_data = true)
    {
       _size = size_;
       _data = ptr;
+      _owns_data = owns_data;
    }
 
    // Copy std::vector
@@ -420,7 +435,8 @@ struct memory_vector
 
     ~memory_vector()
    {
-       delete[] _data;
+       if(_owns_data)
+           delete[] _data;
    }
 
    // operators
@@ -429,10 +445,11 @@ struct memory_vector
        return memory_vector<T>(other);
    }
 
-   void init(T *ptr, size_t size_)
+   void init(T *ptr, size_t size_, bool owns_data = true)
    {
        _size = size_;
        _data = ptr;
+       _owns_data = owns_data;
    }
 
    void resize(size_t size_)
@@ -471,6 +488,8 @@ struct memory_vector
 
    T *_data;
    size_t _size;
+
+   bool _owns_data = true;
 };
 
 inline bool sort_complex(pnt p1, pnt p2)
@@ -709,44 +728,43 @@ public:
     void process(double *ptr, size_t size, memory_vector<control_point> &pts, double * spline_memory, size_t spline_mem_size)
     {
 
-        interp.init(ptr, size);
+        interp.init(ptr, size, false);
         n = (pts.size() - 1);
         _spline_memory =  spline_memory;
         _spline_mem_size = (spline_mem_size);
         _spl_mem_incr = (spline_memory);
-        x.init(spl_memory_incr(n + 1), n + 1);
-        y.init(spl_memory_incr(n + 1), n + 1);
-        a.init(spl_memory_incr(n), n);
-        b.init(spl_memory_incr(n), n);
-        c.init(spl_memory_incr(n), n);
-        d.init(spl_memory_incr(n), n);
-        h.init(spl_memory_incr(n), n);
-        sig.init(spl_memory_incr(n + 1), n + 1);
-        sig_temp.init(spl_memory_incr(n - 1), n - 1);
-        tridiagonal.init( _spl_mem_incr, (n - 1) * n);
+        x.init(spl_memory_incr(n + 1), n + 1, false);
+        y.init(spl_memory_incr(n + 1), n + 1, false);
+        a.init(spl_memory_incr(n), n, false);
+        b.init(spl_memory_incr(n), n, false);
+        c.init(spl_memory_incr(n), n, false);
+        d.init(spl_memory_incr(n), n, false);
+        h.init(spl_memory_incr(n), n, false);
+        sig.init(spl_memory_incr(n + 1), n + 1, false);
+        sig_temp.init(spl_memory_incr(n - 1), n - 1, false);
+        tridiagonal.init( _spl_mem_incr, (n - 1) * n, false);
 
         interpolate_from_points(pts, size);
 
     }
 
     cubic_spline() {}
-
     cubic_spline(double *ptr, size_t size, memory_vector<control_point> &pts, double * spline_memory, size_t spline_mem_size)
-        : interp(ptr, size)
+        : interp(ptr, size, false)
         , n(pts.size() - 1)
         , _spline_memory(spline_memory)
         , _spline_mem_size(spline_mem_size)
         , _spl_mem_incr(spline_memory)
-        , x(spl_memory_incr(n + 1), n + 1)
-        , y(spl_memory_incr(n + 1), n + 1)
-        , a(spl_memory_incr(n), n)
-        , b(spl_memory_incr(n), n)
-        , c(spl_memory_incr(n), n)
-        , d(spl_memory_incr(n), n)
-        , h(spl_memory_incr(n), n)
-        , sig(spl_memory_incr(n + 1), n + 1)
-        , sig_temp(spl_memory_incr(n - 1), n - 1)
-        , tridiagonal( _spl_mem_incr, (n - 1) * n)
+        , x(spl_memory_incr(n + 1), n + 1, false)
+        , y(spl_memory_incr(n + 1), n + 1, false)
+        , a(spl_memory_incr(n), n, false)
+        , b(spl_memory_incr(n), n, false)
+        , c(spl_memory_incr(n), n, false)
+        , d(spl_memory_incr(n), n, false)
+        , h(spl_memory_incr(n), n, false)
+        , sig(spl_memory_incr(n + 1), n + 1, false)
+        , sig_temp(spl_memory_incr(n - 1), n - 1, false)
+        , tridiagonal( _spl_mem_incr, (n - 1) * n, false)
     {
         interpolate_from_points(pts, size);
     }
@@ -898,10 +916,12 @@ public:
 
     void  reset(int n, memory_vector<point> &p)
     {
+        /*
         sn(n);
         sn(x.size());
         sn(y.size());
         sn(p.size());
+        */
         for(size_t  i = 0; i < p.size(); i++)
         {
             x[i] = p[i].x;
@@ -977,7 +997,6 @@ protected:
     size_t _spline_mem_size;
 
     memory_vector<T> x, y, a, b, c, d, sig, sig_temp, h;
-    //memory_vector< memory_vector<T> > tridiagonal;
     memory_vector<T> tridiagonal;
 };
 
@@ -1133,13 +1152,39 @@ inline std::shared_ptr<curve_base> invert(std::shared_ptr<curve_base> cb)
 
 inline std::shared_ptr<curve_base> mirror(std::shared_ptr<curve_base> cb)
 {
-    cb->mirrored = true;
+    cb->mirrored = !cb->mirrored; //true;
     return cb;
 }
 
 //////////////////////////////////////////////////
 // Curve Library
 //////////////////////////////////////////////////
+
+//////////////////////////////////////////////////
+// Logarithmic and exponential approximations
+//////////////////////////////////////////////////
+class logarithmic_curve : public curve_base
+{
+public:
+    logarithmic_curve()
+    {
+    }
+    inline double process(double x) override
+    {
+        return scaled_log_point<double>(x + offset, offset, 1 + offset) / (1 + offset);
+    }
+
+    constexpr static const double offset = 0.1;
+};
+
+class exponential_curve : public logarithmic_curve
+{
+public:
+    exponential_curve()
+    {
+        mirrored = !mirrored;
+    }
+};
 
 class diocles_curve : public curve_base
 {
@@ -1673,29 +1718,45 @@ private:
 class cubic_spline_curve : public virtual curve_base
 {
 public:
+
+    // Internal allocator for Spline aux mem
     cubic_spline_curve(std::vector<point> cp)
-        : _control_points( /* std::move(cp) */ cp.size() + 2 )
+        : _control_points( cp.size() + 2 )
     {
         if(_control_points.size() < 3)
             throw(std::runtime_error("Control point list size must be >= 3"));
         std::move(cp.begin(), cp.end(), _control_points.begin() + 1);
+        int n = _control_points.size() - 1;
+        _spline_mem_size = (5 * n) + (3 * ( n + 1 )) + (n - 1)  + ( (n - 1) * n);
+        _spline_memory.resize(_spline_mem_size);
+        _spline_memory_ptr = _spline_memory.data();
     }
 
+    // Internal allocator for Spline aux mem
     cubic_spline_curve(memory_vector<point> cp)
-        : _control_points( /* std::move(cp) */ cp.size() + 2 )
+        : _control_points(  cp.size() + 2 )
     {
         if(_control_points.size() < 3)
             throw(std::runtime_error("Control point list size must be >= 3"));
+
+        int n = _control_points.size() - 1;
+        _spline_mem_size = (5 * n) + (3 * ( n + 1 )) + (n - 1)  + ( (n - 1) * n);
+        _spline_memory.resize(_spline_mem_size);
+        _spline_memory_ptr = _spline_memory.data();
         std::move(cp.begin(), cp.end(), _control_points.begin() + 1);
     }
 
+    // External allocator constructor
     cubic_spline_curve(point *pts, size_t pts_size, double *spline_memory, size_t spline_mem_size)
         : _control_points(pts, pts_size)
-        , _spline_memory(spline_memory)
+        , _spline_memory_ptr(spline_memory)
         , _spline_mem_size(spline_mem_size)
     {
         if(pts_size < 3)
             throw(std::runtime_error("Control point list size must be >= 3"));
+    }
+
+    ~cubic_spline_curve(){
     }
 
     void on_init() override
@@ -1709,9 +1770,7 @@ public:
     {
         memory_vector<double>::iterator begin_ptr = it;
         double *data_ptr = it.get();
-        //std::vector<double>& res = spl.interpolate_from_points(_control_points, size, point{1.0, 1.0});
-        spl.process(data_ptr, definition, _control_points, _spline_memory, _spline_mem_size);
-
+        spl.process(data_ptr, definition, _control_points, _spline_memory_ptr, _spline_mem_size);
         double max = 0.0;
         for(size_t i = 0; i < size; i++)
         {
@@ -1719,7 +1778,6 @@ public:
             if(inverted) *it = process_invert(hypercurve::fraction(i, size), *it);
             ++it;
         }
-
         post_processing(begin_ptr);
         return max;
     }
@@ -1727,7 +1785,11 @@ public:
 private:
     cubic_spline<double> spl;
     memory_vector<point> _control_points;
-    double * _spline_memory;
+
+    // Vector, automatically destroyed when using internal allocator
+    std::vector<double> _spline_memory;
+    // Ptr to allocated memory, whether it is allocated externally or internally
+    double* _spline_memory_ptr = nullptr;
     size_t _spline_mem_size;
 };
 
@@ -1982,15 +2044,30 @@ public:
 
     void process()
     {
+       size_t full_sz = 0;
        memory_vector<double>::iterator it = samples.begin();
         for(size_t i = 0; i < segs.size(); i++)
         {
             // For each segment, we must give it a real size (size_t), and an iterator position
             size_t seg_size = std::round(segs[i].fractional_size * definition);
+            full_sz += seg_size;
             double seg_max = segs[i].process(it, seg_size);
             if(std::abs(seg_max)  > max) max = std::abs(seg_max);
         }
         find_extremeness();
+        if(full_sz != definition)
+        {
+            // If only one sample difference, pad with 0
+            if( (definition - full_sz) <= 1)
+            {
+                samples[definition - 1] = 0;
+            } else {
+                throw(std::runtime_error("Number of processed samples is different from definition - "
+                                     + std::to_string(full_sz)
+                                     + " / "
+                                     + std::to_string(definition)));
+            }
+        }
     }
 
     void normalize_y(double target_min, double target_max)
@@ -2667,6 +2744,8 @@ static const int max_segments = 64;
 static int hc_diocles_curve(double a) {return faust_curve_base_map.map(share(diocles_curve(a)));}
 static int hc_linear_curve(int) {return faust_curve_base_map.map(share(linear_curve()));}
 static int hc_cubic_curve(int) {return faust_curve_base_map.map(share(cubic_curve()));}
+static int hc_logarithmic_curve(int) {return faust_curve_base_map.map(share(logarithmic_curve()));}
+static int hc_exponential_curve(int) {return faust_curve_base_map.map(share(exponential_curve()));}
 static int hc_power_curve(double exponent) {return faust_curve_base_map.map(share(power_curve(exponent)));}
 static int hc_hanning_curve(int) {return faust_curve_base_map.map(share(hanning_curve()));}
 static int hc_hamming_curve(int) {return faust_curve_base_map.map(share(hamming_curve()));}

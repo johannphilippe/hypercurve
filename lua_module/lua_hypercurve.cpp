@@ -144,6 +144,22 @@ LUA_EXPORT int luahc_cubic_curve(lua_State *lua)
     return 1;
 }
 
+LUA_EXPORT int luahc_logarithmic_curve(lua_State *lua)
+{
+    lua_curve_helper(lua, new hypercurve::logarithmic_curve);
+    luaL_getmetatable(lua, "hypercurve.curve_base");
+    lua_setmetatable(lua, -2);
+    return 1;
+}
+
+LUA_EXPORT int luahc_exponential_curve(lua_State *lua)
+{
+    lua_curve_helper(lua, new hypercurve::exponential_curve);
+    luaL_getmetatable(lua, "hypercurve.curve_base");
+    lua_setmetatable(lua, -2);
+    return 1;
+}
+
 LUA_EXPORT int luahc_power_curve(lua_State *lua)
 {
     lua_curve_helper(lua, new hypercurve::power_curve(lua_tonumber(lua, 1)));
@@ -658,6 +674,8 @@ LUA_EXPORT const luaL_Reg luahc_static_meth[] =
     // Add curve suffix
     {"linear_curve", luahc_curve_base},
     {"cubic_curve", luahc_cubic_curve},
+    {"logarithmic_curve", luahc_logarithmic_curve},
+    {"exponential_curve", luahc_exponential_curve},
     {"power_curve", luahc_power_curve},
     {"diocles_curve", luahc_cissoid_curve},
     {"hanning_curve", luahc_hanning_curve},

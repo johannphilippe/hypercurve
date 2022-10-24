@@ -33,44 +33,44 @@ public:
     void process(double *ptr, size_t size, memory_vector<control_point> &pts, double * spline_memory, size_t spline_mem_size)
     {
 
-        interp.init(ptr, size);
+        interp.init(ptr, size, false);
         n = (pts.size() - 1);
         _spline_memory =  spline_memory;
         _spline_mem_size = (spline_mem_size);
         _spl_mem_incr = (spline_memory);
-        x.init(spl_memory_incr(n + 1), n + 1);
-        y.init(spl_memory_incr(n + 1), n + 1);
-        a.init(spl_memory_incr(n), n);
-        b.init(spl_memory_incr(n), n);
-        c.init(spl_memory_incr(n), n);
-        d.init(spl_memory_incr(n), n);
-        h.init(spl_memory_incr(n), n);
-        sig.init(spl_memory_incr(n + 1), n + 1);
-        sig_temp.init(spl_memory_incr(n - 1), n - 1);
-        tridiagonal.init( _spl_mem_incr, (n - 1) * n);
+        x.init(spl_memory_incr(n + 1), n + 1, false);
+        y.init(spl_memory_incr(n + 1), n + 1, false);
+        a.init(spl_memory_incr(n), n, false);
+        b.init(spl_memory_incr(n), n, false);
+        c.init(spl_memory_incr(n), n, false);
+        d.init(spl_memory_incr(n), n, false);
+        h.init(spl_memory_incr(n), n, false);
+        sig.init(spl_memory_incr(n + 1), n + 1, false);
+        sig_temp.init(spl_memory_incr(n - 1), n - 1, false);
+        tridiagonal.init( _spl_mem_incr, (n - 1) * n, false);
 
         interpolate_from_points(pts, size);
 
     }
 
-    cubic_spline() {}
 
+    cubic_spline() {}
     cubic_spline(double *ptr, size_t size, memory_vector<control_point> &pts, double * spline_memory, size_t spline_mem_size)
-        : interp(ptr, size)
+        : interp(ptr, size, false)
         , n(pts.size() - 1)
         , _spline_memory(spline_memory)
         , _spline_mem_size(spline_mem_size)
         , _spl_mem_incr(spline_memory)
-        , x(spl_memory_incr(n + 1), n + 1)
-        , y(spl_memory_incr(n + 1), n + 1)
-        , a(spl_memory_incr(n), n)
-        , b(spl_memory_incr(n), n)
-        , c(spl_memory_incr(n), n)
-        , d(spl_memory_incr(n), n)
-        , h(spl_memory_incr(n), n)
-        , sig(spl_memory_incr(n + 1), n + 1)
-        , sig_temp(spl_memory_incr(n - 1), n - 1)
-        , tridiagonal( _spl_mem_incr, (n - 1) * n)
+        , x(spl_memory_incr(n + 1), n + 1, false)
+        , y(spl_memory_incr(n + 1), n + 1, false)
+        , a(spl_memory_incr(n), n, false)
+        , b(spl_memory_incr(n), n, false)
+        , c(spl_memory_incr(n), n, false)
+        , d(spl_memory_incr(n), n, false)
+        , h(spl_memory_incr(n), n, false)
+        , sig(spl_memory_incr(n + 1), n + 1, false)
+        , sig_temp(spl_memory_incr(n - 1), n - 1, false)
+        , tridiagonal( _spl_mem_incr, (n - 1) * n, false)
     {
         interpolate_from_points(pts, size);
     }
@@ -223,10 +223,12 @@ public:
 
     void  reset(int n, memory_vector<point> &p)
     {
+        /*
         sn(n);
         sn(x.size());
         sn(y.size());
         sn(p.size());
+        */
         for(size_t  i = 0; i < p.size(); i++)
         {
             x[i] = p[i].x;
@@ -303,7 +305,6 @@ protected:
     size_t _spline_mem_size;
 
     memory_vector<T> x, y, a, b, c, d, sig, sig_temp, h;
-    //memory_vector< memory_vector<T> > tridiagonal;
     memory_vector<T> tridiagonal;
 };
 

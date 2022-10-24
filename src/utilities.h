@@ -71,7 +71,7 @@ inline double limit(double min, double max, double v)
 template<typename T>
 inline std::shared_ptr<T> share(T t)
 {
-    return std::make_shared<T>(t);
+    return std::make_shared<T>(std::move(t));
 }
 
 struct point
@@ -140,7 +140,7 @@ inline double cubic_root(double x) {return std::pow(x, 1.0 / 3.0);}
 inline double squared(double x) {return x*x;}
 inline double cubed(double x) {return x*x*x;}
 
-// Linear or exp interpolation, based on Csound GEN16 algorithm
+// Typed curve interpolation, based on Csound GEN16 algorithm
 template<typename T>
 inline T log_exp_point(T beg, T ending, int dur, int idx, double typ)
 {
@@ -150,6 +150,13 @@ inline T log_exp_point(T beg, T ending, int dur, int idx, double typ)
         double type = limit(-10, 10, typ);
         return beg + (ending - beg) * (1 - std::exp(idx * type / (dur - 1))) / (1 - std::exp(type));
     }
+}
+
+
+// Scaled logarithm
+template<typename T>
+inline T scaled_log_point(T val, T min, T max) {
+    return ((std::log(val) - std::log(min)) / (std::log(max) - std::log(min))) * max;
 }
 
 // returns x between 0 and 1 (1 being x == x2, 0 being x == x1)
@@ -229,7 +236,15 @@ struct memory_vector
       T *ptr;
    };
 
-   memory_vector() {}
+   memory_vector() {
+           _size = 0; _data = nullptr;
+   };
+   memory_vector(memory_vector<T>& other)
+   {
+       _size = other._size;
+       _data = new T[_size];
+       std::copy(other._data, other._data + other._size, _data );
+   }
    memory_vector(const memory_vector<T>& other)
    {
        _size = other._size;
@@ -241,10 +256,11 @@ struct memory_vector
       _size = size_;
       _data = new T[_size];
    }
-   memory_vector(T *ptr, size_t size_)
+   memory_vector(T *ptr, size_t size_, bool owns_data = true)
    {
       _size = size_;
       _data = ptr;
+      _owns_data = owns_data;
    }
 
    // Copy std::vector
@@ -266,7 +282,8 @@ struct memory_vector
 
     ~memory_vector()
    {
-       delete[] _data;
+       if(_owns_data)
+           delete[] _data;
    }
 
    // operators
@@ -275,10 +292,11 @@ struct memory_vector
        return memory_vector<T>(other);
    }
 
-   void init(T *ptr, size_t size_)
+   void init(T *ptr, size_t size_, bool owns_data = true)
    {
        _size = size_;
        _data = ptr;
+       _owns_data = owns_data;
    }
 
    void resize(size_t size_)
@@ -317,6 +335,8 @@ struct memory_vector
 
    T *_data;
    size_t _size;
+
+   bool _owns_data = true;
 };
 
 

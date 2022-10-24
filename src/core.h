@@ -140,15 +140,30 @@ public:
 
     void process()
     {
+       size_t full_sz = 0;
        memory_vector<double>::iterator it = samples.begin();
         for(size_t i = 0; i < segs.size(); i++)
         {
             // For each segment, we must give it a real size (size_t), and an iterator position
             size_t seg_size = std::round(segs[i].fractional_size * definition);
+            full_sz += seg_size;
             double seg_max = segs[i].process(it, seg_size);
             if(std::abs(seg_max)  > max) max = std::abs(seg_max);
         }
         find_extremeness();
+        if(full_sz != definition)
+        {
+            // If only one sample difference, pad with 0
+            if( (definition - full_sz) <= 1)
+            {
+                samples[definition - 1] = 0;
+            } else {
+                throw(std::runtime_error("Number of processed samples is different from definition - "
+                                     + std::to_string(full_sz)
+                                     + " / "
+                                     + std::to_string(definition)));
+            }
+        }
     }
 
     void normalize_y(double target_min, double target_max)
