@@ -41,18 +41,6 @@ if(MACOS_UNIVERSAL)
 endif()
 
 #############################################
-##### 	Build libsndfile
-#############################################
-set(ENABLE_EXTERNAL_LIBS OFF CACHE BOOL "Build libsndfile external libs")
-set(BUILD_SHARED_LIBS ON CACHE BOOL "Build Shared libs")
-set(BUILD_EXAMPLES OFF CACHE BOOL "Not Building Examples for libsndfile")
-set(BUILD_PROGRAMS OFF CACHE BOOL "Not Building Programs for libsndfile")
-set(BUILD_TESTING OFF CACHE BOOL "Not Build testing for libsndfile")
-#set(ENABLE_STATIC_RUNTIME ON CACHE BOOL "Enable static runtime")
-add_subdirectory(libsndfile)
-target_compile_options(sndfile PRIVATE -fPIC)
-
-#############################################
 ##### 	Build Hypercurve library
 #############################################
 set(HYPERCURVE_SOURCES
@@ -125,7 +113,6 @@ target_include_directories(hypercurve_test PUBLIC
 
 target_link_libraries(hypercurve_test
    hypercurve_static
-   sndfile
    )
 
 #############################################
@@ -143,7 +130,6 @@ if(BUILD_LUA_MODULE OR BUILD_ALL)
 
    message(STATUS "Building Lua module ON")
    add_subdirectory(lua_module)
-   #target_link_libraries(lua_hypercurve PUBLIC hypercurve_static sndfile)
 endif()
 
 #############################################

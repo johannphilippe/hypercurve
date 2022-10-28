@@ -451,19 +451,7 @@ LUA_EXPORT int luahc_concatenate(lua_State *lua)
 
 ///////////////////////////////////////////:
 // Curve methods
-// Syntax : hypercurve.write_as_wav(string path, curve c)
 ///////////////////////////////////////////:
-#include"sndfile.hh"
-LUA_EXPORT int luahc_curve_write_as_wav(lua_State *lua)
-{
-    hypercurve::curve *crv = *(hypercurve::curve **) luaL_checkudata(lua, 1, "hypercurve.curve");
-    std::string path = lua_tostring(lua, 2);
-    SndfileHandle sf(path , SFM_WRITE, SF_FORMAT_WAV | SF_FORMAT_PCM_24, 1, 48000);
-
-    sf.writef(crv->get_samples(), crv->get_definition());
-    return 0;
-}
-
 LUA_EXPORT int luahc_curve_ascii_display(lua_State *lua)
 {
     hypercurve::curve *crv = *(hypercurve::curve **) luaL_checkudata(lua, 1, "hypercurve.curve");
@@ -614,7 +602,6 @@ LUA_EXPORT const luaL_Reg luahc_curve_class_meth[] =
 {
     {"ascii_display" ,luahc_curve_ascii_display },
     {"write_as_png" ,luahc_curve_write_png },
-    {"write_as_wav" ,luahc_curve_write_as_wav },
     {"normalize", luahc_curve_normalize_y},
     {"get_samples", luahc_curve_get_samples},
     {"get_sample_at", luahc_curve_get_sample_at},
@@ -670,6 +657,8 @@ LUA_EXPORT const luaL_Reg luahc_static_meth[] =
     {"catmull_rom", luahc_catmull_rom_spline_curve},
     {"lagrange_polynomial", luahc_lagrange_interpolation_curve},
     {"polynomial", luahc_polynomial_curve},
+    {"typed", luahc_typed_curve},
+    {"user_defined", luahc_user_defined_curve},
 
     // Add curve suffix
     {"linear_curve", luahc_curve_base},
@@ -693,17 +682,13 @@ LUA_EXPORT const luaL_Reg luahc_static_meth[] =
     {"catmull_rom_curve", luahc_catmull_rom_spline_curve},
     {"lagrange_polynomial_curve", luahc_lagrange_interpolation_curve},
     {"polynomial_curve", luahc_polynomial_curve},
-
-
-    {"typed", luahc_typed_curve},
-    {"user_defined", luahc_user_defined_curve},
-
+    {"typed_curve", luahc_typed_curve},
+    {"user_defined_curve", luahc_user_defined_curve},
 
     // Helpers
     {"invert", luahc_invert_curve},
     {"mirror", luahc_mirror_curve},
     {"concatenate", luahc_concatenate},
-
 
     // Aliases
     {"cissoid", luahc_cissoid_curve},
@@ -721,10 +706,7 @@ LUA_EXPORT const luaL_Reg luahc_static_meth[] =
     {"kiss_curve", luahc_mouse_curve},
     {"cocked_hat_curve", luahc_bicorn_curve},
 
-
     {"concat", luahc_concatenate},
-
-
 
     { NULL      ,NULL      }
 };

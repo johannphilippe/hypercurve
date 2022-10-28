@@ -158,7 +158,7 @@ public:
             {
                 samples[definition - 1] = 0;
             } else {
-                throw(std::runtime_error("Number of processed samples is different from definition - "
+                (std::runtime_error("Number of processed samples is different from definition - "
                                      + std::to_string(full_sz)
                                      + " / "
                                      + std::to_string(definition)));

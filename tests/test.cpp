@@ -1,5 +1,4 @@
 #include <iostream>
-#include<sndfile.hh>
 #include<memory.h>
 #include"../src/hypercurve.h"
 #include"sndfile.hh"
@@ -133,9 +132,6 @@ void unit_tests()
 {
     int def = 16384;
 
-    const int fmt = SF_FORMAT_WAV | SF_FORMAT_PCM_32;
-    SndfileHandle sf("test_hypercurve_HYBRID.wav", SFM_WRITE, fmt, 1, 48000);
-    SndfileHandle sf2("test_hypercurveGauss2.wav", SFM_WRITE, fmt, 1, 48000);
 
     timer t;
 
@@ -369,10 +365,6 @@ void unit_tests()
     tightrope2.ascii_display("tightrope walker2q", "trw", '*');
     write_as_png(tightrope2, true, "tightrope2.png");
     check_equality(tightrope, tightrope2);
-
-    sf.writef(c13.get_samples(), def);
-    sf2.writef(c10.get_samples(), def);
-
 
     curve polynomial(def, 0, {
                          segment(1, 1, share(polynomial_curve( {1.34, -1, -0.5, 0.1}) ))

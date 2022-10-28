@@ -35,7 +35,7 @@ target_include_directories(lua_hypercurve PUBLIC
    ${CMAKE_BINARY_DIR}/exports
    )
 
-target_link_libraries(lua_hypercurve PUBLIC ${LUA_LIBRARIES} hypercurve_static sndfile)
+target_link_libraries(lua_hypercurve PUBLIC ${LUA_LIBRARIES} hypercurve_static)
 target_compile_options(lua_hypercurve PUBLIC -fPIC)
 
 if(WIN32)
@@ -78,17 +78,3 @@ if(WIN32 AND NOT BUILD_LUAJIT)
     message(STATUS ${LUA_DLL})
     file(COPY ${LUA_DLL} DESTINATION ${CMAKE_BINARY_DIR}/bin)
 endif()
-
-# Installation
-#[[
-if(NOT DEFINED LUA_INSTALL_PATH)
-    get_filename_component(LUA_INSTALL_PATH "${LUA_LIBRARIES}" DIRECTORY)
-endif()
-message(STATUS "Lua Install path : ${LUA_INSTALL_PATH}")
-install(TARGETS lua_hypercurve sndfile
-    RUNTIME DESTINATION ${LUA_INSTALL_PATH}
-    PUBLIC_HEADER DESTINATION ${LUA_INSTALL_PATH}
-    LIBRARY DESTINATION ${LUA_INSTALL_PATH})
-install(FILES ${LUA_DLL}
-    DESTINATION ${LUA_INSTALL_PATH})
-]]

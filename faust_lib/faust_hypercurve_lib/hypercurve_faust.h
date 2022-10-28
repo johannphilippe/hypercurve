@@ -2062,7 +2062,7 @@ public:
             {
                 samples[definition - 1] = 0;
             } else {
-                throw(std::runtime_error("Number of processed samples is different from definition - "
+                (std::runtime_error("Number of processed samples is different from definition - "
                                      + std::to_string(full_sz)
                                      + " / "
                                      + std::to_string(definition)));
@@ -2465,6 +2465,33 @@ private:
 
     const double n;
 };
+
+// Be careful, it is cutoff frequencies. The band 1, ends in cutoff 2. So the index 1 corresponds to start index 0, and width 1.
+static constexpr int bark_bands_cutoff_frequencies[] = {
+    20, 100,200,300,400,510,630, 770, 920, 1080, 1270, 1480, 1720, 2000, 2320, 2700, 3150, 3700, 4400, 5300, 6400, 7700, 9500, 12000, 15500
+};
+
+static constexpr int bark_band_widths[] = {
+  -1, 80, 100, 100, 100, 110, 120, 140, 150, 160, 190, 210, 240, 280, 320, 380, 450, 550, 700, 900, 1100, 1300, 1800, 2500, 3500
+};
+
+static constexpr double bark_width = 15500 - 20;
+static constexpr int bark_nbands = sizeof(bark_band_widths) / sizeof(int);
+inline void scale_to_bark(double *array, size_t size)
+{
+    for(size_t i = 0; i < size; i++) {
+        double value = array[i] * bark_width + 20;
+        for(size_t b = 0; b < bark_nbands; ++b ) {
+            if(b+1 > bark_nbands) break;
+            if(value >= bark_bands_cutoff_frequencies[b] && value < bark_bands_cutoff_frequencies[b+1]) {
+                value *= bark_band_widths[b+1];
+                array[i] = value;
+                break;
+            }
+        }
+    }
+}
+
 }
 
 #endif // MODULATOR_LIB_H
