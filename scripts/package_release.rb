@@ -5,15 +5,15 @@ extention = ""
 prefix = ""
 osname = ""
 if(OS.linux?) then 
-  osname = "linux"
+  osname = "Linux"
   extension = ".so"
   prefix = "lib"
 elsif(OS.windows?) then 
-  osname = "windows"
+  osname = "Windows"
   exec_extention = ".exe"
   extension = ".dll"
 elsif(OS.mac?) then 
-  osname = "macos"
+  osname = "MacOS"
   extension = ".dylib"
   prefix = "lib"
 end

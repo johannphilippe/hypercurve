@@ -421,7 +421,7 @@ void unit_tests()
               });
 
     xp.ascii_display("exponential scaled", "not rescaled", '*');
-    write_as_png(xp, false, "log.png");
+    write_as_png(xp, false, "exp.png");
 
     curve cmp(def, 0, {
                  segment(fraction(1, 2), 1, share(power_curve(2))),
@@ -431,6 +431,14 @@ void unit_tests()
     cmp.ascii_display("cmp power", "not rescaled", '*');
 
     check_equality(xp, cmp);
+
+    curve logarithm(def, 0, {
+                       segment(1, 1, share(logarithmic_curve()))
+                    });
+    write_as_png(logarithm, false, "LOGARITHM.png");
+
+
+
 }
 
 void random_generator_test()
@@ -451,6 +459,22 @@ void random_generator_test()
 void dummy_test()
 {
 
+    size_t def = 16384;
+    size_t hdiv = 9;
+    curve c13(def, 0, {
+                 segment(fraction(1, hdiv), 1, share(gauss_curve(5, 1))),
+                 segment(fraction(1, hdiv), 0.5, share(cissoid_curve(0.51))),
+                 segment(fraction(1, hdiv), 0.3, share(power_curve(9))),
+                 segment(fraction(6, hdiv), 0, share(cubic_bezier_curve(point(0.2, 0.9), point(0.8, 0.8))))
+              });
+
+    c13.ascii_display("Not BARK", "NOOOOOO", '*');
+    write_as_png(c13, false, "not_bark.png");
+    scale_to_bark(c13.get_samples(), def);
+    c13.ascii_display("BARK", "BAAAAARK", '*');
+    c13.normalize_y(0, 1);
+    write_as_png(c13, false, "bark.png");
+    /*
     curve crv(16384, 0, {segment(0.5, 1, share(hamming_curve())), segment(0.5, 0, share(hamming_curve()))});
     write_as_png(crv, false, "hamming.png");
     for(size_t i = 0; i < 1024; ++i)
@@ -464,6 +488,7 @@ void dummy_test()
 
         std::cout << "blackman at "  << i << " is : " << blackman(i, 1024) << std::endl;
     }
+    */
     /*
     curve crv(16384, 0, {segment(1., 1., share(
                        lagrange_polynomial_curve(
@@ -538,8 +563,8 @@ void inversion_test()
 int main()
 {
 
-    //dummy_test();
-    unit_tests();
+    dummy_test();
+    //unit_tests();
     //random_generator_test();
     //inversion_test();
     //generate_curve_pictures();

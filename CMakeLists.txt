@@ -5,7 +5,6 @@ project(hypercurve LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake/Modules/)
-set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64")
 
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
@@ -35,6 +34,11 @@ option(BUILD_LUAJIT "Build Luajit" OFF)
 option(BUILD_FAUST_LIB	"Build Faust library" ON)
 option(BUILD_ALL "Build all libraries" ON)
 option(SSE, "SSE support for FPNG" ON)
+option(MACOS_UNIVERSAL "Support for MacOS Universal build - both x86_64 and ARM64" ON)
+
+if(MACOS_UNIVERSAL) 
+	set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64")
+endif()
 
 #############################################
 ##### 	Build libsndfile

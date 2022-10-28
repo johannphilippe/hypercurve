@@ -160,6 +160,12 @@ The resulting binaries will all be located in `bin` directory. On Windows, `lua_
 This must be considered when packaging the library to be embedded or used by another application.
 
 # TODO
+* Subdivide segments
+* Virtual 3D manipulation (rotate z axis)
+* Interp(0.25) returns an interpolation of two curves (crv1 * 0.25, crv2 * 0.75)
+* Operators with numbers (crv * 2) in Csound where number is 2nd argument
+* extract curve  -> subsample, or another method (based on relevant samples)
+* Abs for waveforms
 * ISSUE : Cubic spline memory error
 * ISSUE : Still bugs when segments size is 1/3 or /6 (etc) in Csound. Probably due to the use of floor instead of round. // Probably fixed
 * Improve hc_resize to resize curve without creating new one (temp memory)
