@@ -163,8 +163,7 @@ This must be considered when packaging the library to be embedded or used by ano
 * Subdivide segments
 * Virtual 3D manipulation (rotate z axis)
 * Interp(0.25) returns an interpolation of two curves (crv1 * 0.25, crv2 * 0.75)
-* Operators with numbers (crv * 2) in Csound where number is 2nd argument
-* extract curve  -> subsample, or another method (based on relevant samples)
+* extract curve  -> subsample from audio, or another method (based on relevant samples)
 * Abs for waveforms
 * ISSUE : Cubic spline memory error
 * ISSUE : Still bugs when segments size is 1/3 or /6 (etc) in Csound. Probably due to the use of floor instead of round. // Probably fixed
@@ -179,6 +178,9 @@ This must be considered when packaging the library to be embedded or used by ano
 * REAPER/Reascript -> see https://forum.cockos.com/showthread.php?p=2543755#post2543755
 * Lagrange interpolation for curve extraction ?
 * Hard one -> all curves allowing one sample processing (including cubic spline) to allow no-table processing.
+
+
+
 ## Curves to implement
 * Cardioid / hypercardioid
 * Elastic curve : https://mathcurve.com/courbes2d.gb/linteaire/linteaire.shtml
@@ -187,9 +189,11 @@ This must be considered when packaging the library to be embedded or used by ano
 * Puntiforme https://mathcurve.com/courbes2d/puntiforme/puntiforme.shtml
 * Legendre polynome
 * Ideas here https://mathcurve.com/courbes2d/courbes2d.shtml
+
+
 # External libraries
-This library uses libsndfile as an external submodule.
-Currently, [libsndfile](https://github.com/libsndfile/libsndfile) is the only dependency of this project. 
+
+The project uses LuaJIT as a submodule, allowing you to try HYPERCURVE out of the box. 
 
 It also includes source files from several open-source projects : 
 *  [AsciiPlot](https://github.com/joehood/asciiplotter) source code with license under src/asciiplot folder.

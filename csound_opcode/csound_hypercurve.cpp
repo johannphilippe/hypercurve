@@ -989,10 +989,56 @@ struct cs_operator
     ftable_info t1, t2;
 };
 
+template<typename T = cs_operator_add>
+struct cs_operator_num
+        : public csnd::Plugin<1, 2>
+        , public cs_rt_hypercurve
+        , public T
+{
+    int init()
+    {
+        t1 = get_gen(csound->get_csound(), inargs[0]);
+        double t2 = inargs[1];
+      if(t1.res != 0 )
+          return NOTOK;
+
+      _definition = t1.size;
+
+      table = allocate_gen(csound->get_csound(), 0, _definition);
+      if(table.res != 0)
+          return NOTOK;
+
+      _initialize(_definition, y_start, table.t_ptr);
+      for(size_t i = 0; i < table.size; ++i) {
+          table.t_ptr[i] = this->process(t1.t_ptr[i], t2);
+      }
+
+      // Weirdly, it works below
+      const char * name = csound->get_csound()->GetOutputArgName(this, 0);
+      AsciiPlotter p(std::string(name)
+                     +  " - Hypercurve GEN number : "
+                     +  std::to_string(table.fno)  , 80, 15);
+      p.addPlot( std::vector<double>(this->samples.begin(), this->samples.end()),
+                 std::string(" - ") + name ,
+                 (char)(rand() % (126 - 92) + 92));
+      p.show();
+
+      curve_map[table.fno] = this;
+      outargs[0] = table.fno;
+      return OK;
+
+    }
+    ftable_info t1, t2;
+};
+
 struct cs_add_curve : public cs_operator<cs_operator_add>{};
 struct cs_sub_curve : public cs_operator<cs_operator_sub>{};
 struct cs_mult_curve : public cs_operator<cs_operator_mult>{};
 struct cs_div_curve : public cs_operator<cs_operator_div>{};
+struct cs_add_curve_num : public cs_operator_num<cs_operator_add>{};
+struct cs_sub_curve_num : public cs_operator_num<cs_operator_sub>{};
+struct cs_mult_curve_num : public cs_operator_num<cs_operator_mult>{};
+struct cs_div_curve_num : public cs_operator_num<cs_operator_div>{};
 
 // args : crv, path, waveform , fill, grid, invert
 struct cs_export_png : public csnd::InPlug<6>
@@ -1117,6 +1163,10 @@ void csnd::on_load(Csound *csound) {
     csnd::plugin<cs_sub_curve>(csound, "hc_sub", "i", "ii" , csnd::thread::i);
     csnd::plugin<cs_mult_curve>(csound, "hc_mult", "i", "ii" , csnd::thread::i);
     csnd::plugin<cs_div_curve>(csound, "hc_div", "i", "ii" , csnd::thread::i);
+    csnd::plugin<cs_add_curve_num>(csound, "hc_addn", "i", "ii" , csnd::thread::i);
+    csnd::plugin<cs_sub_curve_num>(csound, "hc_subn", "i", "ii" , csnd::thread::i);
+    csnd::plugin<cs_mult_curve_num>(csound, "hc_multn", "i", "ii" , csnd::thread::i);
+    csnd::plugin<cs_div_curve_num>(csound, "hc_divn", "i", "ii" , csnd::thread::i);
     csnd::plugin<cs_concat>(csound, "hc_concat", "i", "iim" , csnd::thread::i);
 
 

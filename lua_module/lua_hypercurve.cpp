@@ -523,8 +523,13 @@ LUA_EXPORT int luahc_curve_class_gc(lua_State *lua) {
 LUA_EXPORT int luahc_curve_class_add(lua_State *lua)
 {
     hypercurve::curve *crv = *(hypercurve::curve **) luaL_checkudata(lua, 1, "hypercurve.curve");
-    hypercurve::curve *crv2 = *(hypercurve::curve **) luaL_checkudata(lua, 2, "hypercurve.curve");
-    hypercurve::curve *res = new hypercurve::curve((*crv) + (*crv2));
+    hypercurve::curve* res = nullptr;
+    if(lua_isnumber(lua, 2)) {
+        res = new hypercurve::curve((*crv) + lua_tonumber(lua, 2));
+    } else {
+        hypercurve::curve *crv2 = *(hypercurve::curve **) luaL_checkudata(lua, 2, "hypercurve.curve");
+        res = new hypercurve::curve((*crv) + (*crv2));
+    }
     hypercurve::curve **l_crv = (hypercurve::curve **) lua_newuserdata(lua, sizeof(hypercurve::curve *));
     *l_crv = res;
     luaL_getmetatable(lua, "hypercurve.curve");
@@ -535,8 +540,13 @@ LUA_EXPORT int luahc_curve_class_add(lua_State *lua)
 LUA_EXPORT int luahc_curve_class_sub(lua_State *lua)
 {
     hypercurve::curve *crv = *(hypercurve::curve **) luaL_checkudata(lua, 1, "hypercurve.curve");
-    hypercurve::curve *crv2 = *(hypercurve::curve **) luaL_checkudata(lua, 2, "hypercurve.curve");
-    hypercurve::curve *res = new hypercurve::curve((*crv) - (*crv2));
+    hypercurve::curve* res = nullptr;
+    if(lua_isnumber(lua, 2)) {
+        res = new hypercurve::curve((*crv) - lua_tonumber(lua, 2));
+    } else {
+        hypercurve::curve *crv2 = *(hypercurve::curve **) luaL_checkudata(lua, 2, "hypercurve.curve");
+        res = new hypercurve::curve((*crv) - (*crv2));
+    }
     hypercurve::curve **l_crv = (hypercurve::curve **) lua_newuserdata(lua, sizeof(hypercurve::curve *));
     *l_crv = res;
     luaL_getmetatable(lua, "hypercurve.curve");
@@ -547,8 +557,13 @@ LUA_EXPORT int luahc_curve_class_sub(lua_State *lua)
 LUA_EXPORT int luahc_curve_class_mult(lua_State *lua)
 {
     hypercurve::curve *crv = *(hypercurve::curve **) luaL_checkudata(lua, 1, "hypercurve.curve");
-    hypercurve::curve *crv2 = *(hypercurve::curve **) luaL_checkudata(lua, 2, "hypercurve.curve");
-    hypercurve::curve *res = new hypercurve::curve((*crv) * (*crv2));
+    hypercurve::curve* res = nullptr;
+    if(lua_isnumber(lua, 2)) {
+        res = new hypercurve::curve((*crv) * lua_tonumber(lua, 2));
+    } else {
+        hypercurve::curve *crv2 = *(hypercurve::curve **) luaL_checkudata(lua, 2, "hypercurve.curve");
+        res = new hypercurve::curve((*crv) * (*crv2));
+    }
     hypercurve::curve **l_crv = (hypercurve::curve **) lua_newuserdata(lua, sizeof(hypercurve::curve *));
     *l_crv = res;
     luaL_getmetatable(lua, "hypercurve.curve");
@@ -559,8 +574,13 @@ LUA_EXPORT int luahc_curve_class_mult(lua_State *lua)
 LUA_EXPORT int luahc_curve_class_div(lua_State *lua)
 {
     hypercurve::curve *crv = *(hypercurve::curve **) luaL_checkudata(lua, 1, "hypercurve.curve");
-    hypercurve::curve *crv2 = *(hypercurve::curve **) luaL_checkudata(lua, 2, "hypercurve.curve");
-    hypercurve::curve *res = new hypercurve::curve((*crv) / (*crv2));
+    hypercurve::curve* res = nullptr;
+    if(lua_isnumber(lua, 2)) {
+        res = new hypercurve::curve((*crv) / lua_tonumber(lua, 2));
+    } else {
+        hypercurve::curve *crv2 = *(hypercurve::curve **) luaL_checkudata(lua, 2, "hypercurve.curve");
+        res = new hypercurve::curve((*crv) / (*crv2));
+    }
     hypercurve::curve **l_crv = (hypercurve::curve **) lua_newuserdata(lua, sizeof(hypercurve::curve *));
     *l_crv = res;
     luaL_getmetatable(lua, "hypercurve.curve");

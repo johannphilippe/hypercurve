@@ -61,7 +61,22 @@ static int hc_div(int h1, int h2)
 {
     return faust_curve_map.map(share( *faust_curve_map[h1] / *faust_curve_map[h2]));
 }
-
+static int hc_addn(int h1, double h2)
+{
+    return faust_curve_map.map(share( *faust_curve_map[h1] + h2));
+}
+static int hc_subn(int h1, double h2)
+{
+    return faust_curve_map.map(share( *faust_curve_map[h1] - h2));
+}
+static int hc_multn(int h1, double h2)
+{
+    return faust_curve_map.map(share( *faust_curve_map[h1] * h2));
+}
+static int hc_divn(int h1, double h2)
+{
+    return faust_curve_map.map(share( *faust_curve_map[h1] / h2));
+}
 // Curve bases functions
 
 static const int max_segments = 64;

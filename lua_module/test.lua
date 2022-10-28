@@ -101,12 +101,22 @@ cm_crv:ascii_display("catmullrom", "cm(x)", "*")
 
 -- Operators 
 local sum = cm_crv + hybrid
-local sub = cm_crv - hybrid
-local prod = cm_crv * hybrid
-local div = cm_crv / hybrid
-
-
 sum:ascii_display("sum", "sum", "*")
+local sub = cm_crv - hybrid
 sub:ascii_display("sub", "sub", "*")
+local prod = cm_crv * hybrid
 prod:ascii_display("prod", "prod", "*")
+local div = cm_crv / hybrid
 div:ascii_display("div", "div", "*")
+
+
+
+sum = cm_crv + 2
+sum:ascii_display("sum", "sum", "*")
+sub = cm_crv - 2
+sub:ascii_display("sub", "sub", "*")
+prod = cm_crv * 2
+prod:ascii_display("prod", "prod", "*")
+div = cm_crv / 2
+div:ascii_display("div", "div", "*")
+

@@ -284,6 +284,9 @@ curve = hc.hypercurve(int size_in_samples, float y_start, (list_of_segments) );
 #### Hypercurve Operators 
 
 Hypercurves can be combined with + - * / operators
+You are allowed to combine curve and numbers with these operators (for example mycurve * 2). 
+In Csound and Faust, those are implemented as separate functions. 
+
 
 
 C++ :
@@ -326,6 +329,9 @@ Csound :
   icrv_sub = hc_sub(icrv1, icrv2)
   icrv_prod = hc_mult(icrv1, icrv2)
   icrv_div = hc_div(icrv1, icrv2)
+
+  icrv_sum = hc_add(icrv1, 2)
+  // ... 
 ```
 
 

@@ -207,6 +207,10 @@ add = ffunction(int hc_add (int, int), "hypercurve_faust.h", "");
 sub = ffunction(int hc_sub (int, int), "hypercurve_faust.h", "");
 mult = ffunction(int hc_mult (int, int), "hypercurve_faust.h", "");
 div = ffunction(int hc_div (int, int), "hypercurve_faust.h", "");
+addn = ffunction(int hc_addn (int, float), "hypercurve_faust.h", "");
+subn = ffunction(int hc_subn (int, float), "hypercurve_faust.h", "");
+multn = ffunction(int hc_multn (int, float), "hypercurve_faust.h", "");
+divn = ffunction(int hc_divn (int, float), "hypercurve_faust.h", "");
 
 /*=============================================================================
 Hypercurve operations
