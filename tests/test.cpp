@@ -114,7 +114,7 @@ void generate_curve_pictures()
     curve catmul(2048, 0, {segment(1, 1, share(catmull_rom_spline_curve(point(-1,-0.5), point(2, 3.5))))});
     write_doc_png(catmul, "catmul_rom.png");
     curve polynomial(2048, 0, { segment(1, 1, share(polynomial_curve( {1.34, -1, -0.5, 0.1}) ))});
-    polynomial.normalize_y(0, 1);
+    polynomial.norm();
     write_doc_png(polynomial, "polynomial.png");
     curve typed(2048, 0, {segment(1, 1, share(typed_curve(-5)))});
     write_doc_png(typed, "typed.png");
@@ -123,7 +123,7 @@ void generate_curve_pictures()
     curve bicorn(2048, 0, {segment(1, 1, share(bicorn_curve(true)))});
     write_doc_png(bicorn, "bicorn.png");
     curve lagrange(2048, 0, {segment(1, 1, share(lagrange_polynomial_curve({ control_point(0.2, 0.8),  control_point(0.4, 0.1) })))});
-    lagrange.normalize_y(0, 1);
+    lagrange.scale(0, 1);
     write_doc_png(lagrange, "lagrange.png");
 }
 
@@ -206,7 +206,7 @@ void unit_tests()
              });
     t.time_since_last("Cubic spline");
     c6.ascii_display("Cubic spline", "y = cspline(X)", '*');
-    c6.normalize_y(0.0, 1.0);
+    c6.scale(0.0, 1.0);
     write_as_png(c6,  false, "cubic_spline.png");
 
     // CatmullRom
@@ -256,7 +256,7 @@ void unit_tests()
 
     to_modulate.ascii_display("to_modulate", "tomod", '*');
 
-    modulated.normalize_y(0, 1);
+    modulated.scale(0, 1);
     modulated.ascii_display("Modulated", "mod * catmullrom", '*');
 
 
@@ -357,11 +357,11 @@ void unit_tests()
     write_as_png(tightrope, false, "tightrope.png");
 
     curve tightrope2(def, 0, {
-                       segment(fraction(1,2), 1, invert( share(tightrope_walker_curve(1.01,1)))),
-                       segment(fraction(1,2), 0, invert( share(tightrope_walker_curve(1.01,1)))),
+                       segment(fraction(1,2), 1, vinvert( share(tightrope_walker_curve(1.01,1)))),
+                       segment(fraction(1,2), 0, vinvert( share(tightrope_walker_curve(1.01,1)))),
                     });
 
-    tightrope2.normalize_y(-1, 1);
+    tightrope2.scale(-1, 1);
     tightrope2.ascii_display("tightrope walker2q", "trw", '*');
     write_as_png(tightrope2, true, "tightrope2.png");
     check_equality(tightrope, tightrope2);
@@ -371,7 +371,7 @@ void unit_tests()
                      });
 
     polynomial.ascii_display("polynomial", "poly", '*');
-    polynomial.normalize_y(0, 1);
+    polynomial.scale(0, 1);
     write_as_png(polynomial, false, "poly.png");
 
     curve mouse(def, 0, {
@@ -386,7 +386,7 @@ void unit_tests()
                      segment(fraction(1,2), 0, share(bicorn_curve(false))),
                  });
     bicorn.ascii_display("bicorn", "cocked hat", '*');
-    bicorn.normalize_y(0, 1);
+    bicorn.scale(0, 1);
     write_as_png(bicorn, false, "bicorn.png");
 
     // Curves pictures for Doc
@@ -448,9 +448,8 @@ void random_generator_test()
 
 }
 
-void dummy_test()
+void bark_bands_test()
 {
-
     size_t def = 16384;
     size_t hdiv = 9;
     curve c13(def, 0, {
@@ -464,8 +463,54 @@ void dummy_test()
     write_as_png(c13, false, "not_bark.png");
     scale_to_bark(c13.get_samples(), def);
     c13.ascii_display("BARK", "BAAAAARK", '*');
-    c13.normalize_y(0, 1);
+    c13.scale(0, 1);
     write_as_png(c13, false, "bark.png");
+}
+
+void dummy_test()
+{
+
+    size_t def = 16384;
+    /*
+    curve cnorm(def, 0, {
+                 segment(1, 1, (share(cubic_bezier_curve(point(0.1, 0.95), point(0.2, -1.01)))))
+             });
+    cnorm.ascii_display("bezier curve", "bez", '*');
+    curve cinv(def, 0, {
+                 segment(1, 1, hinvert(share(cubic_bezier_curve(point(0.1, 0.95), point(0.2, -1.01)))))
+             });
+    cinv.ascii_display("hinverted bezier curve", "bez", '*');
+    curve cdinv(def, 0, {
+                 segment(1, 1, vinvert(hinvert(share(cubic_bezier_curve(point(0.1, 0.95), point(0.2, -1.01))))))
+             });
+    cdinv.ascii_display("hinverted and vinverted bezier curve", "bez", '*');
+    */
+
+    curve c2norm(def, 0, {
+                     segment(1, 1, (share(tightrope_walker_curve(1.01, 1))))
+             });
+    c2norm.ascii_display("bezier curve", "bez", '*');
+    write_as_png(c2norm, false, "noinv.png");
+    curve c2inv(def, 0, {
+                 segment(1, 1, hinvert(share(tightrope_walker_curve(1.01, 1))))
+             });
+    c2inv.ascii_display("hinverted bezier curve", "bez", '*');
+    write_as_png(c2inv, false, "hinv.png");
+
+    curve c2vdinv(def, 0, {
+                     segment(1, 1, vinvert((share(tightrope_walker_curve(1.01, 1)))))
+             });
+    c2vdinv.ascii_display(" vinverted bezier curve", "bez", '*');
+    c2vdinv.norm();
+    write_as_png(c2vdinv, false, "vinv.png");
+
+    curve c2dinv(def, 0, {
+                     segment(1, 1, vinvert(hinvert(share(tightrope_walker_curve(1.01, 1)))))
+             });
+    c2dinv.ascii_display("hinverted and vinverted bezier curve", "bez", '*');
+    c2dinv.norm();
+    write_as_png(c2dinv, false, "vhinv.png");
+
     /*
     curve crv(16384, 0, {segment(0.5, 1, share(hamming_curve())), segment(0.5, 0, share(hamming_curve()))});
     write_as_png(crv, false, "hamming.png");
@@ -490,7 +535,7 @@ void dummy_test()
                        }))
                        )});
     crv.ascii_display("lagrange curve", "interpolation", '*');
-    crv.normalize_y(0, 1);
+    crv.scale(0, 1);
     write_as_png(crv, false, "lagrange.png");
 
     curve crvspl(16384, 0, {segment(1., 1., share(
@@ -501,7 +546,7 @@ void dummy_test()
                        }))
                        )});
     crvspl.ascii_display("spline curve", "interpolation", '*');
-    crvspl.normalize_y(0, 1);
+    crvspl.scale(0, 1);
     write_as_png(crvspl, false, "spline.png");
     */
 
@@ -520,12 +565,12 @@ void inversion_test()
     write_as_png(dio, false, "dio.png");
 
     curve inv(4096, start, {
-                 segment(0.5, end, invert(share(tightrope_walker_curve(1.1, 0.1)))),
-                 segment(0.5, 0, invert(share(diocles_curve(2))))
+                 segment(0.5, end, vinvert(share(tightrope_walker_curve(1.1, 0.1)))),
+                 segment(0.5, 0, vinvert(share(diocles_curve(2))))
               });
 
     inv.ascii_display("Inverted", "Inv", '*');
-    inv.normalize_y(0, 1);
+    inv.scale(0, 1);
     write_as_png(inv, false, "inv.png");
 
 

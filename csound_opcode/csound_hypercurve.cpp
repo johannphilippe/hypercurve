@@ -95,7 +95,7 @@ public:
     double get_sample_at(size_t i) {return samples[i]; }
     size_t get_definition() {return _definition;}
 
-    void normalize_y(double target_min, double target_max)
+    void scale(double target_min, double target_max)
     {
         find_extremeness();
 
@@ -104,6 +104,8 @@ public:
             samples[i] = ((samples[i] - min ) / ambitus )  * std::abs(target_max - target_min) + target_min;
         }
     }
+    void normalize() {scale(0, 1);}
+    void norm() {scale(0, 1);}
 
     void find_extremeness()
     {
@@ -666,7 +668,7 @@ struct cs_invert_curve : public csnd::Plugin<1,1>
         if(curve_base_map.find(int(inargs[0])) == curve_base_map.end())
             return NOTOK;
         std::shared_ptr<curve_base> c = curve_base_map[int(inargs[0])];
-        c->inverted = true;
+        c->vinverted = true;
         outargs[0] = int(inargs[0]);
         return OK;
     }
@@ -689,6 +691,21 @@ struct cs_mirror_curve : public csnd::Plugin<1, 1>
 // Normalize curve
 //////////////////////////////////////////////////
 
+struct cs_scale_curve : public csnd::InPlug<3>
+{
+  int init()
+  {
+      if(curve_map.find(int(args[0])) == curve_map.end())
+      {
+          std::cout << "Normalize cannot find the expected curve " << std::endl;
+          return NOTOK;
+      }
+      cs_rt_hypercurve *crv = curve_map[int(args[0])];
+      crv->scale(args[1], args[2]);
+      return OK;
+  }
+};
+
 struct cs_normalize_curve : public csnd::InPlug<3>
 {
   int init()
@@ -699,10 +716,11 @@ struct cs_normalize_curve : public csnd::InPlug<3>
           return NOTOK;
       }
       cs_rt_hypercurve *crv = curve_map[int(args[0])];
-      crv->normalize_y(args[1], args[2]);
+      crv->norm();
       return OK;
   }
 };
+
 
 //////////////////////////////////////////////////
 // Curve lib
@@ -1128,7 +1146,7 @@ struct cs_random_curve_composer : public csnd::Plugin<1, 7>,  public cs_rt_hyper
             auto seg = std::make_shared<segment>(frac_size, dest, get_curve_from_index(index, args.first, args.second) );
             process_one(seg);
         }
-        normalize_y(min, max);
+        scale(min, max);
 
         const char * name = csound->get_csound()->GetOutputArgName(this, 0);
         AsciiPlotter p(std::string(name)  +  " - Hypercurve GEN number : "  + std::to_string(table.fno)  , 80, 15);
@@ -1153,7 +1171,9 @@ struct cs_random_curve_composer : public csnd::Plugin<1, 7>,  public cs_rt_hyper
 void csnd::on_load(Csound *csound) {
     std::cout << "💫 Loading HYPERCURVE 💫" << std::endl;
     // Helpers
-    csnd::plugin<cs_normalize_curve>(csound, "hc_normalize", "", "iii", csnd::thread::i);
+    csnd::plugin<cs_scale_curve>(csound, "hc_scale", "", "iii", csnd::thread::i);
+    csnd::plugin<cs_normalize_curve>(csound, "hc_norm", "", "i", csnd::thread::i);
+    csnd::plugin<cs_normalize_curve>(csound, "hc_normalize", "", "i", csnd::thread::i);
 
     csnd::plugin<cs_control_point>(csound, "hc_control_point", "i", "ii", csnd::thread::i);
     csnd::plugin<cs_control_point>(csound, "hc_point", "i", "ii", csnd::thread::i);
@@ -1211,7 +1231,4 @@ void csnd::on_load(Csound *csound) {
     csnd::plugin<cs_segment>(csound, "hc_segment", "i", "iii", csnd::thread::i);
     csnd::plugin<cs_gen>(csound, "hc_hypercurve", "i", "iiim", csnd::thread::i);
     csnd::plugin<cs_gen>(csound, "hc_gen", "i", "iiim", csnd::thread::i);
-
-    //deprecated
-    csnd::plugin<cs_normalize_curve>(csound, "hc_normalize_y", "", "iii", csnd::thread::i);
 }

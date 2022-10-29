@@ -226,6 +226,8 @@ struct memory_vector
       iterator& operator=(const iterator&o) {ptr = o.ptr; return *this;}
       iterator& operator++() {++ptr; return *this;} //prefix increment
       iterator& operator++(int) {return ptr++;}
+      iterator& operator--() {--ptr; return *this;} //prefix increment
+      iterator& operator--(int) {return ptr--;}
       iterator operator+(int add) {return ptr+add;}
       iterator operator-(int add) {return ptr-add;}
       T * operator->() {return ptr;}

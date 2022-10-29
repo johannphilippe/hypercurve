@@ -20,7 +20,7 @@ It is available in several frontends : C++, Lua, and Csound.
 
 3.3 [Mirror curve base](#mirror-curve-base)
 
-3.4 [Normalize hypercurve](#normalize-hypercurve)
+3.4 [Scale hypercurve](#scale-hypercurve)
 
 3.5 [Concatenate hypercurves](#concatenate-hypercurves)
 
@@ -67,6 +67,10 @@ It is available in several frontends : C++, Lua, and Csound.
 6.16 [Bicorn Curve](#bicorn-curve)
 
 6.17 [Lagrange Polynomial Curve](#lagrange-polynomial-curve)
+
+6.18 [Logarithmic Curve](#logarithmic-curve)
+
+6.19 [Exponential Curve](#Exponential-curve)
 
 ## Hypercurve basic syntax
 
@@ -148,7 +152,7 @@ crv:write_as_wav( "path/curve.wav" )
 
 -- rescale the curve
 
-crv:normalize(-1, 1)
+crv:scale(-1, 1)
 
 local  samp = crv:get_sample_at(1024)
 
@@ -421,16 +425,19 @@ hc.mirror(hc.cubic_curve());
 
 
 
-#### Normalize hypercurve
+#### Scale hypercurve
 
-This function will allow you to normalize an hypercurve between min and max y values
-
+This functions will allow you to scale or normalize an hypercurve between min and max y values
+The scale function allows you to rescale an entire HYPERCURVE, while normalize or norm will scale between 0 and 1. 
 
 C++ :
 
 ```c++
   hypercurve::curve c(4096, 0, {hypercurve::segment(1, 1, hypercurve::cubic_curve())});
-  c.normalize(-1, 1);
+  c.scale(-1, 1);
+  // normalize scales between 0 and 1
+  c.normalize();
+  c.norm();
   // Now "c" curve y start is -1 and its destination is 1
 
 ```
@@ -439,7 +446,9 @@ Lua :
 
 ```Lua
   local crv = hc.hypercurve(4096, 0, {hc.segment(1, 1, hc.cubic_curve())})
-  crv:normalize(-1, 1)
+  crv:scale(-1, 1)
+  crv:normalize()
+  crv:norm()
 ```
 
 Csound :
@@ -448,14 +457,18 @@ Csound :
 
   icrv = hc_hypercurve(4096, 0, hc_segment(1, 1, hc_cubic_curve()))
   // This function won't make a copy, it will only scale the corresponding curve
-  hc_normalize(icrv, -1, 1)
+  hc_scale(icrv, -1, 1)
+  hc_normalize(icrv)
+  hc_norm(icrv)
 ``` 
 
 
 Faust : 
 ```
 crv = hc.hypercurve(2048, 0, (hc.segment(1, 1, hc.cubic_curve())))
-hc.normalize(crv, -1, 1);
+hc.scale(crv, -1, 1);
+hc.normalize(crv);
+hc.norm(crv);
 ```
 
 
@@ -1157,7 +1170,7 @@ hc.catmull_rom_spline_curve(hc.control_point cp1, hc.control_point cp2);
 
 The polynomial curve accepts an infinite number of arguments (up to 64 for Csound) and will evaluate curve with a polynomial expression  : 
 `(arg1*x)^3 + (arg2*x)^2 + (arg1*x)^1`
-In audio context, it is safer to scale the hypercurve in which you use a polynomial, as its y scale may be uncertain. Use the `normalize` method on your hypercurve to do so.
+In audio context, it is safer to scale the hypercurve in which you use a polynomial, as its y scale may be uncertain. Use the `normalize` or `scale` method on your hypercurve to do so.
 
 ![Polynomial curve](png/polynomial.png)
   
@@ -1385,4 +1398,37 @@ hc_lagrange_polynomial_curve( hc_control_point(0.2, 0.8), hc_control_point(0.4, 
 Faust : 
 ```
 hc.lagrange_polynomial_curve( (hc.control_point(0.2, 0.8), hc.control_point(0.4, 0.1)) );
+```
+
+#### Logarithmic Curve
+
+
+![Lagrange curve](png/lagrange.png)
+  
+Like cubic spline, lagrange interpolation takes a list of control points with 0 < x < 1. 
+
+C++ :
+
+```c++
+
+hypercurve::share( hypercurve::logarithmic_curve());
+
+```
+
+Lua :
+
+```Lua
+hc.logarithmic_curve()
+```
+
+Csound :
+
+```Csound
+hc_logarithmic_curve()
+
+```
+
+Faust : 
+```
+hc.logarithmic_curve();
 ```

@@ -348,10 +348,10 @@ LUA_EXPORT int luahc_polynomial_curve(lua_State *lua)
 // Invert curve
 ///////////////////////////////////////////
 
-LUA_EXPORT int luahc_invert_curve(lua_State *lua)
+LUA_EXPORT int luahc_vinvert_curve(lua_State *lua)
 {
     luahc_curve_base_t *curve = *(luahc_curve_base_t **)luaL_checkudata(lua, 1, "hypercurve.curve_base");
-    curve->crv->inverted = true;
+    curve->crv->vinverted = !curve->crv->vinverted;
     luahc_curve_base_t **crv = (luahc_curve_base_t **) lua_newuserdata(lua, sizeof(luahc_curve_base_t*));
     *crv = curve;
     luaL_getmetatable(lua, "hypercurve.curve_base");
@@ -501,10 +501,17 @@ LUA_EXPORT int luahc_curve_get_samples(lua_State *lua)
     return 1;
 }
 
-LUA_EXPORT int luahc_curve_normalize_y(lua_State *lua)
+LUA_EXPORT int luahc_curve_scale(lua_State *lua)
 {
     hypercurve::curve *crv = *(hypercurve::curve **) luaL_checkudata(lua, 1, "hypercurve.curve");
-    crv->normalize_y(lua_tonumber(lua, 2), lua_tonumber(lua, 3));
+    crv->scale(lua_tonumber(lua, 2), lua_tonumber(lua, 3));
+    return 0;
+}
+
+LUA_EXPORT int luahc_curve_normalize(lua_State *lua)
+{
+    hypercurve::curve *crv = *(hypercurve::curve **) luaL_checkudata(lua, 1, "hypercurve.curve");
+    crv->norm();
     return 0;
 }
 
@@ -622,11 +629,14 @@ LUA_EXPORT const luaL_Reg luahc_curve_class_meth[] =
 {
     {"ascii_display" ,luahc_curve_ascii_display },
     {"write_as_png" ,luahc_curve_write_png },
-    {"normalize", luahc_curve_normalize_y},
+
+    {"scale", luahc_curve_scale},
+    {"normalize", luahc_curve_normalize},
+    // Alias
+    {"norm", luahc_curve_normalize},
+
     {"get_samples", luahc_curve_get_samples},
     {"get_sample_at", luahc_curve_get_sample_at},
-    // deprecated
-    {"normalize_y", luahc_curve_normalize_y},
     { NULL          ,NULL            }
 };
 
@@ -705,8 +715,8 @@ LUA_EXPORT const luaL_Reg luahc_static_meth[] =
     {"typed_curve", luahc_typed_curve},
     {"user_defined_curve", luahc_user_defined_curve},
 
-    // Helpers
-    {"invert", luahc_invert_curve},
+    // Manipulations --> Move to hypercurve class ?
+    {"vinvert", luahc_vinvert_curve},
     {"mirror", luahc_mirror_curve},
     {"concatenate", luahc_concatenate},
 

@@ -25,16 +25,16 @@ static increment_map< std::shared_ptr<segment> > faust_segment_map;
 static increment_map< std::shared_ptr<curve> > faust_curve_map;
 
 // Operations on curves
-static int hc_normalize_y(int crv, double min, double max)
+static int hc_scale(int crv, double min, double max)
 {
-    faust_curve_map[crv]->normalize_y(min, max);
+    faust_curve_map[crv]->scale(min, max);
     return crv;
 }
 
 // Just inverts a curve base on its linear axis (symetry on linear axis)
 static int hc_invert_curve_base(int cb)
 {
-    invert(faust_curve_base_map[cb]);
+    vinvert(faust_curve_base_map[cb]);
     return cb;
 }
 

@@ -36,8 +36,8 @@ gilagrange = hc_hypercurve(0, 2048, 0,
                 hc_segment(1, 1, hc_lagrange_curve(  hc_control_point(0.2, 0.8), hc_control_point(0.4, 0.1), hc_control_point(0.75, 0.5))))
 
 
-;hc_normalize_y(gipolynomial, 0, 1)
-;hc_write_as_png(gipolynomial, "./poly.png", 1, 1)
+hc_normalize(gipolynomial)
+hc_write_as_png(gipolynomial, "./poly.png", 1, 1)
 
 print(gicub)
 print(gidiocles)
@@ -46,10 +46,10 @@ gisub = hc_sub(gicub_bez, gipolynomial)
 gimult = hc_mult(gicub, gidiocles)
 gidiv = hc_div(gicm, gipolynomial)
 
-hc_normalize_y(giadd, 0, 1)
-hc_normalize_y(gisub, 0, 1)
-hc_normalize_y(gimult, 0, 1)
-hc_normalize_y(gidiv, 0, 1)
+hc_normalize(giadd)
+hc_normalize(gisub)
+hc_normalize(gimult)
+hc_normalize(gidiv)
 
 
 instr 1

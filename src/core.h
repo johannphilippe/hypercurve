@@ -166,7 +166,7 @@ public:
         }
     }
 
-    void normalize_y(double target_min, double target_max)
+    void scale(double target_min, double target_max)
     {
         find_extremeness();
 
@@ -175,6 +175,9 @@ public:
             samples[i] = ((samples[i] - min ) / ambitus )  * std::abs(target_max - target_min) + target_min;
         }
     }
+    void normalize() {scale(0, 1);}
+    // Alias
+    void norm() { scale(0, 1); }
 
     std::pair<double, double> find_extremeness()
     {

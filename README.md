@@ -160,13 +160,18 @@ The resulting binaries will all be located in `bin` directory. On Windows, `lua_
 This must be considered when packaging the library to be embedded or used by another application.
 
 # TODO
-* Subdivide segments
-* Virtual 3D manipulation (rotate z axis)
+* Inversion across the axis of another curve 
+* Rename vinvert to reflect the fact it's not vertical symmetry, but linear axis vertical reflection
+* Implement real vertical symmetry
+* Implement that for full curves also
+* Reflect those changes to doc
+
+* Subdivide segments (only take an upsampled half for example)
 * Interp(0.25) returns an interpolation of two curves (crv1 * 0.25, crv2 * 0.75)
 * extract curve  -> subsample from audio, or another method (based on relevant samples)
 * Abs for waveforms
-* ISSUE : Cubic spline memory error
-* ISSUE : Still bugs when segments size is 1/3 or /6 (etc) in Csound. Probably due to the use of floor instead of round. // Probably fixed
+* Virtual 3D manipulation (rotate z axis)
+
 * Improve hc_resize to resize curve without creating new one (temp memory)
 * Documentation on hc_resize, and hc_cubic_spline_curve
 * Propagate resize to Lua, Faust and C++ api

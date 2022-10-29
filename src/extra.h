@@ -205,7 +205,7 @@ std::pair<curve, std::string> random_curve_composer( size_t max_segs = 16, int m
 
     double y_start = (envelop | waveform) ? 0 : random<double>(0, 1);
     curve c(definition, y_start, segs);
-    c.normalize_y(min, max);
+    c.scale(min, max);
     return {c, cnames};
 }
 
