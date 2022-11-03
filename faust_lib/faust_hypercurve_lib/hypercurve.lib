@@ -216,14 +216,17 @@ divn = ffunction(int hc_divn (int, float), "hypercurve_faust.h", "");
 Hypercurve operations
 =============================================================================*/
 /*
-      Normalize, without copying the hypercurve, but returns the hypercurve index.
-      normalize_y(int hc, float min, float max);
-      * hc : hypercurve to be normalized
+      Scale, without copying the hypercurve, but returns the hypercurve index.
+      scale(int hc, float min, float max);
+      * hc : hypercurve to be scaled
       * min : minimum value in new scale
       * max : maximum value in new scale
-
+      normalize, and norm are aliases for scale(0, 1)
 */
-normalize_y = ffunction(int hc_normalize_y (int, float, float), "hypercurve_faust.h", "");
+scale = ffunction(int hc_scale (int, float, float), "hypercurve_faust.h", "");
+normalize(_hc) = scale(_hc, 0, 1);
+norm(_hc) = scale(_hc, 0, 1);
+
 /*
       Inverts a curve_base segment. It does not copy the curve_base, but still returns its index.
       invert(int curve_base_index);

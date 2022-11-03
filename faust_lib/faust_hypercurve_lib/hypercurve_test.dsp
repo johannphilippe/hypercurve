@@ -33,7 +33,7 @@ crv = hc.hypercurve(2048, 0,
 //      hc.segment(1/4, 0, hc.catenary_curve(0.1))
 //              ));
 // Sometimes, cubic spline needs to be rescaled
-// hc.normalize_y(crv, 0, 1)
+// hc.scale(crv, 0, 1)
 
 //crv = hc.hypercurve(4096, 0, (hc.segment(1, 1, hc.linear_curve)));
 

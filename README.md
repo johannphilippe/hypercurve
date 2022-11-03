@@ -1,5 +1,4 @@
-
-# Hypercurve
+# HYPERCURVE
 
 ![Hybrid hypercurve](doc/png/hybrid.png)
 This hypercurve is a combination of 1/8 diocles curve, 1/8 toxoid curve, 2/8 mouth curve, and 4/8 gauss curve.
@@ -37,9 +36,10 @@ Every curve algorithm is different. In audio applications, we use to assign enve
 
 Go to [Releases](https://github.com/johannphilippe/hypercurve/releases), and download the latest version. 
 
-### Csound install
 
-To install for Csound, the recommanded way is to move the csound_hypercurve library to the plugins repository of Csound. 
+### Csound install
+
+To install HYPERCURVES opcodes for Csound, the recommanded way is to move the csound_hypercurve library to the plugins repository of Csound. 
 
 Usually, the following instructions will work. If Csound is installed in another location, just change the following path : 
 
@@ -204,3 +204,4 @@ It also includes source files from several open-source projects :
 *  [AsciiPlot](https://github.com/joehood/asciiplotter) source code with license under src/asciiplot folder.
 * [lua-compat-5.3](https://github.com/keplerproject/lua-compat-5.3) which provides an API compatibility from 5.1 to 5.3
 * [fpng](https://github.com/richgel999/fpng) - a great C++ PNG reader/writer.``
+

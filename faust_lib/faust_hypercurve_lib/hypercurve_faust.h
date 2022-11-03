@@ -379,6 +379,8 @@ struct memory_vector
       iterator& operator=(const iterator&o) {ptr = o.ptr; return *this;}
       iterator& operator++() {++ptr; return *this;} //prefix increment
       iterator& operator++(int) {return ptr++;}
+      iterator& operator--() {--ptr; return *this;} //prefix increment
+      iterator& operator--(int) {return ptr--;}
       iterator operator+(int add) {return ptr+add;}
       iterator operator-(int add) {return ptr-add;}
       T * operator->() {return ptr;}
@@ -1085,12 +1087,17 @@ public:
     {
         memory_vector<double>::iterator begin_ptr = it;
         double max = 0.0;
+
         for(size_t i = 0; i < size; ++i)
         {
-            const double x = hypercurve::fraction(i, size);
+            double x = hypercurve::fraction(i, size);
+
             double res = scale(x);
+
             if( std::abs(res) > max) max = std::abs(res);
-            if(inverted) res = process_invert(x, res);
+
+            if(vinverted) res = process_vinvert(x, res);
+
             *it = res;
             ++it;
         }
@@ -1111,6 +1118,7 @@ public:
 
     void post_processing(memory_vector<double>::iterator it)
     {
+        if(hinverted) process_hinvert(it);
         if(mirrored) mirror(it, definition, y_start, y_destination);
     }
 
@@ -1119,22 +1127,42 @@ public:
     inline virtual void on_init() {}
 
     // Allows inversion of curve (y symetry on a linear x_start/x_end axis).
-    bool inverted = false;
+    bool hinverted = false;
+    bool vinverted = false;
     bool mirrored = false;
 protected:
 
     inline virtual double scale(double x)
     {
+        double y;
         if(y_start > y_destination)
-            return process(1.0 - x) * abs_diff + offset;
-        return process(x) * abs_diff + offset;
+            y = process(1.0 - x) ;
+        else
+            y = process(x) * abs_diff + offset;
+
+        y  = y * abs_diff + offset;
+        return y;
     }
 
-    inline double process_invert(double x, double y)
+    // Vertical inversion
+    inline double process_vinvert(double x, double y)
     {
-
         const double lin = linear_interpolation(y_start, y_destination, x);
+        //std::cout << std::fixed << " lin  " << lin << " y " << y << " res " << (lin + (lin - y)) << std::endl;
         return lin + (lin - y) ;
+    }
+
+    inline void process_hinvert(memory_vector<double>::iterator it)
+    {
+        auto endit = it + definition;
+        auto itrev = it;
+        abs_diff = std::abs(y_destination - y_start);
+        std::reverse(it.ptr, endit.ptr);
+        for(size_t i = 0; i < definition; ++i)
+        {
+           *(it.ptr) = (abs_diff + y_start) - (*(it.ptr));
+            ++it;
+        }
     }
 
     size_t definition;
@@ -1144,15 +1172,25 @@ protected:
 using linear_curve = curve_base;
 
 // Allows you to make a symetry on a x_start/y_start x_end/y_end linear axis
-inline std::shared_ptr<curve_base> invert(std::shared_ptr<curve_base> cb)
+inline std::shared_ptr<curve_base> vinvert(std::shared_ptr<curve_base> cb)
 {
-    cb->inverted = true;
+    cb->vinverted = !cb->vinverted;
     return cb;
 }
+inline std::shared_ptr<curve_base> vsymmetry(std::shared_ptr<curve_base> cb) {return vinvert(cb);}
+inline std::shared_ptr<curve_base> vsym(std::shared_ptr<curve_base> cb) {return vinvert(cb);}
+
+inline std::shared_ptr<curve_base> hinvert(std::shared_ptr<curve_base> cb)
+{
+    cb->hinverted = !cb->hinverted;
+    return cb;
+}
+inline std::shared_ptr<curve_base> hsymmetry(std::shared_ptr<curve_base> cb) {return hinvert(cb);}
+inline std::shared_ptr<curve_base> hsym(std::shared_ptr<curve_base> cb) {return hinvert(cb);}
 
 inline std::shared_ptr<curve_base> mirror(std::shared_ptr<curve_base> cb)
 {
-    cb->mirrored = !cb->mirrored; //true;
+    cb->mirrored = !cb->mirrored;
     return cb;
 }
 
@@ -1601,7 +1639,8 @@ public:
 
         for(size_t i = 0; i < size ; i++)
         {
-            const double x = double(i) / double(size);
+            double x = hypercurve::fraction(i, size);
+            //const double x = double(i) / double(size);
             while(cnt < size)
             {
                 if( (r1.first <= x ) && (r2.first >= x))
@@ -1614,7 +1653,7 @@ public:
             double relative_x = relative_position(r1.first, r2.first, x);
             double linear_interp = linear_interpolation(r1.second, r2.second, relative_x);
             if(std::abs(linear_interp) > max) max = std::abs(linear_interp);
-            if(inverted) linear_interp = process_invert(x, linear_interp);
+            if(vinverted) linear_interp = process_vinvert(x, linear_interp);
             *it = linear_interp;
             ++it;
         }
@@ -1769,15 +1808,19 @@ public:
     inline virtual double process_all(size_t size, memory_vector<double>::iterator &it) override
     {
         memory_vector<double>::iterator begin_ptr = it;
+        memory_vector<double>::iterator end_ptr = it;
+
         double *data_ptr = it.get();
         spl.process(data_ptr, definition, _control_points, _spline_memory_ptr, _spline_mem_size);
         double max = 0.0;
+
         for(size_t i = 0; i < size; i++)
         {
             if( std::abs(*it) > max ) max = std::abs(*it);
-            if(inverted) *it = process_invert(hypercurve::fraction(i, size), *it);
+            if(vinverted) *it = process_vinvert(hypercurve::fraction(i, size), *it);
             ++it;
         }
+
         post_processing(begin_ptr);
         return max;
     }
@@ -1822,7 +1865,9 @@ public:
         double max = 0.0;
         for(size_t i =0; i < size; i++)
         {
-            const double x = double(i) / double(size);
+            double x = hypercurve::fraction(i, size);
+
+            //const double x = double(i) / double(size);
             while(cnt < size)
             {
                 if((r1.first <= x) && (r2.first >= x))
@@ -1835,7 +1880,7 @@ public:
             double relative_x = relative_position(r1.first, r2.first, x);
             double linear_interp = linear_interpolation(r1.second, r2.second, relative_x);
             if(std::abs(linear_interp) > max) max = std::abs(linear_interp);
-            if(inverted) linear_interp = process_invert(x, linear_interp);
+            if(vinverted) linear_interp = process_vinvert(x, linear_interp);
             *it = linear_interp;
             ++it;
         }
@@ -2070,7 +2115,7 @@ public:
         }
     }
 
-    void normalize_y(double target_min, double target_max)
+    void scale(double target_min, double target_max)
     {
         find_extremeness();
 
@@ -2079,6 +2124,9 @@ public:
             samples[i] = ((samples[i] - min ) / ambitus )  * std::abs(target_max - target_min) + target_min;
         }
     }
+    void normalize() {scale(0, 1);}
+    // Alias
+    void norm() { scale(0, 1); }
 
     std::pair<double, double> find_extremeness()
     {
@@ -2700,7 +2748,7 @@ std::pair<curve, std::string> random_curve_composer( size_t max_segs = 16, int m
 
     double y_start = (envelop | waveform) ? 0 : random<double>(0, 1);
     curve c(definition, y_start, segs);
-    c.normalize_y(min, max);
+    c.scale(min, max);
     return {c, cnames};
 }
 
@@ -2727,16 +2775,16 @@ static increment_map< std::shared_ptr<segment> > faust_segment_map;
 static increment_map< std::shared_ptr<curve> > faust_curve_map;
 
 // Operations on curves
-static int hc_normalize_y(int crv, double min, double max)
+static int hc_scale(int crv, double min, double max)
 {
-    faust_curve_map[crv]->normalize_y(min, max);
+    faust_curve_map[crv]->scale(min, max);
     return crv;
 }
 
 // Just inverts a curve base on its linear axis (symetry on linear axis)
 static int hc_invert_curve_base(int cb)
 {
-    invert(faust_curve_base_map[cb]);
+    vinvert(faust_curve_base_map[cb]);
     return cb;
 }
 

@@ -1,7 +1,6 @@
 #include <iostream>
 #include<memory.h>
 #include"../src/hypercurve.h"
-#include"sndfile.hh"
 #include<chrono>
 using namespace std;
 

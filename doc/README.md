@@ -3,74 +3,42 @@
   
 ![Hybrid Hypercurve](png/hybrid.png)
 
-
 Hypercurve is a library of 2D curves designed to process audio envelopes, applied to any audio parameter.
- 
 It is available in several frontends : C++, Lua, and Csound.
 
 1. [Hypercurve basic syntax](#hypercurve-basic-syntax)
-
 2. [Import Hypercurve](#import-hypercurve)
-
 3. [Hypercurve class](#hypercurve-class)
-
-3.1 [Hypercurve operators](#hypercurve-operators)
-
-3.2 [Invert curve base](#invert-curve-base)
-
-3.3 [Mirror curve base](#mirror-curve-base)
-
-3.4 [Scale hypercurve](#scale-hypercurve)
-
-3.5 [Concatenate hypercurves](#concatenate-hypercurves)
-
-3.6 [Resize hypercurve](#resize-hypercurve)
-
 4. [Hypercurve Segment](#segment)
-
 5. [Control point](#control-point)
-
 6. [Curve Algorithms](#curve-base)
-
-6.1. [Diocles cissoid curve](#diocles-cissoid-curve)
-
-6.2. [Cubic curve](#cubic-curve)
-
-6.3. [Power curve](#power-curve)
-
-6.4 [FFT Window curves](#hamming-hanning-blackman-curves)
-
-6.5 [Gaussian curve](#gaussian-curve)
-
-6.6 [Toxoid curve](#toxoid-curve)
-
-6.7 [Catenary curve](#catenary-curve)
-
-6.8 [Tightrope Walker curve](#tightrope-walker-curve)
-
-6.9 [Quadratic bezier curve](#quadratic-bezier-curve)
-
-6.10 [Cubic bezier curve](#cubic-bezier-curve)
-
-6.11 [Cubic spline curve](#cubic-spline-curve)
-
-6.12 [Catmull Rom Spline curve](#catmull-rom-spline-curve)
-
-6.13 [Polynomial Curve](#polynomial-curve)
-
-6.14 [User defined Curve](#user-defined-curve)
-
-6.15 [Typed Curve](#typed-curve)
-
-6.16 [Mouth Curve](#mouth-curve)
-
-6.16 [Bicorn Curve](#bicorn-curve)
-
-6.17 [Lagrange Polynomial Curve](#lagrange-polynomial-curve)
-
-6.18 [Logarithmic Curve](#logarithmic-curve)
-
-6.19 [Exponential Curve](#Exponential-curve)
+    6.1. [Diocles cissoid curve](#diocles-cissoid-curve)
+    6.2. [Cubic curve](#cubic-curve)
+    6.3. [Power curve](#power-curve)
+    6.4 [FFT Window curves](#hamming-hanning-blackman-curves)
+    6.5 [Gaussian curve](#gaussian-curve)
+    6.6 [Toxoid curve](#toxoid-curve)
+    6.7 [Catenary curve](#catenary-curve)
+    6.8 [Tightrope Walker curve](#tightrope-walker-curve)
+    6.9 [Quadratic bezier curve](#quadratic-bezier-curve)
+    6.10 [Cubic bezier curve](#cubic-bezier-curve)
+    6.11 [Cubic spline curve](#cubic-spline-curve)
+    6.12 [Catmull Rom Spline curve](#catmull-rom-spline-curve)
+    6.13 [Polynomial Curve](#polynomial-curve)
+    6.14 [User defined Curve](#user-defined-curve)
+    6.15 [Typed Curve](#typed-curve)
+    6.16 [Mouth Curve](#mouth-curve)
+    6.16 [Bicorn Curve](#bicorn-curve)
+    6.17 [Lagrange Polynomial Curve](#lagrange-polynomial-curve)
+    6.18 [Logarithmic Curve](#logarithmic-curve)
+    6.19 [Exponential Curve](#Exponential-curve)
+7. [Manipulation Tools](#manipulation-tools)
+    7.1 [Hypercurve operators](#hypercurve-operators)
+    7.2 [Invert curve base](#invert-curve-base)
+    7.3 [Mirror curve base](#mirror-curve-base)
+    7.4 [Scale hypercurve](#scale-hypercurve)
+    7.5 [Concatenate hypercurves](#concatenate-hypercurves)
+    7.6 [Resize hypercurve](#resize-hypercurve)
 
 ## Hypercurve basic syntax
 
@@ -282,234 +250,6 @@ Faust :
 curve = hc.hypercurve(int size_in_samples, float y_start, (list_of_segments) );
 ```
 
-
-### Methods
-
-#### Hypercurve Operators 
-
-Hypercurves can be combined with + - * / operators
-You are allowed to combine curve and numbers with these operators (for example mycurve * 2). 
-In Csound and Faust, those are implemented as separate functions. 
-
-
-
-C++ :
-
-```c++
-
-  hypercurve::curve c1(2048, 0, {hypercurve::segment(1, 1, hypercurve::share(hypercurve::cubic_curve()))});
-  hypercurve::curve c2(2048, 0, {hypercurve::segment(1, 1, hypercurve::share(hypercurve::diocles_curve(1)))});
-  hypercurve::curve sum = c1 + c2; 
-  hypercurve::curve sub = c1 - c2; 
-  hypercurve::curve prod = c1 * c2; 
-  hypercurve::curve div = c1 / c2; 
-  // Or 
-  c1 += c2;
-  c1 -= c2;
-  c1 *= c2;
-  c1 /= c2;
-
-  // It works for all mathematic operators +, -, /, *
-```
-
-Lua :
-
-```Lua
-
-  local c1 = hc.hypercurve(2048, 0, {hc.segment(1, 1, hc.cubic_curve())})
-  local c2 = hc.hypercurve(2048, 0, {hc.segment(1, 1, hc.diocles_curve(1))})
-  local add = c1 + c2
-  local sub = c1 - c2
-  local prod = c1 * c2
-  local div = c1 / c2
-```
-
-Csound :
-
-```Csound
-  icrv1 = hc_hypercurve(2048, 0, hc_segment(1, 1, hc_cubic_curve()))
-  icrv2 = hc_hypercurve(2048, 0, hc_segment(1, 1, hc_diocles_curve(1)))
-  icrv_sum = hc_add(icrv1, icrv2)
-  icrv_sub = hc_sub(icrv1, icrv2)
-  icrv_prod = hc_mult(icrv1, icrv2)
-  icrv_div = hc_div(icrv1, icrv2)
-
-  icrv_sum = hc_add(icrv1, 2)
-  // ... 
-```
-
-
-Faust : 
-```
-crv1 = hc.hypercurve(2048, 0, (hc.segment(1, 1, hc.cubic_curve)));
-crv2 = hc.hypercurve(2048, 0, (hc.segment(1, 1, hc.diocles_curve(1))));
-
-crv_sum = hc.sum(crv1, crv2);
-crv_sub = hc.sub(crv1, crv2);
-crv_mult = hc.mult(crv1, crv2);
-crv_div = hc.div(crv1, crv2);
-
-```
-
-
-
-#### Invert curve base 
-
-Vertical symetry of the curve base.
-
-
-C++ :
-
-```c++
-
-hypercurve::invert(hypercurve::share( hypercurve::cubic_curve() ));
-
-```
-
-Lua :
-
-```Lua
-
-hc.invert(hc.cubic_curve())
-
-```
-
-Csound :
-
-```Csound
-
-hc_invert(hc_cubic_curve())
-
-```
-
-Faust : 
-```
-hc.invert(hc.cubic_curve());
-```
-
-
-
-#### Mirror curve base
-
-This function will make a symetry of the curve on a x_start/y_start - x_destination/y_destination axis
-
-C++ :
-
-```c++
-
-hypercurve::mirror(hypercurve::share( hypercurve::cubic_curve() ));
-
-```
-
-Lua :
-
-```Lua
-
-hc.mirror(hc.cubic_curve())
-
-```
-
-Csound :
-
-```Csound
-
-hc_mirror(hc_cubic_curve())
-
-```
-
-Faust : 
-```
-hc.mirror(hc.cubic_curve());
-```
-
-
-
-
-#### Scale hypercurve
-
-This functions will allow you to scale or normalize an hypercurve between min and max y values
-The scale function allows you to rescale an entire HYPERCURVE, while normalize or norm will scale between 0 and 1. 
-
-C++ :
-
-```c++
-  hypercurve::curve c(4096, 0, {hypercurve::segment(1, 1, hypercurve::cubic_curve())});
-  c.scale(-1, 1);
-  // normalize scales between 0 and 1
-  c.normalize();
-  c.norm();
-  // Now "c" curve y start is -1 and its destination is 1
-
-```
-
-Lua :
-
-```Lua
-  local crv = hc.hypercurve(4096, 0, {hc.segment(1, 1, hc.cubic_curve())})
-  crv:scale(-1, 1)
-  crv:normalize()
-  crv:norm()
-```
-
-Csound :
-
-```Csound
-
-  icrv = hc_hypercurve(4096, 0, hc_segment(1, 1, hc_cubic_curve()))
-  // This function won't make a copy, it will only scale the corresponding curve
-  hc_scale(icrv, -1, 1)
-  hc_normalize(icrv)
-  hc_norm(icrv)
-``` 
-
-
-Faust : 
-```
-crv = hc.hypercurve(2048, 0, (hc.segment(1, 1, hc.cubic_curve())))
-hc.scale(crv, -1, 1);
-hc.normalize(crv);
-hc.norm(crv);
-```
-
-
-### Concatenate hypercurves
-
-This function allows to contacenate two or more curves 
-
-C++ :
-
-```c++
-
-curve concatenated = hypercurve::concatenate(size_t new_size, {hypercurve::curve &crv1, hypercurve::curve &crv2, [...] } )
-// concat is an alias (also, the same function exist as a hypercurve::curve constructor)
-```
-
-Lua :
-
-```Lua
-
-local new_crv = hc.concatenate(new_size, {curve_list})
--- hc.concat is an alias
-
-```
-
-Csound :
-
-```Csound
-
-iconcatenated, hc_concatenate(inew_ftable_number, inew_size, icrv1, [icrv2, ...] )
-; hc_concat is an alias
-
-```
-
-Faust : 
-```
-// Not implemented yet
-```
-
-### Resize hypercurve
-
-
 ## Segment
 
 An hypercurve is composed with a list of one or more segments. Each segment have a fractional size (0-1 range), a destination in y axis, and a curve_base wich represents the algorithm. 
@@ -587,8 +327,6 @@ hc.point(0.3, 0.8);
 ```
   
 
-<!---
-
 C++ :
 
 ```c++
@@ -618,10 +356,6 @@ Faust :
 hc.
 ```
 
--->
-
-  
-  
 
 ## Curve Base
 
@@ -1432,3 +1166,234 @@ Faust :
 ```
 hc.logarithmic_curve();
 ```
+
+
+
+
+### Manipulation Tools
+
+#### Hypercurve Operators 
+
+Hypercurves can be combined with + - * / operators
+You are allowed to combine curve and numbers with these operators (for example mycurve * 2). 
+In Csound and Faust, those are implemented as separate functions. 
+
+
+
+C++ :
+
+```c++
+
+  hypercurve::curve c1(2048, 0, {hypercurve::segment(1, 1, hypercurve::share(hypercurve::cubic_curve()))});
+  hypercurve::curve c2(2048, 0, {hypercurve::segment(1, 1, hypercurve::share(hypercurve::diocles_curve(1)))});
+  hypercurve::curve sum = c1 + c2; 
+  hypercurve::curve sub = c1 - c2; 
+  hypercurve::curve prod = c1 * c2; 
+  hypercurve::curve div = c1 / c2; 
+  // Or 
+  c1 += c2;
+  c1 -= c2;
+  c1 *= c2;
+  c1 /= c2;
+
+  // It works for all mathematic operators +, -, /, *
+```
+
+Lua :
+
+```Lua
+
+  local c1 = hc.hypercurve(2048, 0, {hc.segment(1, 1, hc.cubic_curve())})
+  local c2 = hc.hypercurve(2048, 0, {hc.segment(1, 1, hc.diocles_curve(1))})
+  local add = c1 + c2
+  local sub = c1 - c2
+  local prod = c1 * c2
+  local div = c1 / c2
+```
+
+Csound :
+
+```Csound
+  icrv1 = hc_hypercurve(2048, 0, hc_segment(1, 1, hc_cubic_curve()))
+  icrv2 = hc_hypercurve(2048, 0, hc_segment(1, 1, hc_diocles_curve(1)))
+  icrv_sum = hc_add(icrv1, icrv2)
+  icrv_sub = hc_sub(icrv1, icrv2)
+  icrv_prod = hc_mult(icrv1, icrv2)
+  icrv_div = hc_div(icrv1, icrv2)
+
+  icrv_sum = hc_add(icrv1, 2)
+  // ... 
+```
+
+
+Faust : 
+```
+crv1 = hc.hypercurve(2048, 0, (hc.segment(1, 1, hc.cubic_curve)));
+crv2 = hc.hypercurve(2048, 0, (hc.segment(1, 1, hc.diocles_curve(1))));
+
+crv_sum = hc.sum(crv1, crv2);
+crv_sub = hc.sub(crv1, crv2);
+crv_mult = hc.mult(crv1, crv2);
+crv_div = hc.div(crv1, crv2);
+
+```
+
+
+
+#### Invert curve base 
+
+Vertical symetry of the curve base.
+
+
+C++ :
+
+```c++
+
+hypercurve::invert(hypercurve::share( hypercurve::cubic_curve() ));
+
+```
+
+Lua :
+
+```Lua
+
+hc.invert(hc.cubic_curve())
+
+```
+
+Csound :
+
+```Csound
+
+hc_invert(hc_cubic_curve())
+
+```
+
+Faust : 
+```
+hc.invert(hc.cubic_curve());
+```
+
+
+
+#### Mirror curve base
+
+This function will make a symetry of the curve on a x_start/y_start - x_destination/y_destination axis
+
+C++ :
+
+```c++
+
+hypercurve::mirror(hypercurve::share( hypercurve::cubic_curve() ));
+
+```
+
+Lua :
+
+```Lua
+
+hc.mirror(hc.cubic_curve())
+
+```
+
+Csound :
+
+```Csound
+
+hc_mirror(hc_cubic_curve())
+
+```
+
+Faust : 
+```
+hc.mirror(hc.cubic_curve());
+```
+
+
+
+
+#### Scale hypercurve
+
+This functions will allow you to scale or normalize an hypercurve between min and max y values
+The scale function allows you to rescale an entire HYPERCURVE, while normalize or norm will scale between 0 and 1. 
+
+C++ :
+
+```c++
+  hypercurve::curve c(4096, 0, {hypercurve::segment(1, 1, hypercurve::cubic_curve())});
+  c.scale(-1, 1);
+  // normalize scales between 0 and 1
+  c.normalize();
+  c.norm();
+  // Now "c" curve y start is -1 and its destination is 1
+
+```
+
+Lua :
+
+```Lua
+  local crv = hc.hypercurve(4096, 0, {hc.segment(1, 1, hc.cubic_curve())})
+  crv:scale(-1, 1)
+  crv:normalize()
+  crv:norm()
+```
+
+Csound :
+
+```Csound
+
+  icrv = hc_hypercurve(4096, 0, hc_segment(1, 1, hc_cubic_curve()))
+  // This function won't make a copy, it will only scale the corresponding curve
+  hc_scale(icrv, -1, 1)
+  hc_normalize(icrv)
+  hc_norm(icrv)
+``` 
+
+
+Faust : 
+```
+crv = hc.hypercurve(2048, 0, (hc.segment(1, 1, hc.cubic_curve())))
+hc.scale(crv, -1, 1);
+hc.normalize(crv);
+hc.norm(crv);
+```
+
+
+### Concatenate hypercurves
+
+This function allows to contacenate two or more curves 
+
+C++ :
+
+```c++
+
+curve concatenated = hypercurve::concatenate(size_t new_size, {hypercurve::curve &crv1, hypercurve::curve &crv2, [...] } )
+// concat is an alias (also, the same function exist as a hypercurve::curve constructor)
+```
+
+Lua :
+
+```Lua
+
+local new_crv = hc.concatenate(new_size, {curve_list})
+-- hc.concat is an alias
+
+```
+
+Csound :
+
+```Csound
+
+iconcatenated = hc_concatenate(inew_ftable_number, inew_size, icrv1, [icrv2, ...] )
+; hc_concat is an alias
+
+```
+
+Faust : 
+```
+// Not implemented yet
+```
+
+### Resize hypercurve
+
+
