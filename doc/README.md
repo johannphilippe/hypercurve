@@ -12,32 +12,59 @@ It is available in several frontends : C++, Lua, and Csound.
 4. [Hypercurve Segment](#segment)
 5. [Control point](#control-point)
 6. [Curve Algorithms](#curve-base)
+    
     6.1. [Diocles cissoid curve](#diocles-cissoid-curve)
+    
     6.2. [Cubic curve](#cubic-curve)
+    
     6.3. [Power curve](#power-curve)
+    
     6.4 [FFT Window curves](#hamming-hanning-blackman-curves)
+    
     6.5 [Gaussian curve](#gaussian-curve)
+    
     6.6 [Toxoid curve](#toxoid-curve)
+    
     6.7 [Catenary curve](#catenary-curve)
+    
     6.8 [Tightrope Walker curve](#tightrope-walker-curve)
+    
     6.9 [Quadratic bezier curve](#quadratic-bezier-curve)
+    
     6.10 [Cubic bezier curve](#cubic-bezier-curve)
+    
     6.11 [Cubic spline curve](#cubic-spline-curve)
+    
     6.12 [Catmull Rom Spline curve](#catmull-rom-spline-curve)
+    
     6.13 [Polynomial Curve](#polynomial-curve)
+    
     6.14 [User defined Curve](#user-defined-curve)
+    
     6.15 [Typed Curve](#typed-curve)
+    
     6.16 [Mouth Curve](#mouth-curve)
+    
     6.16 [Bicorn Curve](#bicorn-curve)
+    
     6.17 [Lagrange Polynomial Curve](#lagrange-polynomial-curve)
+        
     6.18 [Logarithmic Curve](#logarithmic-curve)
+    
     6.19 [Exponential Curve](#Exponential-curve)
+
 7. [Manipulation Tools](#manipulation-tools)
+    
     7.1 [Hypercurve operators](#hypercurve-operators)
+    
     7.2 [Invert curve base](#invert-curve-base)
+    
     7.3 [Mirror curve base](#mirror-curve-base)
+    
     7.4 [Scale hypercurve](#scale-hypercurve)
+    
     7.5 [Concatenate hypercurves](#concatenate-hypercurves)
+    
     7.6 [Resize hypercurve](#resize-hypercurve)
 
 ## Hypercurve basic syntax
@@ -1395,5 +1422,9 @@ Faust :
 ```
 
 ### Resize hypercurve
+
+
+  
+
 
 
