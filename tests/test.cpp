@@ -40,7 +40,7 @@ struct timer
 using namespace hypercurve;
 void write_as_png(curve &c, bool waveform = true, std::string name = "h.png")
 {
-    png p(2048, 1024);
+    png p(2048, 1024, {255,255,255,0}, {244, 101, 36, 255});
     p.draw_curve(c.get_samples(), c.get_definition(), true, waveform);
     //p.draw_grid(10, 10, color{255, 255, 255, 100});
     std::string concat("/home/johann/Documents/" + name);
@@ -109,6 +109,7 @@ void generate_curve_pictures()
     curve cubbez(2048, 0, {segment(1, 1, share(cubic_bezier_curve(point(0.1, 0.1), point(0.5, 0.8))))});
     write_doc_png(cubbez, "cubic_bezier.png");
     curve spl(2048, 0, {segment(1, 1, share(cubic_spline_curve( { point(0.2, 0.7), point(0.3, 0.2), point(0.5, 0.8)} )))});
+    spl.norm();
     write_doc_png(spl, "cubic_spline.png");
     curve catmul(2048, 0, {segment(1, 1, share(catmull_rom_spline_curve(point(-1,-0.5), point(2, 3.5))))});
     write_doc_png(catmul, "catmul_rom.png");
@@ -124,6 +125,11 @@ void generate_curve_pictures()
     curve lagrange(2048, 0, {segment(1, 1, share(lagrange_polynomial_curve({ control_point(0.2, 0.8),  control_point(0.4, 0.1) })))});
     lagrange.scale(0, 1);
     write_doc_png(lagrange, "lagrange.png");
+
+    curve log(2048, 0, {segment(1, 1, share(logarithmic_curve()))});
+    write_doc_png(log, "logarithmic.png");
+    curve exp(2048, 0, {segment(1, 1, share(exponential_curve()))});
+    write_doc_png(exp, "exponential.png");
 }
 
 
@@ -596,14 +602,81 @@ void inversion_test()
     p.show();
 }
 
+
+void icsc()
+{
+    double def = 8192;
+    double div = 64;
+    double atq = 3;
+    double dec = 24;
+    double sus = 0.35;
+    double rel = div - (atq + dec);
+
+    curve tightrope(def, 0, {
+                       segment(fraction(atq, div), 1, share(tightrope_walker_curve(1.105, 0.125))),
+                       segment(fraction(dec, div), sus, share(tightrope_walker_curve(0.95, 0.25))),
+                       segment(fraction(rel, div), 0, share(tightrope_walker_curve(0.5, 0.15)))
+                    });
+    write_as_png(tightrope, false, "icsc_tightrope.png");
+    curve kiss(def, 0, {
+                       segment(fraction(atq, div), 1, share(kiss_curve())),
+                       segment(fraction(dec, div), sus, share(kiss_curve())),
+                       segment(fraction(rel, div), 0, share(kiss_curve()))
+                    });
+    write_as_png(kiss, false, "icsc_kiss.png");
+
+    curve cate(def, 0, {
+                       segment(fraction(atq, div), 1, share(catenary_curve(1.75))),
+                       segment(fraction(dec, div), sus, share(catenary_curve(0.95))),
+                       segment(fraction(rel, div), 0, share(catenary_curve(0.25)))
+                    });
+    write_as_png(cate, false, "icsc_catenary.png");
+    curve tox(def, 0, {
+                       segment(fraction(atq, div), 1, share(toxoid_curve(0.05))),
+                       segment(fraction(dec, div), sus, share(toxoid_curve(5.95))),
+                       segment(fraction(rel, div), 0, share(toxoid_curve(0.05)))
+                    });
+    write_as_png(tox, false, "icsc_toxoid.png");
+
+
+    curve simple(def, 0, {
+                     segment(0.1, 1, share(diocles_curve(0.5001))),
+                     segment(0.9, 0, share(diocles_curve(0.55)))
+                 });
+    write_as_png(simple, false, "icsc_diocles.png");
+
+
+    curve complex(def, 0, {
+                      segment(0.05, 1, share(gauss_curve(1, 0.1))),
+                      segment(0.4, 0.5, share(catmull_rom_spline_curve(point(-1, 3), point(3, -2)))),
+                      segment(0.2, 0.3, mirror(share(bicorn_curve(true)))),
+                      segment(0.35, 0, share(cubic_bezier_curve(point(0.1, 0.1), point(0.9, 0.65))))
+                      //segment(0.3, 0.0, share(linear_curve()))
+                  });
+
+    //complex.norm();
+    complex.find_extremeness();
+    complex.ascii_display("complex", "heeey", '*');
+    write_as_png(complex, false, "icsc_complex.png");
+    /*
+    for(size_t i = 0; i < 100; ++i) {
+        std::pair<curve, std::string> rnd = random_curve_composer(6, 0, 1, 16384, true, false, false );
+        std::string name = "purpleicsc_" + rnd.second + ".png";
+        write_as_png(rnd.first, false, name);
+
+    }
+    */
+}
+
 int main()
 {
 
-    dummy_test();
+    //icsc();
+    //dummy_test();
     //unit_tests();
     //random_generator_test();
     //inversion_test();
-    //generate_curve_pictures();
+    generate_curve_pictures();
 
     /*
     auto crv = curve(16384, 0, {

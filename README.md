@@ -160,6 +160,9 @@ The resulting binaries will all be located in `bin` directory. On Windows, `lua_
 This must be considered when packaging the library to be embedded or used by another application.
 
 # TODO
+* To fix : Lagrange polynomial returns nan, and doesn't scal well
+
+Ideas : 
 * Inversion across the axis of another curve 
 * Rename vinvert to reflect the fact it's not vertical symmetry, but linear axis vertical reflection
 * Implement real vertical symmetry

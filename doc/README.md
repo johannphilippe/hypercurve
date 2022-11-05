@@ -49,9 +49,8 @@ It is available in several frontends : C++, Lua, and Csound.
     
     6.17 [Lagrange Polynomial Curve](#lagrange-polynomial-curve)
         
-    6.18 [Logarithmic Curve](#logarithmic-curve)
+    6.18 [Logarithmic and exponential Curve](#logarithmic-and-exponential-curve)
     
-    6.19 [Exponential Curve](#Exponential-curve)
 
 7. [Manipulation Tools](#manipulation-tools)
     
@@ -1159,20 +1158,21 @@ hc_lagrange_polynomial_curve( hc_control_point(0.2, 0.8), hc_control_point(0.4, 
 Faust : 
 ```
 hc.lagrange_polynomial_curve( (hc.control_point(0.2, 0.8), hc.control_point(0.4, 0.1)) );
-```
+```     
 
-#### Logarithmic Curve
+#### Logarithmic and exponential Curve
 
 
-![Lagrange curve](png/lagrange.png)
+![Logarithmic curve](png/logarithmic.png)
+![Exponential curve](png/exponential.png)
   
-Like cubic spline, lagrange interpolation takes a list of control points with 0 < x < 1. 
 
 C++ :
 
 ```c++
 
 hypercurve::share( hypercurve::logarithmic_curve());
+hypercurve::share( hypercurve::exponential_curve());
 
 ```
 
@@ -1180,18 +1180,21 @@ Lua :
 
 ```Lua
 hc.logarithmic_curve()
+hc.exponential_curve()
 ```
 
 Csound :
 
 ```Csound
 hc_logarithmic_curve()
+hc_exponential_curve()
 
 ```
 
 Faust : 
 ```
 hc.logarithmic_curve();
+hc.exponential_curve();
 ```
 
 
@@ -1421,7 +1424,6 @@ Faust :
 // Not implemented yet
 ```
 
-### Resize hypercurve
 
 
   
