@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.19)
+cmake_minimum_required(VERSION 3.16)
 
 execute_process(COMMAND quom
    ${CMAKE_CURRENT_SOURCE_DIR}/hypercurve_faust.h
@@ -6,10 +6,11 @@ execute_process(COMMAND quom
 
 project(faust_library)
 
-add_library(hypercurve_header INTERFACE
-   ${CMAKE_CURRENT_SOURCE_DIR}/hypercurve_faust.h
-   ${CMAKE_CURRENT_SOURCE_DIR}/hypercurve.lib
-   ${CMAKE_CURRENT_SOURCE_DIR}/hypercurve_test.dsp)
+#add_library(hypercurve_header INTERFACE
+#   ${CMAKE_CURRENT_SOURCE_DIR}/hypercurve_faust.h
+#   ${CMAKE_CURRENT_SOURCE_DIR}/hypercurve.lib
+#   ${CMAKE_CURRENT_SOURCE_DIR}/hypercurve_test.dsp)
+
 
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/hypercurve_test.dsp
    DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/faust_hypercurve_lib)

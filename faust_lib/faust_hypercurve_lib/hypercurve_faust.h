@@ -174,6 +174,7 @@ namespace fpng
 #include<string>
 #include<vector>
 #include<complex>
+
 typedef std::complex<double> pnt;
 
 #ifndef M_PI
@@ -181,7 +182,19 @@ typedef std::complex<double> pnt;
 #endif
 
 namespace hypercurve {
+// Definitions
+class curve;
 
+// Create shared pointer to object
+template<typename T>
+inline std::shared_ptr<T> share(T t)
+{
+    return std::make_shared<T>(std::move(t));
+}
+
+/*
+ * Maths utilities
+ */
 template<typename Numeric, typename Generator = std::mt19937>
 Numeric random(Numeric from, Numeric to)
 {
@@ -220,12 +233,6 @@ inline double limit(double min, double max, double v)
     if(v > max) return max;
     if(v < min) return min;
     return v;
-}
-
-template<typename T>
-inline std::shared_ptr<T> share(T t)
-{
-    return std::make_shared<T>(std::move(t));
 }
 
 struct point
@@ -541,6 +548,19 @@ void mirror(memory_vector<double>::iterator &it, size_t definition, double y_sta
     }
 }
 
+inline std::pair<double, double> find_extremeness(double *samples, size_t size)
+{
+    double min = samples[0], max = samples[0];
+    for(size_t i = 0; i < size; ++i)
+    {
+        if(samples[i] < min)
+            min = samples[i];
+        if(samples[i] > max)
+            max = samples[i];
+    }
+    return std::make_pair(min, max);
+}
+
 // PNG utils
 
 //using color = std::array<uint8_t, 4>;
@@ -567,7 +587,8 @@ struct png
 
     void set(size_t x, size_t y, color c)
     {
-        data[ width * (height - y - 1) + x] = c;
+        const int idx = width * (height - y ) + x;
+        data[ width * (height - y) + x] = c;
     }
 
     void set_curve_point(double x, double y)
@@ -623,17 +644,23 @@ struct png
 
     }
 
-    void draw_curve(double *samples, size_t size,
-                    bool fill = true, bool waveform = false )
+    // Grid 0 makes not grid, more than 1 will set the division
+    virtual void draw_curve(double *samples, size_t size,
+                    bool fill = true, size_t grid = 0, bool waveform = false)
     {
+        if(grid > 0)
+            draw_grid(grid, grid);
+
+        std::pair<double, double> extremeness = find_extremeness(samples, size);
+        double ambitus = std::abs(extremeness.second - extremeness.first);
         for(size_t i = 0; i < size; ++i)
         {
             double x = hypercurve::fraction(i,size);
-            double y = (waveform) ? (samples[i] + 1.0) / 2.0 : samples[i];
+            double spl = (samples[i] - extremeness.first) / ambitus;
             if(fill)
-                fill_curve_point(x, y, waveform);
+                fill_curve_point(x, spl, waveform);
             else
-                set_curve_point(x, y);
+                set_curve_point(x, spl);
         }
 
     }
@@ -1138,7 +1165,7 @@ protected:
         if(y_start > y_destination)
             y = process(1.0 - x) ;
         else
-            y = process(x) * abs_diff + offset;
+            y = process(x); // * abs_diff + offset;
 
         y  = y * abs_diff + offset;
         return y;
@@ -2130,16 +2157,11 @@ public:
 
     std::pair<double, double> find_extremeness()
     {
-        min = samples[0], max = samples[0];
-        for(auto & it : samples)
-        {
-            if(it < min)
-                min = it;
-            if(it > max)
-                max = it;
-        }
+        std::pair<double, double> ext = hypercurve::find_extremeness(samples.data(), definition);
         ambitus = std::abs(max - min);
-        return std::make_pair(min, max);
+        min = ext.first;
+        max = ext.second;
+        return ext;
     }
 
     void ascii_display(std::string name, std::string label, char marker)
