@@ -161,6 +161,7 @@ This must be considered when packaging the library to be embedded or used by ano
 
 # TODO
 * To fix : Lagrange polynomial returns nan, and doesn't scal well
+* Fixed : Major scaling issue when creating complex curves (going down after being more than 1)
 
 Ideas : 
 * Inversion across the axis of another curve 

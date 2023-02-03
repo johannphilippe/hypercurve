@@ -181,16 +181,11 @@ public:
 
     std::pair<double, double> find_extremeness()
     {
-        min = samples[0], max = samples[0];
-        for(auto & it : samples)
-        {
-            if(it < min)
-                min = it;
-            if(it > max)
-                max = it;
-        }
+        std::pair<double, double> ext = hypercurve::find_extremeness(samples.data(), definition);
         ambitus = std::abs(max - min);
-        return std::make_pair(min, max);
+        min = ext.first;
+        max = ext.second;
+        return ext;
     }
 
     void ascii_display(std::string name, std::string label, char marker)

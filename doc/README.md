@@ -66,6 +66,8 @@ It is available in several frontends : C++, Lua, and Csound.
     
     7.6 [Resize hypercurve](#resize-hypercurve)
 
+8 [Utilities](#utilities)
+
 ## Hypercurve basic syntax
 
 
@@ -1426,7 +1428,38 @@ Faust :
 
 
 
+### Utilities
+
+
+#### Export as PNG 
   
+C++ :
+
+```c++
+
+write_as_png(
+```
+
+Lua :
+
+```Lua
+
+
+```
+
+Csound :
+
+```Csound
+
+iconcatenated = hc_concatenate(inew_ftable_number, inew_size, icrv1, [icrv2, ...] )
+; hc_concat is an alias
+
+```
+
+Faust : 
+```
+// Not implemented yet
+```
 
 
 

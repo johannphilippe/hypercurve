@@ -41,7 +41,7 @@ using namespace hypercurve;
 void write_as_png(curve &c, bool waveform = true, std::string name = "h.png")
 {
     png p(2048, 1024, {255,255,255,0}, {244, 101, 36, 255});
-    p.draw_curve(c.get_samples(), c.get_definition(), true, waveform);
+    p.draw_curve(c.get_samples(), c.get_definition(), false, 0 , waveform);
     //p.draw_grid(10, 10, color{255, 255, 255, 100});
     std::string concat("/home/johann/Documents/" + name);
     p.write_as_png(concat);
@@ -50,7 +50,7 @@ void write_as_png(curve &c, bool waveform = true, std::string name = "h.png")
 void write_doc_png(curve &c, std::string name, int width = 1024, int height = 256)
 {
     png p(width, height);
-    p.draw_curve(c.get_samples(), c.get_definition(), true, false);
+    p.draw_curve(c.get_samples(), c.get_definition(),true,0, false);
     p.draw_grid(10, 10, color{255, 255, 255, 100});
     std::string concat("/home/johann/Documents/GitHub/hypercurve/doc/png/" + name);
     std::cout << concat << std::endl;
@@ -476,6 +476,24 @@ void dummy_test()
 {
 
     size_t def = 16384;
+
+
+    // Tests on png
+
+    curve xplode(def, 0, {
+                     segment(1, 1, share(lagrange_polynomial_curve({point(0.01, 0.9), point(0.02, 0.01), point(0.021, 0.99)})))
+                 });
+    xplode.ascii_display("xplode", "lagrange polynomial", '*');
+    write_as_png(xplode, false, "xplode.png");
+
+
+    curve wav(def, 0, {
+                  segment(fraction(1,3), 1, share(lagrange_polynomial_curve({point(0.01, 0.9), point(0.02, 0.01), point(0.021, 0.99)}))),
+                  segment(fraction(1,3), -1, share(lagrange_polynomial_curve({point(0.01, 0.9), point(0.02, 0.01), point(0.021, 0.99)}))),
+                  segment(fraction(1,3), 0, share(lagrange_polynomial_curve({point(0.01, 0.9), point(0.02, 0.01), point(0.021, 0.99)})))
+              });
+    wav.ascii_display("waveform", "lagrange wav", '*');
+    write_as_png(wav, false, "waveform.png");
     /*
     curve cnorm(def, 0, {
                  segment(1, 1, (share(cubic_bezier_curve(point(0.1, 0.95), point(0.2, -1.01)))))
@@ -491,6 +509,7 @@ void dummy_test()
     cdinv.ascii_display("hinverted and vinverted bezier curve", "bez", '*');
     */
 
+    /*
     curve c2norm(def, 0, {
                      segment(1, 1, (share(tightrope_walker_curve(1.01, 1))))
              });
@@ -515,6 +534,7 @@ void dummy_test()
     c2dinv.ascii_display("hinverted and vinverted bezier curve", "bez", '*');
     c2dinv.norm();
     write_as_png(c2dinv, false, "vhinv.png");
+    */
 
     /*
     curve crv(16384, 0, {segment(0.5, 1, share(hamming_curve())), segment(0.5, 0, share(hamming_curve()))});

@@ -89,7 +89,7 @@ protected:
         if(y_start > y_destination)
             y = process(1.0 - x) ;
         else
-            y = process(x) * abs_diff + offset;
+            y = process(x); // * abs_diff + offset;
 
         y  = y * abs_diff + offset;
         return y;

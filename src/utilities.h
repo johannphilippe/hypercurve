@@ -19,15 +19,27 @@
 #include<string>
 #include<vector>
 #include<complex>
-typedef std::complex<double> pnt;
 
+typedef std::complex<double> pnt;
 
 #ifndef M_PI
  #define M_PI 3.14159265358979323846
 #endif
 
 namespace hypercurve {
+// Definitions
+class curve;
 
+// Create shared pointer to object
+template<typename T>
+inline std::shared_ptr<T> share(T t)
+{
+    return std::make_shared<T>(std::move(t));
+}
+
+/*
+ * Maths utilities
+ */
 template<typename Numeric, typename Generator = std::mt19937>
 Numeric random(Numeric from, Numeric to)
 {
@@ -66,12 +78,6 @@ inline double limit(double min, double max, double v)
     if(v > max) return max;
     if(v < min) return min;
     return v;
-}
-
-template<typename T>
-inline std::shared_ptr<T> share(T t)
-{
-    return std::make_shared<T>(std::move(t));
 }
 
 struct point
@@ -122,6 +128,7 @@ struct curve_point : public point
 
    float curve;
 };
+
 
 // x must be between 0 and 1, 0 being the y1 x position, 1 the y2 x position
 inline double linear_interpolation(double y1, double y2, double x)
@@ -391,6 +398,21 @@ void mirror(memory_vector<double>::iterator &it, size_t definition, double y_sta
 }
 
 
+
+
+inline std::pair<double, double> find_extremeness(double *samples, size_t size)
+{
+    double min = samples[0], max = samples[0];
+    for(size_t i = 0; i < size; ++i)
+    {
+        if(samples[i] < min)
+            min = samples[i];
+        if(samples[i] > max)
+            max = samples[i];
+    }
+    return std::make_pair(min, max);
+}
+
 // PNG utils
 
 //using color = std::array<uint8_t, 4>;
@@ -414,17 +436,29 @@ struct png
         , background(background_)
         , foreground(foreground_)
         , data(width * height, background)
-    {}
+    {
+
+    }
 
     void set(size_t x, size_t y, color c)
     {
-        data[ width * (height - y - 1) + x] = c;
+        const size_t idx = width * (height - 1 - y ) + x;
+        if(idx >= data.size())
+        {
+            std::cout << "size : " << data.size() << " & write index : " << idx << std::endl;
+            throw(std::runtime_error("HYPERCURVE PNG > You should not write outside the PNG array"));
+        }
+        data[ idx ] = c;
     }
 
     void set_curve_point(double x, double y)
     {
         size_t ix = x * width;
         size_t iy = y * height;
+        if(ix >= width)
+            ix = width-1;
+        if(iy >= height)
+            iy = height-1;
         set(ix, iy, foreground);
     }
 
@@ -432,6 +466,10 @@ struct png
     {
         size_t ix = x * width;
         size_t iy = y * height; // y position of point
+        if(ix >= width)
+            ix = width-1;
+        if(iy >= height)
+            iy = height-1;
 
         size_t half = height / 2;
         if(!waveform)
@@ -474,17 +512,23 @@ struct png
 
     }
 
-    void draw_curve(double *samples, size_t size,
-                    bool fill = true, bool waveform = false )
+    // Grid 0 makes not grid, more than 1 will set the division
+    virtual void draw_curve(double *samples, size_t size,
+                    bool fill = true, size_t grid = 0, bool waveform = false)
     {
+        if(grid > 0)
+            draw_grid(grid, grid);
+
+        std::pair<double, double> extremeness = find_extremeness(samples, size);
+        double ambitus = std::abs(extremeness.second - extremeness.first);
         for(size_t i = 0; i < size; ++i)
         {
             double x = hypercurve::fraction(i,size);
-            double y = (waveform) ? (samples[i] + 1.0) / 2.0 : samples[i];
+            double spl = (samples[i] - extremeness.first) / ambitus;
             if(fill)
-                fill_curve_point(x, y, waveform);
+                fill_curve_point(x, spl, waveform);
             else
-                set_curve_point(x, y);
+                set_curve_point(x, spl);
         }
 
     }
@@ -500,6 +544,7 @@ protected:
     color background, foreground;
     std::vector<color> data;
 };
+
 
 // Make it derive from AuxMem
 template<typename T>
