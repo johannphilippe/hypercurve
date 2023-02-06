@@ -583,18 +583,29 @@ struct png
         , background(background_)
         , foreground(foreground_)
         , data(width * height, background)
-    {}
+    {
+
+    }
 
     void set(size_t x, size_t y, color c)
     {
-        const int idx = width * (height - y ) + x;
-        data[ width * (height - y) + x] = c;
+        const size_t idx = width * (height - 1 - y ) + x;
+        if(idx >= data.size())
+        {
+            std::cout << "size : " << data.size() << " & write index : " << idx << std::endl;
+            throw(std::runtime_error("HYPERCURVE PNG > You should not write outside the PNG array"));
+        }
+        data[ idx ] = c;
     }
 
     void set_curve_point(double x, double y)
     {
         size_t ix = x * width;
         size_t iy = y * height;
+        if(ix >= width)
+            ix = width-1;
+        if(iy >= height)
+            iy = height-1;
         set(ix, iy, foreground);
     }
 
@@ -602,6 +613,10 @@ struct png
     {
         size_t ix = x * width;
         size_t iy = y * height; // y position of point
+        if(ix >= width)
+            ix = width-1;
+        if(iy >= height)
+            iy = height-1;
 
         size_t half = height / 2;
         if(!waveform)

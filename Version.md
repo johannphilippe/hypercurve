@@ -23,3 +23,6 @@ First release
 - Round instead of floor for Csound index calculations
 - Fixed size issues with 0 padding when one sample is missed (fractional size divided by 3, 6, 9 ...)
 - Fixed Cubic Spline allocation issues
+- PNG memory issue - writing out of bounds
+
+

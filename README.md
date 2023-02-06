@@ -1,7 +1,6 @@
 # HYPERCURVE
 
 ![Hybrid hypercurve](doc/png/hybrid.png)
-This hypercurve is a combination of 1/8 diocles curve, 1/8 toxoid curve, 2/8 mouth curve, and 4/8 gauss curve.
 
 
 # What is it ? 
@@ -11,6 +10,9 @@ As shown above, you can perfectly combine gaussian curve with diocles cissoid cu
 The library can be used in C++, Lua, Csound and Faust.
 
 Every curve algorithm is different. In audio applications, we use to assign envelopes to any kind of parameter. In computer music, the way a value goes up and down in time has a big influence on how we hear a sound. Thus, the possibility to create finely shaped envelopes is truly essential. This is the purpose of Hypercurve. 
+
+The above hypercurve is a combination of 1/8 diocles curve, 1/8 toxoid curve, 2/8 mouth curve, and 4/8 gauss curve.
+
 
 ## Implemented curve algorithms
 
@@ -162,6 +164,12 @@ This must be considered when packaging the library to be embedded or used by ano
 # TODO
 * To fix : Lagrange polynomial returns nan, and doesn't scal well
 * Fixed : Major scaling issue when creating complex curves (going down after being more than 1)
+* To fix : remove #include OpcodeBase.cpp 
+* Move to template (float or double or long double)
+* Same for Csound -> MYFLT instead of double
+
+# WASM 
+* Move the ifdef wasi (utilities.h)
 
 Ideas : 
 * Inversion across the axis of another curve 

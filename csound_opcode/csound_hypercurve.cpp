@@ -5,7 +5,6 @@
 
 #include"../src/hypercurve.h"
 #include<plugin.h>
-#include<OpcodeBase.hpp>
 
 using namespace hypercurve;
 
