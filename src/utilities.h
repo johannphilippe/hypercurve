@@ -14,11 +14,14 @@
 #include<memory>
 #include<cstring>
 #include<functional>
-#include"fpng/src/fpng.h"
 #include <random>
 #include<string>
 #include<vector>
 #include<complex>
+
+#ifndef __wasi__
+#include"fpng/src/fpng.h"
+#endif
 
 typedef std::complex<double> pnt;
 
@@ -431,17 +434,20 @@ struct png
 {
     png(size_t width_ = 2048, size_t height_ = 1024,
         color background_ = black, color foreground_ = purple)
+#ifndef __wasi__
         : width(width_)
         , height(height_)
         , background(background_)
         , foreground(foreground_)
         , data(width * height, background)
+#endif
     {
 
     }
 
     void set(size_t x, size_t y, color c)
     {
+#ifndef __wasi__
         const size_t idx = width * (height - 1 - y ) + x;
         if(idx >= data.size())
         {
@@ -449,10 +455,12 @@ struct png
             throw(std::runtime_error("HYPERCURVE PNG > You should not write outside the PNG array"));
         }
         data[ idx ] = c;
+#endif
     }
 
     void set_curve_point(double x, double y)
     {
+#ifndef __wasi__
         size_t ix = x * width;
         size_t iy = y * height;
         if(ix >= width)
@@ -460,10 +468,12 @@ struct png
         if(iy >= height)
             iy = height-1;
         set(ix, iy, foreground);
+#endif
     }
 
     void fill_curve_point(double x, double y, bool waveform = false)
     {
+#ifndef __wasi__
         size_t ix = x * width;
         size_t iy = y * height; // y position of point
         if(ix >= width)
@@ -485,10 +495,12 @@ struct png
                 set(ix, i, foreground);
             }
         }
+#endif
     }
 
     void draw_grid(size_t xdiv = 10, size_t ydiv = 10, color c = white)
     {
+#ifndef __wasi__
         for(size_t i = 1; i < xdiv; ++i)
         {
             size_t yb = 0;
@@ -509,6 +521,7 @@ struct png
                 set(x, y, c);
             }
         }
+#endif
 
     }
 
@@ -516,6 +529,7 @@ struct png
     virtual void draw_curve(double *samples, size_t size,
                     bool fill = true, size_t grid = 0, bool waveform = false)
     {
+#ifndef __wasi__
         if(grid > 0)
             draw_grid(grid, grid);
 
@@ -531,12 +545,15 @@ struct png
                 set_curve_point(x, spl);
         }
 
+#endif
     }
 
     void write_as_png(std::string path)
     {
+#ifndef __wasi__
         fpng::fpng_encode_image_to_file(path.c_str(),
                                         (void *) data.data(), width, height, 4);
+#endif
     }
 
 protected:

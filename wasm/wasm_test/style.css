@@ -1,0 +1,24 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+}
+canvas {
+  display: block;
+}
+
+#play_test {
+  margin: auto;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 200px;
+  height: 120px;
+  font-family: monospace;
+  background: magenta;
+  color: white;
+  cursor: pointer;
+}
