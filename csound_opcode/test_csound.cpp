@@ -1,5 +1,5 @@
 //#include<csound.hpp>
-#include<csound/csound.hpp>
+#include<csound.hpp>
 #include<iostream>
 #include<string>
 
