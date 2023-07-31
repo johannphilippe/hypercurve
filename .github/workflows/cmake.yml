@@ -24,7 +24,7 @@ jobs:
         with:
           submodules: recursive
       - name: Install Dependencies
-        run: sudo apt-get update && sudo apt-get install csound libcsound64-dev && ls /usr/include/csound
+        run: sudo apt-get update && sudo apt-get install csound libcsound64-dev && csound --version && ls /usr/include/csound && locate csound.hpp
       - name: Configure CMake
         run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DBUILD_LUAJIT=ON
       - name: Build 
@@ -43,7 +43,7 @@ jobs:
         with:
           submodules: recursive
       - name: Install Dependencies
-        run: brew install csound && which csound && whereis csound
+        run: brew install csound && which csound && whereis csound && ls /usr/local/Cellar/csound/6.18.1_3 && ls /usr/local/lib && ls /usr/local/include
       - name: Configure CMake
         run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DBUILD_LUAJIT=ON
       - name: Build 
