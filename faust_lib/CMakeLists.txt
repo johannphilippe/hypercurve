@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.18)
 
 execute_process(COMMAND quom
    ${CMAKE_CURRENT_SOURCE_DIR}/hypercurve_faust.h
