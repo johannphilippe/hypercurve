@@ -345,6 +345,133 @@ LUA_EXPORT int luahc_polynomial_curve(lua_State *lua)
 }
 
 ///////////////////////////////////////////
+// Easing curves
+///////////////////////////////////////////
+
+
+LUA_EXPORT int luahc_ease_in_sine(lua_State *lua)
+{
+    lua_curve_helper(lua, new hypercurve::ease_in_sine());
+    luaL_getmetatable(lua, "hypercurve.curve_base");
+    lua_setmetatable(lua, -2);
+    return 1;
+}
+
+LUA_EXPORT int luahc_ease_out_sine(lua_State *lua)
+{
+    lua_curve_helper(lua, new hypercurve::ease_out_sine());
+    luaL_getmetatable(lua, "hypercurve.curve_base");
+    lua_setmetatable(lua, -2);
+    return 1;
+}
+
+LUA_EXPORT int luahc_ease_inout_sine(lua_State *lua)
+{
+    lua_curve_helper(lua, new hypercurve::ease_inout_sine());
+    luaL_getmetatable(lua, "hypercurve.curve_base");
+    lua_setmetatable(lua, -2);
+    return 1;
+}
+
+LUA_EXPORT int luahc_ease_in_back(lua_State *lua)
+{
+    lua_curve_helper(lua, new hypercurve::ease_in_back());
+    luaL_getmetatable(lua, "hypercurve.curve_base");
+    lua_setmetatable(lua, -2);
+    return 1;
+}
+
+LUA_EXPORT int luahc_ease_out_back(lua_State *lua)
+{
+    lua_curve_helper(lua, new hypercurve::ease_out_back());
+    luaL_getmetatable(lua, "hypercurve.curve_base");
+    lua_setmetatable(lua, -2);
+    return 1;
+}
+
+LUA_EXPORT int luahc_ease_inout_back(lua_State *lua)
+{
+    lua_curve_helper(lua, new hypercurve::ease_inout_back());
+    luaL_getmetatable(lua, "hypercurve.curve_base");
+    lua_setmetatable(lua, -2);
+    return 1;
+}
+
+LUA_EXPORT int luahc_ease_in_circ(lua_State *lua)
+{
+    lua_curve_helper(lua, new hypercurve::ease_in_circ());
+    luaL_getmetatable(lua, "hypercurve.curve_base");
+    lua_setmetatable(lua, -2);
+    return 1;
+}
+
+LUA_EXPORT int luahc_ease_out_circ(lua_State *lua)
+{
+    lua_curve_helper(lua, new hypercurve::ease_out_circ());
+    luaL_getmetatable(lua, "hypercurve.curve_base");
+    lua_setmetatable(lua, -2);
+    return 1;
+}
+
+LUA_EXPORT int luahc_ease_inout_circ(lua_State *lua)
+{
+    lua_curve_helper(lua, new hypercurve::ease_inout_circ());
+    luaL_getmetatable(lua, "hypercurve.curve_base");
+    lua_setmetatable(lua, -2);
+    return 1;
+}
+
+LUA_EXPORT int luahc_ease_in_elastic(lua_State *lua)
+{
+    lua_curve_helper(lua, new hypercurve::ease_in_elastic());
+    luaL_getmetatable(lua, "hypercurve.curve_base");
+    lua_setmetatable(lua, -2);
+    return 1;
+}
+
+LUA_EXPORT int luahc_ease_out_elastic(lua_State *lua)
+{
+    lua_curve_helper(lua, new hypercurve::ease_out_elastic());
+    luaL_getmetatable(lua, "hypercurve.curve_base");
+    lua_setmetatable(lua, -2);
+    return 1;
+}
+
+LUA_EXPORT int luahc_ease_inout_elastic(lua_State *lua)
+{
+    lua_curve_helper(lua, new hypercurve::ease_inout_elastic());
+    luaL_getmetatable(lua, "hypercurve.curve_base");
+    lua_setmetatable(lua, -2);
+    return 1;
+}
+
+LUA_EXPORT int luahc_ease_in_bounce(lua_State *lua)
+{
+    lua_curve_helper(lua, new hypercurve::ease_in_bounce());
+    luaL_getmetatable(lua, "hypercurve.curve_base");
+    lua_setmetatable(lua, -2);
+    return 1;
+}
+
+LUA_EXPORT int luahc_ease_out_bounce(lua_State *lua)
+{
+    lua_curve_helper(lua, new hypercurve::ease_out_bounce());
+    luaL_getmetatable(lua, "hypercurve.curve_base");
+    lua_setmetatable(lua, -2);
+    return 1;
+}
+
+LUA_EXPORT int luahc_ease_inout_bounce(lua_State *lua)
+{
+    lua_curve_helper(lua, new hypercurve::ease_inout_bounce());
+    luaL_getmetatable(lua, "hypercurve.curve_base");
+    lua_setmetatable(lua, -2);
+    return 1;
+}
+
+
+
+///////////////////////////////////////////
 // Invert curve
 ///////////////////////////////////////////
 
@@ -714,6 +841,24 @@ LUA_EXPORT const luaL_Reg luahc_static_meth[] =
     {"polynomial_curve", luahc_polynomial_curve},
     {"typed_curve", luahc_typed_curve},
     {"user_defined_curve", luahc_user_defined_curve},
+
+    // Easings
+    {"ease_in_sine_curve", luahc_ease_in_sine},
+    {"ease_out_sine_curve", luahc_ease_out_sine},
+    {"ease_inout_sine_curve", luahc_ease_inout_sine},
+    {"ease_in_back_curve", luahc_ease_in_back},
+    {"ease_out_back_curve", luahc_ease_out_back},
+    {"ease_inout_back_curve", luahc_ease_inout_back},
+    {"ease_in_circ_curve", luahc_ease_in_circ},
+    {"ease_out_circ_curve", luahc_ease_out_circ},
+    {"ease_inout_circ_curve", luahc_ease_inout_circ},
+    {"ease_in_elastic_curve", luahc_ease_in_elastic},
+    {"ease_out_elastic_curve", luahc_ease_out_elastic},
+    {"ease_inout_elastic_curve", luahc_ease_inout_elastic},
+    {"ease_in_bounce_curve", luahc_ease_in_bounce},
+    {"ease_out_bounce_curve", luahc_ease_out_bounce},
+    {"ease_inout_bounce_curve", luahc_ease_inout_bounce},
+
 
     // Manipulations --> Move to hypercurve class ?
     {"vinvert", luahc_vinvert_curve},

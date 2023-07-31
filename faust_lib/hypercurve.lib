@@ -118,7 +118,70 @@ with {
                         "hypercurve_faust.h", "");
       args = argument_list, par(n, 32 - ba.count(argument_list), 0);
 };
+           
+// Easing curves 
+ease_in_sine_curve = hanning_curve_proxy(0) with 
+{
+      ease_in_sine_curve_proxy = ffunction(int hc_ease_in_sine_curve(int), "hypercurve_faust.h", "");
+};
+ease_out_sine_curve = hanning_curve_proxy(0) with 
+{
+      ease_out_sine_curve_proxy = ffunction(int hc_ease_out_sine_curve(int), "hypercurve_faust.h", "");
+};
+ease_inout_sine_curve = hanning_curve_proxy(0) with 
+{
+      ease_inout_sine_curve_proxy = ffunction(int hc_ease_inout_sine_curve(int), "hypercurve_faust.h", "");
+};
+ease_in_back_curve = hanning_curve_proxy(0) with 
+{
+      ease_in_back_curve_proxy = ffunction(int hc_ease_in_back_curve(int), "hypercurve_faust.h", "");
+};
+ease_out_back_curve = hanning_curve_proxy(0) with 
+{
+      ease_out_back_curve_proxy = ffunction(int hc_ease_out_back_curve(int), "hypercurve_faust.h", "");
+};
+ease_inout_back_curve = hanning_curve_proxy(0) with 
+{
+      ease_inout_back_curve_proxy = ffunction(int hc_ease_inout_back_curve(int), "hypercurve_faust.h", "");
+};
+ease_in_circ_curve = hanning_curve_proxy(0) with 
+{
+      ease_in_circ_curve_proxy = ffunction(int hc_ease_in_circ_curve(int), "hypercurve_faust.h", "");
+};
+ease_out_circ_curve =hanning_curve_proxy(0) with 
+{
+      ease_out_circ_curve_proxy = ffunction(int hc_ease_out_circ_curve(int), "hypercurve_faust.h", "");
+};
+ease_inout_circ_curve = hanning_curve_proxy(0) with 
+{
+      ease_inout_circ_curve_proxy = ffunction(int hc_ease_inout_circ_curve(int), "hypercurve_faust.h", "");
+};
+ease_in_elastic_curve = hanning_curve_proxy(0) with 
+{
+      ease_in_elastic_curve_proxy = ffunction(int hc_ease_in_elastic_curve(int), "hypercurve_faust.h", "");
+};
+ease_out_elastic_curve = hanning_curve_proxy(0) with 
+{
+      ease_out_elastic_curve_proxy = ffunction(int hc_ease_out_elastic_curve(int), "hypercurve_faust.h", "");
+};
+ease_inout_elastic_curve = hanning_curve_proxy(0) with 
+{
+      ease_inout_elastic_curve_proxy = ffunction(int hc_ease_inout_elastic_curve(int), "hypercurve_faust.h", "");
+};
+ease_in_bounce_curve = hanning_curve_proxy(0) with 
+{
+      ease_in_bounce_curve_proxy = ffunction(int hc_ease_in_bounce_curve(int), "hypercurve_faust.h", "");
+};
+ease_out_bounce_curve = hanning_curve_proxy(0) with 
+{
+      ease_out_bounce_curve_proxy = ffunction(int hc_ease_out_bounce_curve(int), "hypercurve_faust.h", "");
+};
+ease_inout_bounce_curve = hanning_curve_proxy(0) with 
+{
+      ease_inout_bounce_curve_proxy = ffunction(int hc_ease_inout_bounce_curve(int), "hypercurve_faust.h", "");
+};
 
+           
 // Utility : control point (x, y) point
 control_point = ffunction(int hc_control_point (float, float), "hypercurve_faust.h", "");
 

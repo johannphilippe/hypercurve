@@ -90,7 +90,7 @@ instr 1
 	icrv = hc_hypercurve(2048, 0, 
 				hc_segment(1/2, 1, hc_diocles_curve(1)),
 				hc_segment(1/2, 0, hc_hanning_curve()))
-	kenv = hc_run(icrv, linseg(0, p3, 1))
+	kenv = tablei:k(linseg:k(0, p3, 1), icrv, 1)
 	ao = vco2(0.3, 300) * kenv
 	outs(ao, ao)
 endin

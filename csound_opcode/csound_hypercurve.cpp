@@ -656,6 +656,289 @@ struct cs_polynomial_curve : csnd::Plugin<1, 64>
     std::shared_ptr<polynomial_curve> _curve;
 };
 
+/**
+    ****************************************************************************
+    Easing curves
+    ****************************************************************************
+*/
+
+struct cs_easing_in_sine : csnd::Plugin<1, 0>
+{
+    int init() {
+        csound->plugin_deinit(this);
+        _curve = std::make_shared<ease_in_sine>();
+        index = curve_base_map.map(_curve);
+        outargs[0] = index;
+        return OK;
+    }
+
+    int deinit() {
+        curve_base_map.unmap(index);
+        return OK;
+    }
+
+    int index;
+    std::shared_ptr<ease_in_sine> _curve;
+};
+
+struct cs_easing_out_sine : csnd::Plugin<1, 0>
+{
+    int init() {
+        csound->plugin_deinit(this);
+        _curve = std::make_shared<ease_out_sine>();
+        index = curve_base_map.map(_curve);
+        outargs[0] = index;
+        return OK;
+    }
+
+    int deinit() {
+        curve_base_map.unmap(index);
+        return OK;
+    }
+
+    int index;
+    std::shared_ptr<ease_out_sine> _curve;
+};
+
+struct cs_easing_inout_sine : csnd::Plugin<1, 0>
+{
+    int init() {
+        csound->plugin_deinit(this);
+        _curve = std::make_shared<ease_inout_sine>();
+        index = curve_base_map.map(_curve);
+        outargs[0] = index;
+        return OK;
+    }
+
+    int deinit() {
+        curve_base_map.unmap(index);
+        return OK;
+    }
+
+    int index;
+    std::shared_ptr<ease_inout_sine> _curve;
+};
+
+struct cs_easing_in_back : csnd::Plugin<1, 0>
+{
+    int init() {
+        csound->plugin_deinit(this);
+        _curve = std::make_shared<ease_in_back>();
+        index = curve_base_map.map(_curve);
+        outargs[0] = index;
+        return OK;
+    }
+
+    int deinit() {
+        curve_base_map.unmap(index);
+        return OK;
+    }
+
+    int index;
+    std::shared_ptr<ease_in_back> _curve;
+};
+struct cs_easing_out_back : csnd::Plugin<1, 0>
+{
+    int init() {
+        csound->plugin_deinit(this);
+        _curve = std::make_shared<ease_out_back>();
+        index = curve_base_map.map(_curve);
+        outargs[0] = index;
+        return OK;
+    }
+
+    int deinit() {
+        curve_base_map.unmap(index);
+        return OK;
+    }
+
+    int index;
+    std::shared_ptr<ease_out_back> _curve;
+};
+struct cs_easing_inout_back : csnd::Plugin<1, 0>
+{
+    int init() {
+        csound->plugin_deinit(this);
+        _curve = std::make_shared<ease_inout_back>();
+        index = curve_base_map.map(_curve);
+        outargs[0] = index;
+        return OK;
+    }
+
+    int deinit() {
+        curve_base_map.unmap(index);
+        return OK;
+    }
+
+    int index;
+    std::shared_ptr<ease_inout_back> _curve;
+};
+struct cs_easing_in_circ : csnd::Plugin<1, 0>
+{
+    int init() {
+        csound->plugin_deinit(this);
+        _curve = std::make_shared<ease_in_circ>();
+        index = curve_base_map.map(_curve);
+        outargs[0] = index;
+        return OK;
+    }
+
+    int deinit() {
+        curve_base_map.unmap(index);
+        return OK;
+    }
+
+    int index;
+    std::shared_ptr<ease_in_circ> _curve;
+};
+struct cs_easing_out_circ : csnd::Plugin<1, 0>
+{
+    int init() {
+        csound->plugin_deinit(this);
+        _curve = std::make_shared<ease_out_circ>();
+        index = curve_base_map.map(_curve);
+        outargs[0] = index;
+        return OK;
+    }
+
+    int deinit() {
+        curve_base_map.unmap(index);
+        return OK;
+    }
+
+    int index;
+    std::shared_ptr<ease_out_circ> _curve;
+};
+struct cs_easing_inout_circ : csnd::Plugin<1, 0>
+{
+    int init() {
+        csound->plugin_deinit(this);
+        _curve = std::make_shared<ease_inout_circ>();
+        index = curve_base_map.map(_curve);
+        outargs[0] = index;
+        return OK;
+    }
+
+    int deinit() {
+        curve_base_map.unmap(index);
+        return OK;
+    }
+
+    int index;
+    std::shared_ptr<ease_inout_circ> _curve;
+};
+struct cs_easing_in_elastic : csnd::Plugin<1, 0>
+{
+    int init() {
+        csound->plugin_deinit(this);
+        _curve = std::make_shared<ease_in_elastic>();
+        index = curve_base_map.map(_curve);
+        outargs[0] = index;
+        return OK;
+    }
+
+    int deinit() {
+        curve_base_map.unmap(index);
+        return OK;
+    }
+
+    int index;
+    std::shared_ptr<ease_in_elastic> _curve;
+};
+struct cs_easing_out_elastic : csnd::Plugin<1, 0>
+{
+    int init() {
+        csound->plugin_deinit(this);
+        _curve = std::make_shared<ease_out_elastic>();
+        index = curve_base_map.map(_curve);
+        outargs[0] = index;
+        return OK;
+    }
+
+    int deinit() {
+        curve_base_map.unmap(index);
+        return OK;
+    }
+
+    int index;
+    std::shared_ptr<ease_out_elastic> _curve;
+};
+struct cs_easing_inout_elastic : csnd::Plugin<1, 0>
+{
+    int init() {
+        csound->plugin_deinit(this);
+        _curve = std::make_shared<ease_inout_elastic>();
+        index = curve_base_map.map(_curve);
+        outargs[0] = index;
+        return OK;
+    }
+
+    int deinit() {
+        curve_base_map.unmap(index);
+        return OK;
+    }
+
+    int index;
+    std::shared_ptr<ease_inout_elastic> _curve;
+};
+struct cs_easing_in_bounce : csnd::Plugin<1, 0>
+{
+    int init() {
+        csound->plugin_deinit(this);
+        _curve = std::make_shared<ease_in_bounce>();
+        index = curve_base_map.map(_curve);
+        outargs[0] = index;
+        return OK;
+    }
+
+    int deinit() {
+        curve_base_map.unmap(index);
+        return OK;
+    }
+
+    int index;
+    std::shared_ptr<ease_in_bounce> _curve;
+};
+struct cs_easing_out_bounce : csnd::Plugin<1, 0>
+{
+    int init() {
+        csound->plugin_deinit(this);
+        _curve = std::make_shared<ease_out_bounce>();
+        index = curve_base_map.map(_curve);
+        outargs[0] = index;
+        return OK;
+    }
+
+    int deinit() {
+        curve_base_map.unmap(index);
+        return OK;
+    }
+
+    int index;
+    std::shared_ptr<ease_out_bounce> _curve;
+};
+struct cs_easing_inout_bounce : csnd::Plugin<1, 0>
+{
+    int init() {
+        csound->plugin_deinit(this);
+        _curve = std::make_shared<ease_inout_bounce>();
+        index = curve_base_map.map(_curve);
+        outargs[0] = index;
+        return OK;
+    }
+
+    int deinit() {
+        curve_base_map.unmap(index);
+        return OK;
+    }
+
+    int index;
+    std::shared_ptr<ease_inout_bounce> _curve;
+};
+
+
+
+
 //////////////////////////////////////////////////
 // Invert curve
 //////////////////////////////////////////////////
@@ -1216,6 +1499,24 @@ void csnd::on_load(Csound *csound) {
     csnd::plugin<cs_catmull_rom>(csound, "hc_catmull_rom_curve", "i" , "ii", csnd::thread::i);
     csnd::plugin<cs_lagrange_curve>(csound, "hc_lagrange_curve", "i", "m", csnd::thread::i);
     csnd::plugin<cs_cubic_spline_curve>(csound, "hc_cubic_spline_curve", "i", "m", csnd::thread::i);
+
+    // Easing
+    csnd::plugin<cs_easing_in_sine>(csound, "hc_ease_in_sine_curve", "i", "", csnd::thread::i);
+    csnd::plugin<cs_easing_out_sine>(csound, "hc_ease_out_sine_curve", "i", "", csnd::thread::i);
+    csnd::plugin<cs_easing_inout_sine>(csound, "hc_ease_inout_sine_curve", "i", "", csnd::thread::i);
+    csnd::plugin<cs_easing_in_back>(csound, "hc_ease_in_back_curve", "i", "", csnd::thread::i);
+    csnd::plugin<cs_easing_out_back>(csound, "hc_ease_out_back_curve", "i", "", csnd::thread::i);
+    csnd::plugin<cs_easing_inout_back>(csound, "hc_ease_inout_back_curve", "i", "", csnd::thread::i);
+    csnd::plugin<cs_easing_in_circ>(csound, "hc_ease_in_circ_curve", "i", "", csnd::thread::i);
+    csnd::plugin<cs_easing_out_circ>(csound, "hc_ease_out_circ_curve", "i", "", csnd::thread::i);
+    csnd::plugin<cs_easing_inout_circ>(csound, "hc_ease_inout_circ_curve", "i", "", csnd::thread::i);
+    csnd::plugin<cs_easing_in_elastic>(csound, "hc_ease_in_elastic_curve", "i", "", csnd::thread::i);
+    csnd::plugin<cs_easing_out_elastic>(csound, "hc_ease_out_elastic_curve", "i", "", csnd::thread::i);
+    csnd::plugin<cs_easing_inout_elastic>(csound, "hc_ease_inout_elastic_curve", "i", "", csnd::thread::i);
+    csnd::plugin<cs_easing_in_bounce>(csound, "hc_ease_in_bounce_curve", "i", "", csnd::thread::i);
+    csnd::plugin<cs_easing_out_bounce>(csound, "hc_ease_out_bounce_curve", "i", "", csnd::thread::i);
+    csnd::plugin<cs_easing_inout_bounce>(csound, "hc_ease_inout_bounce_curve", "i", "", csnd::thread::i);
+
 
     // Aliases
     csnd::plugin<cs_toxoid>(csound, "hc_duplicatrix_cubic_curve", "i", "i", csnd::thread::i);

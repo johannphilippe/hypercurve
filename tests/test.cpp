@@ -41,7 +41,7 @@ using namespace hypercurve;
 void write_as_png(curve &c, bool waveform = true, std::string name = "h.png")
 {
     png p(2048, 1024, {255,255,255,0}, {244, 101, 36, 255});
-    p.draw_curve(c.get_samples(), c.get_definition(), false, 0 , waveform);
+    p.draw_curve(c.get_samples(), c.get_definition(), true, 0 , waveform);
     //p.draw_grid(10, 10, color{255, 255, 255, 100});
     std::string concat("/home/johann/Documents/" + name);
     p.write_as_png(concat);
@@ -130,6 +130,42 @@ void generate_curve_pictures()
     write_doc_png(log, "logarithmic.png");
     curve exp(2048, 0, {segment(1, 1, share(exponential_curve()))});
     write_doc_png(exp, "exponential.png");
+
+    curve easing_sine_out(2048, 0, {segment(1, 1, share(ease_out_sine())) });
+    write_doc_png(easing_sine_out, "ease_sine_out.png");
+    curve easing_sine_in(2048, 0, {segment(1, 1, share(ease_in_sine())) });
+    write_doc_png(easing_sine_in, "ease_sine_in.png");
+    curve easing_sine_inout(2048, 0, {segment(1, 1, share(ease_inout_sine())) });
+    write_doc_png(easing_sine_inout, "ease_sine_inout.png");
+
+    curve easing_circ_out(2048, 0, {segment(1, 1, share(ease_out_circ())) });
+    write_doc_png(easing_circ_out, "ease_circ_out.png");
+    curve easing_circ_in(2048, 0, {segment(1, 1, share(ease_in_circ())) });
+    write_doc_png(easing_circ_in, "ease_circ_in.png");
+    curve easing_circ_inout(2048, 0, {segment(1, 1, share(ease_inout_circ())) });
+    write_doc_png(easing_circ_inout, "ease_circ_inout.png");
+
+    curve easing_back_out(2048, 0, {segment(1, 1, share(ease_out_back())) });
+    write_doc_png(easing_back_out, "ease_back_out.png");
+    curve easing_back_in(2048, 0, {segment(1, 1, share(ease_in_back())) });
+    write_doc_png(easing_back_in, "ease_back_in.png");
+    curve easing_back_inout(2048, 0, {segment(1, 1, share(ease_inout_back())) });
+    write_doc_png(easing_back_inout, "ease_back_inout.png");
+
+    curve easing_bounce_out(2048, 0, {segment(1, 1, share(ease_out_bounce())) });
+    write_doc_png(easing_bounce_out, "ease_bounce_out.png");
+    curve easing_bounce_in(2048, 0, {segment(1, 1, share(ease_in_bounce())) });
+    write_doc_png(easing_bounce_in, "ease_bounce_in.png");
+    curve easing_bounce_inout(2048, 0, {segment(1, 1, share(ease_inout_bounce())) });
+    write_doc_png(easing_bounce_inout, "ease_bounce_inout.png");
+
+    curve easing_elastic_in(2048, 0, {segment(1, 1, share(ease_in_elastic())) });
+    write_doc_png(easing_elastic_in, "ease_elastic_in.png");
+    curve easing_elastic_out(2048, 0, {segment(1, 1, share(ease_out_elastic())) });
+    write_doc_png(easing_elastic_out, "ease_elastic_out.png");
+    curve easing_elastic_inout(2048, 0, {segment(1, 1, share(ease_inout_elastic())) });
+    write_doc_png(easing_elastic_inout, "ease_elastic_inout.png");
+
 }
 
 
@@ -688,6 +724,20 @@ void icsc()
     */
 }
 
+void ease_test()
+{
+    std::cout << "before" <<std::endl;
+    curve c(16384, 0, {
+               segment(0.2, 0.5, share(diocles_curve(0.51))),
+               segment(0.5, 0.8, share(ease_inout_elastic())),
+               segment(0.3, 0, share(diocles_curve(0.51)))
+            });
+
+    std::cout << "curve ok" <<std::endl;
+    write_as_png(c, false, "ease.png");
+    std::cout << "written" <<std::endl;
+}
+
 int main()
 {
 
@@ -696,8 +746,8 @@ int main()
     //unit_tests();
     //random_generator_test();
     //inversion_test();
-    generate_curve_pictures();
-
+    //generate_curve_pictures();
+    ease_test();
     /*
     auto crv = curve(16384, 0, {
                         segment(0.5, 1, share(diocles_curve(0.51))),

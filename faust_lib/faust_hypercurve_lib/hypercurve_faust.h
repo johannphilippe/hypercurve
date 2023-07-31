@@ -2000,6 +2000,200 @@ protected:
     memory_vector<control_point> c_pts;
 };
 
+/**
+  ***************************************************************
+ * Easing curves from easings.net
+ * - Missing Quad, Cubic, Quart, Quint, Expo
+ ****************************************************************
+*/
+
+class ease_in_sine : public curve_base
+{
+public:
+    inline double process(double x) override
+    {
+        return 1.0 - std::cos((x * M_PI) / 2);
+    }
+};
+
+class ease_out_sine : public curve_base
+{
+public:
+    inline double process(double x) override
+    {
+        return std::sin((x * M_PI) / 2);
+    }
+};
+
+class ease_inout_sine : public curve_base
+{
+public:
+    inline double process(double x) override
+    {
+        return -(std::cos(M_PI * x) - 1.0) / 2.0;
+    }
+};
+
+class ease_in_circ : public curve_base
+{
+public:
+    inline double process(double x) override
+    {
+        return 1 - std::sqrt(1 - std::pow(x, 2));
+    }
+};
+
+class ease_out_circ : public curve_base
+{
+public:
+    inline double process(double x) override
+    {
+        return std::sqrt(1 - std::pow(x - 1, 2));
+    }
+};
+
+class ease_inout_circ : public curve_base
+{
+public:
+    inline double process(double x) override
+    {
+        return x < 0.5
+          ? (1 - std::sqrt(1 - std::pow(2 * x, 2))) / 2
+          : (std::sqrt(1 - std::pow(-2 * x + 2, 2)) + 1) / 2;
+    }
+};
+
+class ease_in_back : public curve_base
+{
+public:
+    inline double process(double x) override
+    {
+        return c3 * x * x * x - c1 * x * x;
+    }
+    constexpr static const double c1 = 1.70158;
+    constexpr static const double c3 = c1 + 1;
+};
+class ease_out_back : public curve_base
+{
+public:
+    inline double process(double x) override
+    {
+        return 1 + c3 * std::pow(x - 1, 3) + c1 * std::pow(x - 1, 2);
+    }
+
+    constexpr static const double c1 = 1.70158;
+    constexpr static const double c3 = c1 + 1;
+};
+class ease_inout_back : public curve_base
+{
+public:
+    inline double process(double x) override
+    {
+        return x < 0.5
+          ? (std::pow(2 * x, 2) * ((c2 + 1) * 2 * x - c2)) / 2
+          : (std::pow(2 * x - 2, 2) * ((c2 + 1) * (x * 2 - 2) + c2) + 2) / 2;
+    }
+
+    constexpr static const double c1 = 1.70158;
+    constexpr static const double c2 = c1 * 1.525;
+
+};
+
+class ease_in_elastic : public curve_base
+{
+public:
+    inline double process(double x) override
+    {
+        return x == 0
+          ? 0
+          : x == 1
+          ? 1
+          : -std::pow(2, 10 * x - 10) * std::sin((x * 10 - 10.75) * c4);
+    }
+
+    constexpr static const double c4 = (2 * M_PI) / 3;
+};
+
+class ease_out_elastic : public curve_base
+{
+public:
+    inline double process(double x) override
+    {
+
+        return x == 0
+          ? 0
+          : x == 1
+          ? 1
+          : std::pow(2, -10 * x) * std::sin((x * 10 - 0.75) * c4) + 1;
+    }
+
+    constexpr static const double c4 = (2 * M_PI) / 3;
+};
+
+class ease_inout_elastic : public curve_base
+{
+public:
+    inline double process(double x) override
+    {
+        return x == 0.0
+          ? 0.0
+          : x == 1.0
+          ? 1.0
+          : x < 0.5
+          ? -(std::pow(2, 20 * x - 10) * std::sin((20 * x - 11.125) * c5)) / 2.0
+          : (std::pow(2, -20 * x + 10) * std::sin((20 * x - 11.125) * c5)) / 2.0 + 1.0;
+    }
+
+    constexpr static const double c5 = (2 * M_PI) / 4.5;
+};
+
+class ease_out_bounce : public curve_base
+{
+public:
+
+    inline double process(double x) override
+    {
+        return process_value(x);
+    }
+
+    static double process_value(double x ) {
+        if (x < 1.0 / d1) {
+            return n1 * x * x;
+        } else if (x < 2 / d1) {
+            x -= (1.5 / d1);
+            return n1 * (x) * x + 0.75;
+        } else if (x < 2.5 / d1) {
+            x -= 2.25 / d1;
+            return n1 * (x) * x + 0.9375;
+        } else {
+            x -= (2.625 / d1);
+            return n1 * (x) * x + 0.984375;
+        }
+    }
+    constexpr static const double n1 = 7.5625;
+    constexpr static const double d1 = 2.75;
+};
+
+class ease_in_bounce : public curve_base
+{
+public:
+    inline double process(double x) override
+    {
+        return 1.0 - ease_out_bounce::process_value(1.0 - x);
+    }
+};
+
+class ease_inout_bounce : public curve_base
+{
+public:
+    inline double process(double x) override
+    {
+        return x < 0.5
+          ? (1.0 - ease_out_bounce::process_value(1.0 - 2.0 * x)) / 2.0
+          : (1.0 + ease_out_bounce::process_value(2.0 * x - 1)) / 2.0;
+    }
+};
+
 }
 #endif // CURVE_LIB_H
 
