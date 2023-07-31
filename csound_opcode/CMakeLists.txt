@@ -33,7 +33,7 @@ endfunction(make_plugin)
 message(STATUS "Building Opcodes")
 make_plugin(csound_hypercurve csound_hypercurve.cpp)
 
-if(BUILD_TESTS) (
+if(BUILD_TESTS)
       add_executable(csound_test test_csound.cpp)
       target_link_libraries(csound_test PUBLIC ${CSOUND_LIBRARIES})
       target_include_directories(csound_test PUBLIC ${CSOUND_INCLUDE_DIRS})
@@ -41,7 +41,7 @@ if(BUILD_TESTS) (
          DESTINATION ${CMAKE_BINARY_DIR}/bin)
       file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/hypertest.csd
          DESTINATION ${CMAKE_BINARY_DIR}/bin)
-)
+endif()
 # Installation
 #[[
 if(NOT DEFINED CSOUND_INSTALL_PATH)
