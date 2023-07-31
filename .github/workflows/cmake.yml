@@ -43,7 +43,7 @@ jobs:
         with:
           submodules: recursive
       - name: Install Dependencies
-        run: curl -o Csound-MacOS-universal-6.18.1.dmg -L https://github.com/csound/csound/releases/download/6.18.1/Csound-MacOS-universal-6.18.1.dmg && ls . &&  hdiutil mount Csound-MacOS-universal-6.18.1.dmg && echo disks && diskutil list && ls /Volumes/Csound-MacOS-universal-6.18.1 && sudo installer -pkg /Volumes/Csound-MacOS-universal-6.18.1 -target /  && echo Frameworks && ls /Library/Frameworks
+        run: curl -o Csound-MacOS-universal-6.18.1.dmg -L https://github.com/csound/csound/releases/download/6.18.1/Csound-MacOS-universal-6.18.1.dmg && ls . &&  hdiutil mount Csound-MacOS-universal-6.18.1.dmg && echo disks && diskutil list && sudo installer -pkg /Volumes/Csound-MacOS-universal-6.18.1 -target /  && echo Frameworks && ls /Library/Frameworks
       - name: Configure CMake
         run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DBUILD_LUAJIT=ON -DBUILD_TESTS=OFF
       - name: Build 
