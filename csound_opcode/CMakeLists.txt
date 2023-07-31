@@ -17,6 +17,9 @@ set(CMAKE_CXX_FLAGS  ${CMAKE_CXX_FLAGS}  "-std=c++17")
 # Csound opcode build
 find_package(Csound REQUIRED)
 
+message(STATUS "CSOUND INCLUDE DIRS : ${CSOUND_INCLUDE_DIRS}")
+message(STATUS "CSOUND LIBRARIES : ${CSOUND_LIBRARIES}")
+
 function(make_plugin pluginlib srcs)
   if(APPLE)
         add_library(${pluginlib} SHARED ${srcs})
