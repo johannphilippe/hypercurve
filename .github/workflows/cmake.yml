@@ -53,6 +53,7 @@ jobs:
       name: Windows Build
       runs-on: windows-latest
       steps:
+      - uses: ilammy/msvc-dev-cmd@v1
       - name: Setup cmake
         uses: jwlawson/actions-setup-cmake@v1.13
         with:
