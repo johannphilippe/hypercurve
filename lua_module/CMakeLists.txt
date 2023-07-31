@@ -67,12 +67,13 @@ else()
 endif()
 
 ## Lua CPP Test
-add_executable(lua_test lua_test.cpp)
-target_link_libraries(lua_test ${LUA_LIBRARIES})
-target_include_directories(lua_test PUBLIC ${LUA_INCLUDE_DIR})
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/test.lua
-   DESTINATION ${CMAKE_BINARY_DIR}/bin)
-
+if(BUILD_TESTS)(
+      add_executable(lua_test lua_test.cpp)
+      target_link_libraries(lua_test ${LUA_LIBRARIES})
+      target_include_directories(lua_test PUBLIC ${LUA_INCLUDE_DIR})
+      file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/test.lua
+         DESTINATION ${CMAKE_BINARY_DIR}/bin)
+)
 if(WIN32 AND NOT BUILD_LUAJIT)
     string(REPLACE ".lib" ".dll" LUA_DLL ${LUA_LIBRARIES})
     message(STATUS ${LUA_DLL})

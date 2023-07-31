@@ -36,8 +36,10 @@ option(BUILD_ALL "Build all libraries" ON)
 option(SSE, "SSE support for FPNG" ON)
 option(MACOS_UNIVERSAL "Support for MacOS Universal build - both x86_64 and ARM64" ON)
 
+option(BUILD_TESTS "Build tests for different targets" ON)
+
 if(MACOS_UNIVERSAL) 
-	set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64")
+      set(CMAKE_OSX_ARCHITECTURES "arm64")
 endif()
 
 #############################################

@@ -24,9 +24,9 @@ jobs:
         with:
           submodules: recursive
       - name: Install Dependencies
-        run: sudo apt-get update && sudo apt-get install csound libcsound64-dev && csound --version && sudo wget https://github.com/csound/csound/blob/master/include/csound.hpp -o /usr/include/csound/csound.hpp
+        run: sudo apt-get update && sudo apt-get install csound libcsound64-dev && csound --version 
       - name: Configure CMake
-        run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DBUILD_LUAJIT=ON
+        run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DBUILD_LUAJIT=ON -DBUILD_TESTS=OFF
       - name: Build 
         run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
 
@@ -43,8 +43,8 @@ jobs:
         with:
           submodules: recursive
       - name: Install Dependencies
-        run: brew install csound && which csound && whereis csound && ls /usr/local/Cellar/csound/6.18.1_3/include/csound && echo "OKKKKK" && ls /usr/local/Cellar/csound/6.18.1_3/lib  && echo "Binary : " && ls /usr/local/Cellar/csound/6.18.1_3/bin
+        run: brew install curl && curl -o csound.dmg https://github.com/csound/csound/releases/download/6.18.1/Csound-MacOS-universal-6.18.1.dmg && hdiutil mount csound.dmg && echo disks && diskutil list  && sudo cp -r /Volumes/csound /Library/Frameworks && echo Frameworks && ls /Library/Frameworks
       - name: Configure CMake
-        run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DBUILD_LUAJIT=ON
+        run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DBUILD_LUAJIT=ON -DBUILD_TESTS=OFF
       - name: Build 
         run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
