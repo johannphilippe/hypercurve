@@ -32,7 +32,7 @@ option(BUILD_CSOUND_OPCODE "Build Csound opcodes" ON)
 option(BUILD_LUA_MODULE "Build Lua module" ON)
 option(BUILD_LUAJIT "Build Luajit" OFF)
 option(BUILD_FAUST_LIB	"Build Faust library" ON)
-option(BUILD_ALL "Build all libraries" ON)
+option(BUILD_ALL "Build all libraries" OFF)
 option(SSE, "SSE support for FPNG" ON)
 option(MACOS_UNIVERSAL "Support for MacOS Universal build - both x86_64 and ARM64" ON)
 
