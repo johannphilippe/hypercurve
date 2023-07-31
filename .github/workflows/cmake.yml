@@ -26,6 +26,11 @@ jobs:
     #runs-on: [ubuntu-latest, macos-latest, windows-latest]
  
     steps:
+    - name: Setup cmake
+      uses: jwlawson/actions-setup-cmake@v1.13
+      with:
+        cmake-version: '3.18.x'
+        
     - name: Checkout Repo
       uses: actions/checkout@v3
       with: 
