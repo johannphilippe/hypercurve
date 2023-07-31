@@ -64,7 +64,7 @@ jobs:
           submodules: recursive
       - name: Install Dependencies
         #run: curl.exe -L -o Csound-6.18.1-windows-x64-binaries.zip https://github.com/csound/csound/releases/download/6.18.1/Csound-6.18.1-windows-x64-binaries.zip && tar -xf Csound-6.18.1-windows-x64-binaries.zip && dir
-        run: choco install -y csound && dir "C:/Program Files/" && dir "C:/Program Files/csound" && mv "C:/Program Files/csound" "C:/Program Files/Csound6_x64" && setx Csound "C:/Program Files/Csound6_x64" && dir "C:/Program Files" && curl.exe -L -o Csound-6.18.1-windows-x64-binaries.zip https://github.com/csound/csound/releases/download/6.18.1/Csound-6.18.1-windows-x64-binaries.zip && tar -xf Csound-6.18.1-windows-x64-binaries.zip && dir && refreshenv
+        run: choco install -y csound && dir "C:/Program Files/" && dir "C:/Program Files/csound" && mv "C:/Program Files/csound" "C:/Program Files/Csound6_x64" && setx Csound "C:/Program Files/Csound6_x64" && dir "C:/Program Files" && curl.exe -L -o Csound-6.18.1-windows-x64-binaries.zip https://github.com/csound/csound/releases/download/6.18.1/Csound-6.18.1-windows-x64-binaries.zip && tar -xf Csound-6.18.1-windows-x64-binaries.zip && dir && Update-SessionEnvironment
       - name: Configure CMake
         run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DBUILD_LUAJIT=OFF -DBUILD_LUA_MODULE=OFF -DBUILD_TESTS=OFF
       - name: Build 
