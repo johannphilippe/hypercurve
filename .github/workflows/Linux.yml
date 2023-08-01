@@ -1,0 +1,35 @@
+name: Linux Build
+
+on:
+  push:
+    branches: [ "main" ]
+  #pull_request:
+    #branches: [ "main" ]
+  release:
+    branches: [ "main" ]
+
+env:
+  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  BUILD_TYPE: Release
+
+jobs:
+  linux_build:
+      name: Linux/Ubuntu build
+      runs-on: ubuntu-latest
+      steps:
+      - name: Setup cmake
+        uses: jwlawson/actions-setup-cmake@v1.13
+        with:
+          cmake-version: '3.18.x'
+      - name: Checkout Source Code
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      - name: Install Dependencies
+        run: sudo apt-get update && sudo apt-get install csound libcsound64-dev && csound --version 
+      - name: Configure CMake
+        run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DBUILD_LUAJIT=ON -DBUILD_TESTS=OFF
+      - name: Build 
+        run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+
+
