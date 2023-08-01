@@ -8,7 +8,7 @@ if(APPLE)
     find_path(CSOUND_INCLUDE_DIR csound.h HINTS /Library/Frameworks/CsoundLib64.framework/Headers
         "$ENV{HOME}/Library/Frameworks/CsoundLib64.framework/Headers")
 elseif(WIN32)
-    find_path(CSOUND_INCLUDE_DIR csound.h HINTS "C:/Program Files/Csound6_x64/include")
+    find_path(CSOUND_INCLUDE_DIR csound.h HINTS "C:/Program Files/Csound6_x64/include" "C:/Program Files/Csound6_x64/include/csound")
 else()
     find_path(CSOUND_INCLUDE_DIR csound.h PATH_SUFFIXES csound)
 endif()
