@@ -7,6 +7,8 @@
 if(APPLE)
     find_path(CSOUND_INCLUDE_DIR csound.h HINTS /Library/Frameworks/CsoundLib64.framework/Headers
         "$ENV{HOME}/Library/Frameworks/CsoundLib64.framework/Headers")
+elsif(WIN32)
+    find_path(CSOUND_INCLUDE_DIR csound.h HINTS "C:/Program Files/Csound6_x64/include")
 else()
     find_path(CSOUND_INCLUDE_DIR csound.h PATH_SUFFIXES csound)
 endif()
@@ -14,8 +16,9 @@ endif()
 if(APPLE)
     find_library(CSOUND_LIBRARY NAMES CsoundLib64 HINTS /Library/Frameworks/CsoundLib64.framework/
         "$ENV{HOME}/Library/Frameworks/CsoundLib64.framework")
+elsif(WIN32)
+    find_library(CSOUND_LIBRARY NAMES csound64 csound HINTS "C:/Program Files/Csound6_x64/bin" "C:/Program Files/Csound6_x64/lib") 
 else()
-
     find_library(CSOUND_LIBRARY NAMES csound64 csound)
 endif()
 
