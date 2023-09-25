@@ -169,6 +169,31 @@ extern "C"
     static int hc_ease_in_sine_curve(int) { return faust_curve_base_map.map(share(ease_in_sine())); }
     static int hc_ease_out_sine_curve(int) { return faust_curve_base_map.map(share(ease_out_sine())); }
     static int hc_ease_inout_sine_curve(int) { return faust_curve_base_map.map(share(ease_inout_sine())); }
+    
+    static int hc_ease_in_quad_curve(int) { return faust_curve_base_map.map(share(ease_in_quad())); }
+    static int hc_ease_out_quad_curve(int) { return faust_curve_base_map.map(share(ease_out_quad())); }
+    static int hc_ease_inout_quad_curve(int) { return faust_curve_base_map.map(share(ease_inout_quad())); }
+
+    static int hc_ease_in_cubicc_curve(int) { return faust_curve_base_map.map(share(ease_in_cubic())); }
+    static int hc_ease_out_cubic_curve(int) { return faust_curve_base_map.map(share(ease_out_cubic())); }
+    static int hc_ease_inout_cubic_curve(int) { return faust_curve_base_map.map(share(ease_inout_cubic())); }
+
+    static int hc_ease_in_quart_curve(int) { return faust_curve_base_map.map(share(ease_in_quart())); }
+    static int hc_ease_out_quart_curve(int) { return faust_curve_base_map.map(share(ease_out_quart())); }
+    static int hc_ease_inout_quart_curve(int) { return faust_curve_base_map.map(share(ease_inout_quart())); }
+
+    static int hc_ease_in_quint_curve(int) { return faust_curve_base_map.map(share(ease_in_quint())); }
+    static int hc_ease_out_quint_curve(int) { return faust_curve_base_map.map(share(ease_out_quint())); }
+    static int hc_ease_inout_quint_curve(int) { return faust_curve_base_map.map(share(ease_inout_quint())); }
+    
+    static int hc_ease_in_expo_curve(int) { return faust_curve_base_map.map(share(ease_in_expo())); }
+    static int hc_ease_out_expo_curve(int) { return faust_curve_base_map.map(share(ease_out_expo())); }
+    static int hc_ease_inout_expo_curve(int) { return faust_curve_base_map.map(share(ease_inout_expo())); }
+    
+    static int hc_ease_in_power_curve(int exponent) {return faust_curve_base_map.map(share(ease_in_power(exponent))); }
+    static int hc_ease_out_power_curve(int exponent) {return faust_curve_base_map.map(share(ease_out_power(exponent))); }
+    static int hc_ease_inout_power_curve(int exponent) {return faust_curve_base_map.map(share(ease_inout_power(exponent))); }
+    
     static int hc_ease_in_back_curve(int) { return faust_curve_base_map.map(share(ease_in_back())); }
     static int hc_ease_out_back_curve(int) { return faust_curve_base_map.map(share(ease_out_back())); }
     static int hc_ease_inout_back_curve(int) { return faust_curve_base_map.map(share(ease_inout_back())); }

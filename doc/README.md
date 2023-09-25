@@ -6,65 +6,38 @@
 Hypercurve is a library of 2D curves designed to process audio envelopes, applied to any audio parameter.
 It is available in several frontends : C++, Lua, and Csound.
 
-1. [Hypercurve basic syntax](#hypercurve-basic-syntax)
-2. [Import Hypercurve](#import-hypercurve)
-3. [Hypercurve class](#hypercurve-class)
-4. [Hypercurve Segment](#segment)
-5. [Control point](#control-point)
-6. [Curve Algorithms](#curve-base)
-    
-    6.1. [Diocles cissoid curve](#diocles-cissoid-curve)
-    
-    6.2. [Cubic curve](#cubic-curve)
-    
-    6.3. [Power curve](#power-curve)
-    
-    6.4 [FFT Window curves](#hamming-hanning-blackman-curves)
-    
-    6.5 [Gaussian curve](#gaussian-curve)
-    
-    6.6 [Toxoid curve](#toxoid-curve)
-    
-    6.7 [Catenary curve](#catenary-curve)
-    
-    6.8 [Tightrope Walker curve](#tightrope-walker-curve)
-    
-    6.9 [Quadratic bezier curve](#quadratic-bezier-curve)
-    
-    6.10 [Cubic bezier curve](#cubic-bezier-curve)
-    
-    6.11 [Cubic spline curve](#cubic-spline-curve)
-    
-    6.12 [Catmull Rom Spline curve](#catmull-rom-spline-curve)
-    
-    6.13 [Polynomial Curve](#polynomial-curve)
-    
-    6.14 [User defined Curve](#user-defined-curve)
-    
-    6.15 [Typed Curve](#typed-curve)
-    
-    6.16 [Mouth Curve](#mouth-curve)
-    
-    6.16 [Bicorn Curve](#bicorn-curve)
-    
-    6.17 [Lagrange Polynomial Curve](#lagrange-polynomial-curve)
-        
-    6.18 [Logarithmic and exponential Curve](#logarithmic-and-exponential-curve)
-    
-
-7. [Manipulation Tools](#manipulation-tools)
-    
-    7.1 [Hypercurve operators](#hypercurve-operators)
-    
-    7.2 [Invert curve base](#invert-curve-base)
-    
-    7.3 [Mirror curve base](#mirror-curve-base)
-    
-    7.4 [Scale hypercurve](#scale-hypercurve)
-    
-    7.5 [Concatenate hypercurves](#concatenate-hypercurves)
-    
-    7.6 [Resize hypercurve](#resize-hypercurve)
+- [Hypercurve documentation](#hypercurve-documentation)
+  - [Hypercurve basic syntax](#hypercurve-basic-syntax)
+  - [Import hypercurve](#import-hypercurve)
+  - [Hypercurve class](#hypercurve-class)
+  - [Segment](#segment)
+  - [Control point](#control-point)
+  - [Curve Base](#curve-base)
+      - [Diocles cissoid curve](#diocles-cissoid-curve)
+      - [Cubic curve](#cubic-curve)
+      - [Power curve](#power-curve)
+      - [Hamming Hanning Blackman curves](#hamming-hanning-blackman-curves)
+      - [Gaussian curve](#gaussian-curve)
+      - [Toxoid curve](#toxoid-curve)
+      - [Catenary curve](#catenary-curve)
+      - [Tightrope Walker curve](#tightrope-walker-curve)
+      - [Quadratic Bezier curve](#quadratic-bezier-curve)
+      - [Cubic Bezier curve](#cubic-bezier-curve)
+      - [Cubic spline curve](#cubic-spline-curve)
+      - [Catmull Rom spline curve](#catmull-rom-spline-curve)
+      - [Polynomial curve](#polynomial-curve)
+      - [User defined curve](#user-defined-curve)
+      - [Typed Curve](#typed-curve)
+      - [Mouse Curve](#mouse-curve)
+      - [Bicorn Curve](#bicorn-curve)
+      - [Lagrange polynomial curve](#lagrange-polynomial-curve)
+      - [Logarithmic and exponential Curve](#logarithmic-and-exponential-curve)
+      - [Easing curves](#easing-curves)
+    - [Manipulation Tools](#manipulation-tools)
+      - [Hypercurve Operators](#hypercurve-operators)
+      - [Mirror curve base](#mirror-curve-base)
+    - [Concatenate hypercurves](#concatenate-hypercurves)
+    - [Utilities](#utilities)
 
 8 [Utilities](#utilities)
 
@@ -1199,7 +1172,25 @@ hc.logarithmic_curve();
 hc.exponential_curve();
 ```
 
+#### Easing curves
 
+Hypercurve contains implementation of [Easings](easings.net). Easings take no argument. 
+
+Csound example : 
+```Csound 
+hc_ease_in_sine_curve()
+hc_ease_out_sine_curve()
+hc_ease_inout_sine_curve()
+```
+
+All easing from [Easings](easings.net) is avaiabe (just replace the "sine" with another type). 
+
+Another one has been added for convenience, and it takes an exponent argument : 
+```Csound
+hc_ease_in_power_curve(int exponent)
+hc_ease_out_power_curve(int exponent)
+hc_ease_inout_power_curve(int exponent)
+```
 
 
 ### Manipulation Tools

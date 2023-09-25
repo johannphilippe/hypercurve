@@ -373,6 +373,153 @@ LUA_EXPORT int luahc_ease_inout_sine(lua_State *lua)
     return 1;
 }
 
+LUA_EXPORT int luahc_ease_in_quad(lua_State *lua)
+{
+    lua_curve_helper(lua, new hypercurve::ease_in_quad());
+    luaL_getmetatable(lua, "hypercurve.curve_base");
+    lua_setmetatable(lua, -2);
+    return 1;
+}
+
+LUA_EXPORT int luahc_ease_out_quad(lua_State *lua)
+{
+    lua_curve_helper(lua, new hypercurve::ease_out_quad());
+    luaL_getmetatable(lua, "hypercurve.curve_base");
+    lua_setmetatable(lua, -2);
+    return 1;
+}
+
+LUA_EXPORT int luahc_ease_inout_quad(lua_State *lua)
+{
+    lua_curve_helper(lua, new hypercurve::ease_inout_quad());
+    luaL_getmetatable(lua, "hypercurve.curve_base");
+    lua_setmetatable(lua, -2);
+    return 1;
+}
+
+LUA_EXPORT int luahc_ease_in_cubic(lua_State *lua)
+{
+    lua_curve_helper(lua, new hypercurve::ease_in_cubic());
+    luaL_getmetatable(lua, "hypercurve.curve_base");
+    lua_setmetatable(lua, -2);
+    return 1;
+}
+
+LUA_EXPORT int luahc_ease_out_cubic(lua_State *lua)
+{
+    lua_curve_helper(lua, new hypercurve::ease_out_cubic());
+    luaL_getmetatable(lua, "hypercurve.curve_base");
+    lua_setmetatable(lua, -2);
+    return 1;
+}
+
+LUA_EXPORT int luahc_ease_inout_cubic(lua_State *lua)
+{
+    lua_curve_helper(lua, new hypercurve::ease_inout_cubic());
+    luaL_getmetatable(lua, "hypercurve.curve_base");
+    lua_setmetatable(lua, -2);
+    return 1;
+}
+
+LUA_EXPORT int luahc_ease_in_quart(lua_State *lua)
+{
+    lua_curve_helper(lua, new hypercurve::ease_in_quart());
+    luaL_getmetatable(lua, "hypercurve.curve_base");
+    lua_setmetatable(lua, -2);
+    return 1;
+}
+
+LUA_EXPORT int luahc_ease_out_quart(lua_State *lua)
+{
+    lua_curve_helper(lua, new hypercurve::ease_out_quart());
+    luaL_getmetatable(lua, "hypercurve.curve_base");
+    lua_setmetatable(lua, -2);
+    return 1;
+}
+
+LUA_EXPORT int luahc_ease_inout_quart(lua_State *lua)
+{
+    lua_curve_helper(lua, new hypercurve::ease_inout_quart());
+    luaL_getmetatable(lua, "hypercurve.curve_base");
+    lua_setmetatable(lua, -2);
+    return 1;
+}
+
+LUA_EXPORT int luahc_ease_in_quint(lua_State *lua)
+{
+    lua_curve_helper(lua, new hypercurve::ease_in_quint());
+    luaL_getmetatable(lua, "hypercurve.curve_base");
+    lua_setmetatable(lua, -2);
+    return 1;
+}
+
+LUA_EXPORT int luahc_ease_out_quint(lua_State *lua)
+{
+    lua_curve_helper(lua, new hypercurve::ease_out_quint());
+    luaL_getmetatable(lua, "hypercurve.curve_base");
+    lua_setmetatable(lua, -2);
+    return 1;
+}
+
+LUA_EXPORT int luahc_ease_inout_quint(lua_State *lua)
+{
+    lua_curve_helper(lua, new hypercurve::ease_inout_quint());
+    luaL_getmetatable(lua, "hypercurve.curve_base");
+    lua_setmetatable(lua, -2);
+    return 1;
+}
+
+LUA_EXPORT int luahc_ease_in_expo(lua_State *lua)
+{
+    lua_curve_helper(lua, new hypercurve::ease_in_expo());
+    luaL_getmetatable(lua, "hypercurve.curve_base");
+    lua_setmetatable(lua, -2);
+    return 1;
+}
+
+LUA_EXPORT int luahc_ease_out_expo(lua_State *lua)
+{
+    lua_curve_helper(lua, new hypercurve::ease_out_expo());
+    luaL_getmetatable(lua, "hypercurve.curve_base");
+    lua_setmetatable(lua, -2);
+    return 1;
+}
+
+LUA_EXPORT int luahc_ease_inout_expo(lua_State *lua)
+{
+    lua_curve_helper(lua, new hypercurve::ease_inout_expo());
+    luaL_getmetatable(lua, "hypercurve.curve_base");
+    lua_setmetatable(lua, -2);
+    return 1;
+}
+
+LUA_EXPORT int luahc_ease_in_power(lua_State *lua)
+{
+    size_t exponent = lua_tointeger(lua, 1);
+    lua_curve_helper(lua, new hypercurve::ease_in_power(exponent));
+    luaL_getmetatable(lua, "hypercurve.curve_base");
+    lua_setmetatable(lua, -2);
+    return 1;
+}
+
+LUA_EXPORT int luahc_ease_out_power(lua_State *lua)
+{
+    size_t exponent = lua_tointeger(lua, 1);
+    lua_curve_helper(lua, new hypercurve::ease_out_power(exponent));
+    luaL_getmetatable(lua, "hypercurve.curve_base");
+    lua_setmetatable(lua, -2);
+    return 1;
+}
+
+LUA_EXPORT int luahc_ease_inout_power(lua_State *lua)
+{
+    size_t exponent = lua_tointeger(lua, 1);
+    lua_curve_helper(lua, new hypercurve::ease_inout_power(exponent));
+    luaL_getmetatable(lua, "hypercurve.curve_base");
+    lua_setmetatable(lua, -2);
+    return 1;
+}
+
 LUA_EXPORT int luahc_ease_in_back(lua_State *lua)
 {
     lua_curve_helper(lua, new hypercurve::ease_in_back());
@@ -846,6 +993,26 @@ LUA_EXPORT const luaL_Reg luahc_static_meth[] =
     {"ease_in_sine_curve", luahc_ease_in_sine},
     {"ease_out_sine_curve", luahc_ease_out_sine},
     {"ease_inout_sine_curve", luahc_ease_inout_sine},
+    
+    {"ease_in_quad_curve", luahc_ease_in_quad},
+    {"ease_out_quad_curve", luahc_ease_out_quad},
+    {"ease_inout_quad_curve", luahc_ease_inout_quad},
+    {"ease_in_cubic_curve", luahc_ease_in_cubic},
+    {"ease_out_cubic_curve", luahc_ease_out_cubic},
+    {"ease_inout_cubic_curve", luahc_ease_inout_cubic},
+    {"ease_in_quart_curve", luahc_ease_in_quart},
+    {"ease_out_quart_curve", luahc_ease_out_quart},
+    {"ease_inout_quart_curve", luahc_ease_inout_quart},
+    {"ease_in_quint_curve", luahc_ease_in_quint},
+    {"ease_out_quint_curve", luahc_ease_out_quint},
+    {"ease_inout_quint_curve", luahc_ease_inout_quint},
+    {"ease_in_expo_curve", luahc_ease_in_expo},
+    {"ease_out_expo_curve", luahc_ease_out_expo},
+    {"ease_inout_expo_curve", luahc_ease_inout_expo},
+    {"ease_in_power_curve", luahc_ease_in_power},
+    {"ease_out_power_curve", luahc_ease_out_power},
+    {"ease_inout_power_curve", luahc_ease_inout_power},
+    
     {"ease_in_back_curve", luahc_ease_in_back},
     {"ease_out_back_curve", luahc_ease_out_back},
     {"ease_inout_back_curve", luahc_ease_inout_back},

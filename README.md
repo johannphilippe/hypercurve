@@ -30,6 +30,7 @@ The above hypercurve is a combination of 1/8 diocles curve, 1/8 toxoid curve, 2/
 - Tightrope Walker curve  
 - Mouth curve
 - Bicorn curve
+- Easing curves - from https://github.com/ai/easings.net - translated to C++
 
 - Typed curves : inspired from Csounds [GEN16](http://www.csounds.com/manual/html/GEN16.html)
 - User defined curves - pass it a function (or a lambda in C++), that returns y for any x between 0 and 1. Not implemented in Csound.
@@ -213,7 +214,13 @@ Ideas :
 The project uses LuaJIT as a submodule, allowing you to try HYPERCURVE out of the box. 
 
 It also includes source files from several open-source projects : 
-*  [AsciiPlot](https://github.com/joehood/asciiplotter) source code with license under src/asciiplot folder.
+* [AsciiPlot](https://github.com/joehood/asciiplotter) source code with license under src/asciiplot folder.
 * [lua-compat-5.3](https://github.com/keplerproject/lua-compat-5.3) which provides an API compatibility from 5.1 to 5.3
 * [fpng](https://github.com/richgel999/fpng) - a great C++ PNG reader/writer.``
+* [this work](https://github.com/ai/easings.net)
 
+
+# LICENSE 
+
+The core of HYPERCURVE is licensed wit MIT. 
+Easing curves - located in curve_lib.h - are derived from [this work](https://github.com/ai/easings.net) and thus are licensed as GNU General Public License 3. 

@@ -2003,7 +2003,10 @@ protected:
 /**
   ***************************************************************
  * Easing curves from easings.net
- * - Missing Quad, Cubic, Quart, Quint, Expo
+ * - Additional feature : abstraction taking exponent as argument
+ * 		- ease_in_power
+ * 		- ease_out_power
+ * 		- ease_inout_power
  ****************************************************************
 */
 
@@ -2015,7 +2018,6 @@ public:
         return 1.0 - std::cos((x * M_PI) / 2);
     }
 };
-
 class ease_out_sine : public curve_base
 {
 public:
@@ -2024,13 +2026,207 @@ public:
         return std::sin((x * M_PI) / 2);
     }
 };
-
 class ease_inout_sine : public curve_base
 {
 public:
     inline double process(double x) override
     {
         return -(std::cos(M_PI * x) - 1.0) / 2.0;
+    }
+};
+
+class ease_in_quad : public curve_base
+{
+public:
+    inline double process(double x) override
+    {
+        return x * x;
+    }
+};
+class ease_out_quad : public curve_base
+{
+public:
+    inline double process(double x) override
+    {
+        return 1 - (1 - x) * (1 - x);
+    }
+};
+class ease_inout_quad : public curve_base
+{
+public:
+    inline double process(double x) override
+    {
+        return (x < 0.5) ? 2 * x * x : 1 - std::pow(-2 * x + 2, 2) / 2;
+    }
+};
+
+class ease_in_cubic : public curve_base
+{
+public:
+    inline double process(double x) override
+    {
+        return x * x * x;
+    }
+};
+class ease_out_cubic : public curve_base
+{
+public:
+    inline double process(double x) override
+    {
+        return 1 - std::pow(1 - x, 3);
+    }
+};
+class ease_inout_cubic : public curve_base
+{
+public:
+    inline double process(double x) override
+    {
+        return (x < 0.5) ? 4 * x * x * x : 1 - std::pow(-2 * x + 2, 3) / 2;
+    }
+};
+
+class ease_in_quart : public curve_base
+{
+public:
+    inline double process(double x) override
+    {
+        return x * x * x * x;
+    }
+};
+class ease_out_quart : public curve_base
+{
+public:
+    inline double process(double x) override
+    {
+        return 1 - std::pow(1 - x, 4);
+    }
+};
+class ease_inout_quart : public curve_base
+{
+public:
+    inline double process(double x) override
+    {
+        return (x < 0.5) ? 8 * x * x * x * x : 1 - std::pow(-2 * x + 2, 4) / 2;
+    }
+};
+
+class ease_in_quint : public curve_base
+{
+public:
+    inline double process(double x) override
+    {
+        return x * x * x * x * x;
+    }
+};
+class ease_out_quint : public curve_base
+{
+public:
+    inline double process(double x) override
+    {
+        return 1 - std::pow(1 - x, 5);
+    }
+};
+class ease_inout_quint : public curve_base
+{
+public:
+    inline double process(double x) override
+    {
+        return (x < 0.5) ? 16 * x * x * x * x * x : 1 - std::pow(-2 * x + 2, 5) / 2;
+    }
+};
+
+class ease_in_power : public curve_base
+{
+public:
+    ease_in_power(size_t exp)
+        : exponent(exp)
+    {
+        if(exponent <= 1)
+            throw(std::runtime_error("Ease power : Exponent must be > to 1"));
+    }
+
+    inline double process(double x) override
+    {
+        return std::pow(x, exponent);
+    }
+
+protected:
+    size_t exponent;
+};
+class ease_out_power : public curve_base
+{
+public:
+    ease_out_power(size_t exp)
+        : exponent(exp)
+    {
+        if(exponent <= 1)
+            throw(std::runtime_error("Ease power : Exponent must be > to 1"));
+    }
+
+    inline double process(double x) override
+    {
+        return 1 - std::pow(1 - x, exponent);
+    }
+
+protected:
+    size_t exponent;
+};
+class ease_inout_power : public curve_base
+{
+public:
+    ease_inout_power(size_t exp)
+        : exponent(exp)
+    {
+        if(exponent <= 1)
+            throw(std::runtime_error("Ease power : Exponent must be > to 1"));
+        base = std::pow(2, exponent - 1);
+    }
+
+    inline double process(double x) override
+    {
+        double res;
+        if(x < 0.5) {
+            res = static_cast<double>(base);
+            for(size_t i = 0; i < exponent; ++i)
+                res *= x;
+        } else {
+            res = std::pow(-2.0 * x + 2.0, exponent) / 2.0;
+        }
+        return res;
+    }
+
+protected:
+    size_t exponent;
+    size_t base;
+};
+
+class ease_in_expo : public curve_base
+{
+public:
+    inline double process(double x) override
+    {
+        return (x == 0) ? 0 : std::pow(2, 10 * x - 10);
+    }
+};
+class ease_out_expo : public curve_base
+{
+public:
+    inline double process(double x) override
+    {
+        return (x == 1) ? 1 : 1 - std::pow(2, -10 * x);
+    }
+};
+class ease_inout_expo : public curve_base
+{
+public:
+    inline double process(double x) override
+    {
+        return (x == 0)
+          ? 0
+          : (x == 1)
+          ? 1
+          : (x < 0.5) ? std::pow(2, 20 * x - 10) / 2
+          : (2 - std::pow(2, -20 * x + 10)) / 2;
     }
 };
 
@@ -2042,7 +2238,6 @@ public:
         return 1 - std::sqrt(1 - std::pow(x, 2));
     }
 };
-
 class ease_out_circ : public curve_base
 {
 public:
@@ -2051,7 +2246,6 @@ public:
         return std::sqrt(1 - std::pow(x - 1, 2));
     }
 };
-
 class ease_inout_circ : public curve_base
 {
 public:
@@ -2113,7 +2307,6 @@ public:
 
     constexpr static const double c4 = (2 * M_PI) / 3;
 };
-
 class ease_out_elastic : public curve_base
 {
 public:
@@ -2129,7 +2322,6 @@ public:
 
     constexpr static const double c4 = (2 * M_PI) / 3;
 };
-
 class ease_inout_elastic : public curve_base
 {
 public:
@@ -2173,7 +2365,6 @@ public:
     constexpr static const double n1 = 7.5625;
     constexpr static const double d1 = 2.75;
 };
-
 class ease_in_bounce : public curve_base
 {
 public:
@@ -2182,7 +2373,6 @@ public:
         return 1.0 - ease_out_bounce::process_value(1.0 - x);
     }
 };
-
 class ease_inout_bounce : public curve_base
 {
 public:
@@ -3151,6 +3341,31 @@ extern "C"
     static int hc_ease_in_sine_curve(int) { return faust_curve_base_map.map(share(ease_in_sine())); }
     static int hc_ease_out_sine_curve(int) { return faust_curve_base_map.map(share(ease_out_sine())); }
     static int hc_ease_inout_sine_curve(int) { return faust_curve_base_map.map(share(ease_inout_sine())); }
+    
+    static int hc_ease_in_quad_curve(int) { return faust_curve_base_map.map(share(ease_in_quad())); }
+    static int hc_ease_out_quad_curve(int) { return faust_curve_base_map.map(share(ease_out_quad())); }
+    static int hc_ease_inout_quad_curve(int) { return faust_curve_base_map.map(share(ease_inout_quad())); }
+
+    static int hc_ease_in_cubicc_curve(int) { return faust_curve_base_map.map(share(ease_in_cubic())); }
+    static int hc_ease_out_cubic_curve(int) { return faust_curve_base_map.map(share(ease_out_cubic())); }
+    static int hc_ease_inout_cubic_curve(int) { return faust_curve_base_map.map(share(ease_inout_cubic())); }
+
+    static int hc_ease_in_quart_curve(int) { return faust_curve_base_map.map(share(ease_in_quart())); }
+    static int hc_ease_out_quart_curve(int) { return faust_curve_base_map.map(share(ease_out_quart())); }
+    static int hc_ease_inout_quart_curve(int) { return faust_curve_base_map.map(share(ease_inout_quart())); }
+
+    static int hc_ease_in_quint_curve(int) { return faust_curve_base_map.map(share(ease_in_quint())); }
+    static int hc_ease_out_quint_curve(int) { return faust_curve_base_map.map(share(ease_out_quint())); }
+    static int hc_ease_inout_quint_curve(int) { return faust_curve_base_map.map(share(ease_inout_quint())); }
+    
+    static int hc_ease_in_expo_curve(int) { return faust_curve_base_map.map(share(ease_in_expo())); }
+    static int hc_ease_out_expo_curve(int) { return faust_curve_base_map.map(share(ease_out_expo())); }
+    static int hc_ease_inout_expo_curve(int) { return faust_curve_base_map.map(share(ease_inout_expo())); }
+    
+    static int hc_ease_in_power_curve(int exponent) {return faust_curve_base_map.map(share(ease_in_power(exponent))); }
+    static int hc_ease_out_power_curve(int exponent) {return faust_curve_base_map.map(share(ease_out_power(exponent))); }
+    static int hc_ease_inout_power_curve(int exponent) {return faust_curve_base_map.map(share(ease_inout_power(exponent))); }
+    
     static int hc_ease_in_back_curve(int) { return faust_curve_base_map.map(share(ease_in_back())); }
     static int hc_ease_out_back_curve(int) { return faust_curve_base_map.map(share(ease_out_back())); }
     static int hc_ease_inout_back_curve(int) { return faust_curve_base_map.map(share(ease_inout_back())); }

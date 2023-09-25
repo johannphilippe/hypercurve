@@ -29,16 +29,16 @@ set( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin )
 #############################################
 
 option(BUILD_CSOUND_OPCODE "Build Csound opcodes" ON)
-option(BUILD_LUA_MODULE "Build Lua module" ON)
+option(BUILD_LUA_MODULE "Build Lua module" OFF)
 option(BUILD_LUAJIT "Build Luajit" OFF)
 option(BUILD_FAUST_LIB	"Build Faust library" ON)
 option(BUILD_ALL "Build all libraries" OFF)
 option(SSE, "SSE support for FPNG" ON)
-option(MACOS_UNIVERSAL "Support for MacOS Universal build - both x86_64 and ARM64" ON)
+option(MACOS_ARM "Support for MacOS Universal build - both x86_64 and ARM64" ON)
 
 option(BUILD_TESTS "Build tests for different targets" ON)
 
-if(MACOS_UNIVERSAL) 
+if(MACOS_ARM) 
       set(CMAKE_OSX_ARCHITECTURES "arm64")
 endif()
 
