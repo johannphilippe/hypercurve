@@ -31,7 +31,6 @@ The above hypercurve is a combination of 1/8 diocles curve, 1/8 toxoid curve, 2/
 - Mouth curve
 - Bicorn curve
 - Easing curves - from https://github.com/ai/easings.net - translated to C++
-
 - Typed curves : inspired from Csounds [GEN16](http://www.csounds.com/manual/html/GEN16.html)
 - User defined curves - pass it a function (or a lambda in C++), that returns y for any x between 0 and 1. Not implemented in Csound.
 
@@ -162,15 +161,17 @@ The PNG writer [fpng](https://github.com/richgel999/fpng) used for hypercurve ha
 The resulting binaries will all be located in `bin` directory. On Windows, `lua_hypercurve.dll` and `hypercurve.dll` require `sndfile.dll` to be in the same folder. `lua_hypercurve.dll` also requires the Lua `.dll` you linked against (e.g. `lua5.1.dll`). 
 This must be considered when packaging the library to be embedded or used by another application.
 
+# WASM/WASI  port
+
+After hours of tests, I'm struggling with this. I have not much knowledge about web, neither about Web Assembly. 
+I probably need help.
+
 # TODO
 * To fix : Lagrange polynomial returns nan, and doesn't scal well
 * Fixed : Major scaling issue when creating complex curves (going down after being more than 1)
 * To fix : remove #include OpcodeBase.cpp 
 * Move to template (float or double or long double)
 * Same for Csound -> MYFLT instead of double
-
-# WASM 
-* Move the ifdef wasi (utilities.h)
 
 Ideas : 
 * Inversion across the axis of another curve 
@@ -183,21 +184,15 @@ Ideas :
 * Interp(0.25) returns an interpolation of two curves (crv1 * 0.25, crv2 * 0.75)
 * extract curve  -> subsample from audio, or another method (based on relevant samples)
 * Abs for waveforms
-* Virtual 3D manipulation (rotate z axis)
+* Virtual 3D manipulation (rotate z axis, but in reality the curve is still 2D)
 
 * Improve hc_resize to resize curve without creating new one (temp memory)
 * Documentation on hc_resize, and hc_cubic_spline_curve
 * Propagate resize to Lua, Faust and C++ api
- 
-* Gen automatic number : does not take "f" statements into account
-* Waveform scaling : will only work if min_y = max_y : make a specific function
+
+* Csound Gen automatic number : does not take "f" statements into account (collision)
 * Expose random generators to frontends (Lua, Csound, Faust).
-* Tests on invert function (Lua and Csound)
-* REAPER/Reascript -> see https://forum.cockos.com/showthread.php?p=2543755#post2543755
 * Lagrange interpolation for curve extraction ?
-* Hard one -> all curves allowing one sample processing (including cubic spline) to allow no-table processing.
-
-
 
 ## Curves to implement
 * Cardioid / hypercardioid
@@ -207,6 +202,24 @@ Ideas :
 * Puntiforme https://mathcurve.com/courbes2d/puntiforme/puntiforme.shtml
 * Legendre polynome
 * Ideas here https://mathcurve.com/courbes2d/courbes2d.shtml
+
+## AI Hypercurves
+
+NOTE : Start with markov models training first, not to burn your hands.
+Find an environment : C++ ? Ruby (lack audio libs..) ? Python (lack hypercurve support) ? Lua (lack everything else support) ? 
+
+Idea to implement a nn or another ML stuff to generate Hypercurves with a prior : 
+* Prior : generates curves
+* No prior : reacts with curves to audio input (will be delayed, since curve is a large scale compared to audio)
+
+* First create a dataset with audio
+* Take RMS of audio and determine curve boundaries 
+	* Other parameters could be possible (like check the filtering by finding the resonant - most powerful - frequency, or f0)
+* Train model
+	- With labels : hypercurves 
+	- Without : with test to see which one fits best (difference of curves, or something more sophisticated)
+	- 
+* Try RAVE with interpolated unipolar audio examples (wont work because it is thought to make fast changes for audio construction) ? 
 
 
 # External libraries
