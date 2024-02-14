@@ -1,5 +1,5 @@
 /*=============================================================================
-   Copyright (c) 2021 Johann Philippe
+   Copyright (c) 2021-2024 Johann Philippe
    Distributed under the MIT License (https://opensource.org/licenses/MIT)
 =============================================================================*/
 
@@ -32,7 +32,6 @@ public:
 
     void process(double *ptr, size_t size, memory_vector<control_point> &pts, double * spline_memory, size_t spline_mem_size)
     {
-
         interp.init(ptr, size, false);
         n = (pts.size() - 1);
         _spline_memory =  spline_memory;
@@ -48,9 +47,7 @@ public:
         sig.init(spl_memory_incr(n + 1), n + 1, false);
         sig_temp.init(spl_memory_incr(n - 1), n - 1, false);
         tridiagonal.init( _spl_mem_incr, (n - 1) * n, false);
-
         interpolate_from_points(pts, size);
-
     }
 
 
@@ -75,7 +72,6 @@ public:
         interpolate_from_points(pts, size);
     }
 
-
     ~cubic_spline()
     {
     }
@@ -89,7 +85,6 @@ public:
             {
                 int iii = (n * i) + i;
                 int kii = (n * k) + i;
-                //double term = tridiagonal[k][i] / tridiagonal[i][i];
                 double term = tridiagonal[kii] / tridiagonal[iii];
                 for(j = 0; j < n; j++)
                 {
@@ -100,10 +95,6 @@ public:
                     int fi = kk + jj;
                     int li = jj + ii;
                     tridiagonal[fi] = tridiagonal[fi] - term * tridiagonal[li];
-                    /*
-                    tridiagonal[k][j] = tridiagonal[k][j] -
-                            term * tridiagonal[i][j];
-                    */
                 }
             }
         }
@@ -113,16 +104,13 @@ public:
         {
             int in = (i * n) + (n - 1);
             sig_temp[i] = tridiagonal[in];
-            //sig_temp[i] = tridiagonal[i][n - 1];
             for(j = i + 1; j < n - 1; j++)
             {
                 int ij = (i * n) + j;
-                //sig_temp[i] = sig_temp[i] - tridiagonal[i][j] * sig_temp[j];
                 sig_temp[i] = sig_temp[i] - tridiagonal[ij] * sig_temp[j];
             }
             int ii = (i * n) + i;
             sig_temp[i] = sig_temp[i] / tridiagonal[ii];
-            //sig_temp[i] = sig_temp[i] / tridiagonal[i][i];
         }
     }
 
@@ -145,7 +133,6 @@ public:
         {
             double ii = (i * n) + i;
             tridiagonal[ii] = 2 * (h[i] + h[i + 1]);
-            //tridiagonal[i][i] = 2 * (h[i]+ h[i + 1]);
         }
         for(i = 0; i < n - 2; i++)
         {
@@ -153,18 +140,12 @@ public:
             tridiagonal[ifirst] = h[i +  1];
             int ilast = (i+1) * n + i;
             tridiagonal[ilast] = h[i + 1];
-            //tridiagonal[i][i + 1] = h[i + 1];
-            //tridiagonal[i + 1][i] = h[i + 1];
         }
         for(i = 1; i < n; i++)
         {
             int ind = (i - 1) * n + (n - 1);
             tridiagonal[ind] = (y[i + 1] - y[i]) * 6.0 / h[i] -
                     (y[i] - y[i - 1]) * 6.0 / h[i - 1];
-            /*
-            tridiagonal[i - 1][n - 1] = (y[i + 1] - y[i]) * 6.0 / h[i] -
-                    (y[i] - y[i - 1]) * 6.0 / h[i - 1];
-            */
         }
     }
 
@@ -186,34 +167,9 @@ public:
                 key_index++;
                 key = x[key_index];
             }
-            interp[i] = equation(xval, key, key_index);  //equation_map[key](xval);
-        }
-       // equation_map.clear();
-    }
-
-    /*
-    void resize(int n)
-    {
-        x.resize(n + 1);
-        y.resize(n + 1);
-
-        h.resize(n);
-
-        a.resize(n);
-        b.resize(n);
-        c.resize(n);
-        d.resize(n);
-
-        sig.resize(n + 1);
-        sig_temp.resize(n - 1);
-
-        tridiagonal.resize(n - 1);
-        for(int i = 0; i < tridiagonal.size(); i++)
-        {
-            tridiagonal[i].resize(n);
+            interp[i] = equation(xval, key, key_index);  
         }
     }
-    */
 
     template<typename N>
     void sn(N a)
@@ -223,12 +179,6 @@ public:
 
     void  reset(int n, memory_vector<point> &p)
     {
-        /*
-        sn(n);
-        sn(x.size());
-        sn(y.size());
-        sn(p.size());
-        */
         for(size_t  i = 0; i < p.size(); i++)
         {
             x[i] = p[i].x;
@@ -242,22 +192,12 @@ public:
         ::memset(d.data(), 0, n * sizeof(T));
         ::memset(sig.data(), 0, (n + 1) * sizeof(T)  );
         ::memset(sig_temp.data(), 0, (n - 1) * sizeof(T) );
-
         ::memset(tridiagonal.data(), 0, n * (n-1) * sizeof(T));
-
         ::memset(interp.data(), 0, sizeof(T) * n_precision);
-        /*
-        for(int i = 0; i < tridiagonal.size(); i++)
-        {
-            ::memset(tridiagonal[i].data(), 0, n * sizeof(T) );
-        }
-        */
-
     }
 
     void interpolate(int n)
     {
-
         int i;
         for(i = 0; i < n; i++)
             h[i] = x[i + 1] - x[i];
@@ -267,7 +207,6 @@ public:
 
         tridiagonal_cubic_splin_gen(n);
         gauss_elimination_ls(n -1, n);
-
 
         for(i = 1; i < n; i++)
             sig[i] = sig_temp[i - 1];

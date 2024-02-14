@@ -152,6 +152,7 @@ On some platforms (e.g. Windows) you might need to set the Lua paths with the fo
 cmake .. -DBUILD_LUA_MODULE=TRUE -DLUA_INCLUDE_DIR=/you/dir/include -DLUA_LIBRARIES=/path/to/lua.lib
 ```
 
+
 Windows build for Lua is a bit more complicated, due to the way Windows searches for dynamic libraries. Wheter you provide `LUA_LIBRARIES` yourself or let CMake find it, you will need the `.lib` and `.dll` libraries of Lua to share the same name (except the extension) and the same path (as it is the case in standard Lua distributions). This will allow CMake to copy the Lua `.dll` dynamic library next to `lua_hypercurve` in the bin folder.
 
 In order to build the Faust library, you will need [Quom](https://pypi.org/project/quom/) to be installed in your system. See the Faust [README](faust_lib/README.md)
@@ -167,6 +168,10 @@ After hours of tests, I'm struggling with this. I have not much knowledge about 
 I probably need help.
 
 # TODO
+
+* Interpolating curve parameters : something like `hc_diocles(hc_linspace(0.5 , 1, 1024))` to create interpolating parameters with hypercurve itself
+* Remove "_curve" suffix from everywhere (useless)
+
 * To fix : Lagrange polynomial returns nan, and doesn't scal well
 * Fixed : Major scaling issue when creating complex curves (going down after being more than 1)
 * To fix : remove #include OpcodeBase.cpp 

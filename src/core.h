@@ -1,5 +1,5 @@
 /*=============================================================================
-   Copyright (c) 2022 Johann Philippe
+   Copyright (c) 2022-2024 Johann Philippe
    Distributed under the MIT License (https://opensource.org/licenses/MIT)
 =============================================================================*/
 #pragma once
@@ -14,8 +14,9 @@
 #include<iostream>
 #include<utility>
 namespace hypercurve {
+
 ///////////////////////////////////////////////////
-// The segment class
+// Segment
 ////////////////////////////////////////////////////
 
 class segment
@@ -53,7 +54,7 @@ protected:
 };
 
 /////////////////////////////////////////////////////
-// Curve class
+// Curve 
 ////////////////////////////////////////////////////
 
 class curve
@@ -69,6 +70,25 @@ public:
         init();
         process();
     }
+
+    curve(std::vector<double> o)
+        : definition(o.size())
+        , samples(definition)
+    {
+        std::copy(o.begin(), o.end(), this->samples.data());
+    }
+
+    curve(double *o_smps, size_t size)
+        : definition(size)
+        , samples(definition)
+    {
+        std::copy(o_smps, o_smps + definition, this->samples.data());
+    }
+
+    curve(size_t size)
+        : definition(size)
+        , samples(definition)
+    {}
 
     // Concatenate constructor
     // If definition is 0, it will be the sum of all curves
@@ -181,11 +201,17 @@ public:
 
     std::pair<double, double> find_extremeness()
     {
-        std::pair<double, double> ext = hypercurve::find_extremeness(samples.data(), definition);
+        std::pair<double, double> ext = 
+            hypercurve::find_extremeness(samples.data(), definition);
         ambitus = std::abs(max - min);
         min = ext.first;
         max = ext.second;
         return ext;
+    }
+
+    std::pair<size_t, size_t> find_extremeness_positions()
+    {
+        return hypercurve::find_extremeness_positions(samples.data(), definition);
     }
 
     void ascii_display(std::string name, std::string label, char marker)
@@ -196,12 +222,27 @@ public:
         plot.show();
     }
 
+    double *data() {return samples.data(); }
+    // Compatibility alias
     double *get_samples() {return samples.data();}
-    double get_sample_at(size_t i) {return samples[i];}
-    size_t get_definition() {return definition;}
+
+    // With bound checking 
+    double get_sample_at(size_t i) {
+        if(i >= definition)
+            return samples[definition-1];
+        return samples[i];
+    }
+
+    size_t size() {return definition;}
 
     // Operators
 
+    // linear interpolation operator() e.g. mycurve(0.34)
+    double operator()(double x) const { return _interpolate_linear(x); }
+    // Custom interpolator based on curve base
+    double operator()(double x, std::shared_ptr<curve_base> crv) { return _interpolate_custom(x, crv); }
+
+    double operator[](size_t index) const  { return samples[index];}
     double& operator[](size_t index)  { return samples[index];}
 
     curve& operator *=(curve &other)
@@ -210,7 +251,7 @@ public:
             samples[i] *= other.get_sample_at(i);
         return *this;
     }
-    curve &operator *=(double k)
+    curve& operator *=(double k)
     {
         for(auto & it : samples)
             it *= k;
@@ -223,7 +264,7 @@ public:
             samples[i] /= other.get_sample_at(i);
         return *this;
     }
-    curve &operator /=(double k)
+    curve& operator /=(double k)
     {
         for(auto & it : samples)
             it /= k;
@@ -332,6 +373,50 @@ protected:
         }
     }
 
+    // Linear
+    double _interpolate_linear(double x) const 
+    {
+        if(x <= 0)
+            return samples[0];
+        if(x >= 1) 
+            return samples[definition - 1];
+
+        double xidx = x * definition;
+        size_t index_base = size_t(xidx);
+        if(index_base == (definition - 1))
+            return samples[index_base];
+
+        if(xidx != index_base) {
+            double xdec = xidx - index_base;
+            return hypercurve::linear_interpolation(samples[index_base], 
+                samples[index_base + 1], xdec);
+
+        }
+        return samples[size_t(x * definition)];
+    }
+
+    double _interpolate_custom(double x, std::shared_ptr<curve_base> crv) const 
+    {
+        if(x <= 0)
+            return samples[0];
+        if(x >= 1) 
+            return samples[definition - 1];
+
+        double xidx = x * definition;
+        size_t index_base = size_t(xidx);
+        if(index_base == (definition - 1))
+            return samples[index_base];
+
+        if(xidx != index_base) {
+            double xdec = xidx - index_base;
+            double y1 = samples[index_base];
+            double y2 = samples[index_base + 1];
+            hypercurve::curve c(3, y1, {segment(1, y2, crv)});
+            return c(xdec);
+        }
+        return samples[size_t(x * definition)];
+    }
+
     double max = 0.0, min = 0.0, ambitus = 0.0;
     size_t definition;
     double y_start;
@@ -341,6 +426,53 @@ protected:
 
 inline curve concatenate(size_t new_size, std::vector<curve*> to_concat) {return curve(new_size, to_concat);}
 inline curve concat(size_t new_size, std::vector<curve*> to_concat) {return curve(new_size, to_concat);}
+
+
+inline double derivate_point(hypercurve::curve &crv, size_t x, size_t dx) 
+{
+    return (crv[x + dx] - crv[x - dx]) / (2.0 * double(dx));
+}
+
+
+inline curve derivative(hypercurve::curve &c, size_t dx)
+{
+    hypercurve::curve deriv(c.size());
+    for(size_t i = dx; i < (c.size() - (dx+1)); ++i)
+    {
+        deriv[i] = derivate_point(c, i, dx); 
+    }
+    for(size_t i = 0; i <= dx; ++i)
+    {
+        deriv[i] = deriv[dx];
+        deriv[deriv.size() - 1 - i] = deriv[deriv.size() - (dx + 1)];
+    }
+    return deriv;
+}
+
+inline double curvature_point(hypercurve::curve &deriv, hypercurve::curve &second, size_t index)
+{
+    return second[index] / pow(1.0 + pow(deriv[index], 2.0), 1.5 );
+}
+
+inline curve curvature(hypercurve::curve &c, size_t dx)
+{
+    hypercurve::curve deriv = derivative(c, dx);
+    hypercurve::curve second = derivative(deriv, dx);   
+    hypercurve::curve res(deriv.size());
+
+    for(size_t i = 0; i < deriv.size(); ++i)
+        res[i] = curvature_point(deriv, second, i);
+    return res;
+}
+
+inline curve curvature(hypercurve::curve &deriv, hypercurve::curve &second)
+{
+    hypercurve::curve res(deriv.size());
+
+    for(size_t i = 0; i < deriv.size(); ++i)
+        res[i] = curvature_point(deriv, second, i);
+    return res;
+}
 
 }
 #endif // CORE_H

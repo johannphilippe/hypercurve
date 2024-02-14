@@ -41,7 +41,7 @@ using namespace hypercurve;
 void write_as_png(curve &c, bool waveform = true, std::string name = "h.png")
 {
     png p(2048, 1024, {255,255,255,0}, {244, 101, 36, 255});
-    p.draw_curve(c.get_samples(), c.get_definition(), true, 0 , waveform);
+    p.draw_curve(c.get_samples(), c.size(), true, 0 , waveform);
     //p.draw_grid(10, 10, color{255, 255, 255, 100});
     std::string concat("/home/johann/Documents/" + name);
     p.write_as_png(concat);
@@ -50,7 +50,7 @@ void write_as_png(curve &c, bool waveform = true, std::string name = "h.png")
 void write_doc_png(curve &c, std::string name, int width = 1024, int height = 256)
 {
     png p(width, height);
-    p.draw_curve(c.get_samples(), c.get_definition(),true,0, false);
+    p.draw_curve(c.get_samples(), c.size(),true,0, false);
     p.draw_grid(10, 10, color{255, 255, 255, 100});
     std::string concat("/home/johann/Documents/GitHub/hypercurve/doc/png/" + name);
     std::cout << concat << std::endl;
@@ -59,7 +59,7 @@ void write_doc_png(curve &c, std::string name, int width = 1024, int height = 25
 
 void check_equality(curve &c1, curve &c2)
 {
-    for(size_t i = 0; i < c1.get_definition(); i++)
+    for(size_t i = 0; i < c1.size(); i++)
     {
         if(c1.get_sample_at(i) != c2.get_sample_at(i))
         {
@@ -636,18 +636,18 @@ void inversion_test()
 
 
     AsciiPlotter p("comp", 80, 30);
-    std::vector<double> dio_vec(dio.get_definition());
-    ::memcpy(dio_vec.data(), dio.get_samples(), sizeof(double) * dio.get_definition());
-    std::vector<double> inv_vec(dio.get_definition());
-    ::memcpy(inv_vec.data(), inv.get_samples(), sizeof(double) * inv.get_definition());
+    std::vector<double> dio_vec(dio.size());
+    ::memcpy(dio_vec.data(), dio.get_samples(), sizeof(double) * dio.size());
+    std::vector<double> inv_vec(dio.size());
+    ::memcpy(inv_vec.data(), inv.get_samples(), sizeof(double) * inv.size());
 
 
     curve linear_axis(4096, start, {
                          segment(0.5, end, share(linear_curve())),
                          segment(0.5, 0, share(linear_curve()))
                       });
-    std::vector<double> linear_vec(linear_axis.get_definition());
-    ::memcpy(linear_vec.data(), linear_axis.get_samples(), sizeof(double) * linear_axis.get_definition());
+    std::vector<double> linear_vec(linear_axis.size());
+    ::memcpy(linear_vec.data(), linear_axis.get_samples(), sizeof(double) * linear_axis.size());
 
     p.addPlot(dio_vec, "diocles", '\\');
     p.addPlot(inv_vec, "inverted", '/');

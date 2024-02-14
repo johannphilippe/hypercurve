@@ -1,5 +1,5 @@
 /*=============================================================================
-   Copyright (c) 2022 Johann Philippe
+   Copyright (c) 2022-2024 Johann Philippe
    Distributed under the MIT License (https://opensource.org/licenses/MIT)
 =============================================================================*/
 
@@ -316,10 +316,8 @@ struct memory_vector
       _data = new T[_size];
    }
 
-   T& operator[](size_t index)
-   {
-      return _data[index];
-   }
+   T operator[](size_t index) const {return _data[index];}
+   T& operator[](size_t index) {return _data[index];}
 
    T front() {return *_data;}
    T back() {return *_data + (_size - 1);}
@@ -411,6 +409,26 @@ inline std::pair<double, double> find_extremeness(double *samples, size_t size)
             max = samples[i];
     }
     return std::make_pair(min, max);
+}
+
+inline std::pair<double, double> find_extremeness_positions(double *samples, size_t size)
+{
+    double min = samples[0], max = samples[0];
+    size_t minpos = 0, maxpos = 0;
+    for(size_t i = 0; i < size; ++i)
+    {
+        if(samples[i] < min)
+        {
+            min = samples[i];
+            minpos = i;
+        }
+        if(samples[i] > max)
+        {
+            max = samples[i];
+            maxpos = i;
+        }
+    }
+    return std::make_pair(minpos, maxpos);
 }
 
 // PNG utils

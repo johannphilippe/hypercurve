@@ -1,5 +1,5 @@
 /*=============================================================================
-   Copyright (c) 2022 Johann Philippe
+   Copyright (c) 2022-2024 Johann Philippe
    Distributed under the MIT License (https://opensource.org/licenses/MIT)
 =============================================================================*/
 
@@ -699,13 +699,8 @@ private:
     std::pair<double, double> process_bezier(double x) override
     {
         return {
-            (std::pow(x, 3) * c_x)
-                    + (std::pow(x, 2) * b_x)
-                    + (x * a_x),
-            (std::pow(x, 3) * c_y)
-                    + (std::pow(x, 2) * b_y)
-                    + (x * a_y)
-                    + y_start
+            (std::pow(x, 3) * c_x) + (std::pow(x, 2) * b_x) + (x * a_x),
+            (std::pow(x, 3) * c_y) + (std::pow(x, 2) * b_y) + (x * a_y) + y_start
         };
     }
     control_point _control_point1, _control_point2;
