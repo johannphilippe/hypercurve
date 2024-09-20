@@ -4,7 +4,7 @@ First release
 
 # 0.0.2 
 
-## New 
+## New 
 
 - Faust (FFI) implementation
 - "_curve" suffix for all curve algorithm (curve_base) in every frontend (including Lua)
@@ -24,5 +24,3 @@ First release
 - Fixed size issues with 0 padding when one sample is missed (fractional size divided by 3, 6, 9 ...)
 - Fixed Cubic Spline allocation issues
 - PNG memory issue - writing out of bounds
-
-
