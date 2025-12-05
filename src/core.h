@@ -236,7 +236,6 @@ public:
     size_t size() {return definition;}
 
     // Operators
-
     // linear interpolation operator() e.g. mycurve(0.34)
     double operator()(double x) const { return _interpolate_linear(x); }
     // Custom interpolator based on curve base
@@ -426,7 +425,6 @@ protected:
 
 inline curve concatenate(size_t new_size, std::vector<curve*> to_concat) {return curve(new_size, to_concat);}
 inline curve concat(size_t new_size, std::vector<curve*> to_concat) {return curve(new_size, to_concat);}
-
 
 inline double derivate_point(hypercurve::curve &crv, size_t x, size_t dx) 
 {

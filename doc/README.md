@@ -1174,7 +1174,7 @@ hc.exponential_curve();
 
 #### Easing curves
 
-Hypercurve contains implementation of [Easings](easings.net). Easings take no argument. 
+Hypercurve contains implementation of [Easings](https://easings.net). Easings take no argument. 
 
 Csound example : 
 ```Csound 
@@ -1183,7 +1183,7 @@ hc_ease_out_sine_curve()
 hc_ease_inout_sine_curve()
 ```
 
-All easing from [Easings](easings.net) is avaiabe (just replace the "sine" with another type). 
+All easing from [Easings](https://easings.net) is avaiabe (just replace the "sine" with another type). 
 
 Another one has been added for convenience, and it takes an exponent argument : 
 ```Csound

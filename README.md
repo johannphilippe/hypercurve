@@ -208,6 +208,22 @@ Ideas :
 * Legendre polynome
 * Ideas here https://mathcurve.com/courbes2d/courbes2d.shtml
 
+Try to read about splines : 
+* Akima Spline 
+* Cubic hermite spline
+* Cardinal Spline
+* Kochanek-Bartels spline
+* Monotone cubic interpolation
+* Non-uniform rational B-spline (widely used in graphics)
+* Smoothing spline
+* Polyharmonic spline
+* https://kluge.in-chemnitz.de/opensource/spline/
+
+About smoothing : https://en.wikipedia.org/wiki/Smoothing
+* Laplace or Lidstone smoothing 
+* Kernel smoother : https://en.wikipedia.org/wiki/Kernel_smoother
+* Local regression : 
+* Ramer–Douglas–Peucker algorithm - decimation to a smaller number of points - used in cartography. Could be interesting to determine where to cut curves.
 ## AI Hypercurves
 
 NOTE : Start with markov models training first, not to burn your hands.
